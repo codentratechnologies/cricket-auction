@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Auction - Cricket Auction</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/create-auction.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand">
+                <div class="brand-shield">
+                    <i class="fa-solid fa-shield"></i>
+                    <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">CRICKET</div>
+                    <div class="brand-subtitle">
+                        <span class="text-green">AUCTION</span>
+                        <i class="fa-solid fa-gavel gavel-icon"></i>
+                    </div>
+                    <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a href="#" class="nav-link active">
+                <i class="fa-solid fa-gavel"></i> Auctions
+            </a>
+        </div>
+
+        <div class="nav-search">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="profile-menu" id="profileMenuToggle">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
+                <div class="profile-info">
+                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
+                    <span class="profile-role">Super Admin</span>
+                </div>
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                
+                <!-- Dropdown Menu -->
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <div class="back-link">
+            <a href="dashboard.html"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+        
+        <!-- Header -->
+        <header class="page-header">
+            <div class="header-text">
+                <h1>Create New Auction</h1>
+                <p>Fill out the details below to set up your tournament.</p>
+            </div>
+            <div class="header-icon-bg">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+        </header>
+
+        <!-- Form Section -->
+        <section class="form-section">
+            <form id="createAuctionForm" enctype="multipart/form-data">
+                
+                <!-- Logo Upload -->
+                <div class="upload-container">
+                    <input type="file" id="tournamentLogo" name="tournamentLogo" accept="image/png, image/jpeg, image/webp" hidden>
+                    <label for="tournamentLogo" class="upload-dropzone">
+                        <div class="upload-icon-circle">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <div class="upload-text">
+                            <strong>Upload Tournament Logo</strong>
+                            <p>JPG, PNG, WebP (Max. 5MB)</p>
+                        </div>
+                    </label>
+                    <div id="logoPreview" class="logo-preview hidden">
+                        <img id="logoImg" src="" alt="Tournament Logo Preview">
+                        <button type="button" class="btn-remove-logo" id="removeLogoBtn"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                </div>
+
+                <!-- Form Grid -->
+                <div class="form-grid">
+                    <!-- Auction Name -->
+                    <div class="form-group">
+                        <label for="auctionName">Auction Name <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-solid fa-trophy purple-text"></i></div>
+                            <input type="text" id="auctionName" name="auctionName" placeholder="e.g., Premier League 2026" required>
+                        </div>
+                        <span class="error-msg" id="err-auctionName"></span>
+                    </div>
+
+                    <!-- Venue -->
+                    <div class="form-group">
+                        <label for="venue">Venue <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-solid fa-location-dot blue-text"></i></div>
+                            <input type="text" id="venue" name="venue" placeholder="e.g., City Stadium" required>
+                        </div>
+                        <span class="error-msg" id="err-venue"></span>
+                    </div>
+
+                    <!-- Auction Date -->
+                    <div class="form-group">
+                        <label for="auctionDate">Auction Date <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-regular fa-calendar blue-text"></i></div>
+                            <input type="date" id="auctionDate" name="auctionDate" required>
+                        </div>
+                        <span class="error-msg" id="err-auctionDate"></span>
+                    </div>
+
+                    <!-- Auction Time -->
+                    <div class="form-group">
+                        <label for="auctionTime">Auction Time <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-regular fa-clock purple-text"></i></div>
+                            <input type="time" id="auctionTime" name="auctionTime" required>
+                        </div>
+                        <span class="error-msg" id="err-auctionTime"></span>
+                    </div>
+
+                    <!-- Balance Per Team -->
+                    <div class="form-group">
+                        <label for="balancePerTeam">Balance Per Team <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-solid fa-wallet green-text"></i></div>
+                            <input type="number" id="balancePerTeam" name="balancePerTeam" placeholder="e.g., 100000" min="1" required>
+                        </div>
+                        <span class="error-msg" id="err-balancePerTeam"></span>
+                    </div>
+
+                    <!-- Players Per Team -->
+                    <div class="form-group">
+                        <label for="playersPerTeam">Players Per Team <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-solid fa-users purple-text"></i></div>
+                            <input type="number" id="playersPerTeam" name="playersPerTeam" placeholder="e.g., 15" min="1" required>
+                        </div>
+                        <span class="error-msg" id="err-playersPerTeam"></span>
+                    </div>
+
+                    <!-- Minimum Bid -->
+                    <div class="form-group">
+                        <label for="minBid">Minimum Bid <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-solid fa-tag orange-text"></i></div>
+                            <input type="number" id="minBid" name="minBid" placeholder="e.g., 500" min="1" required>
+                        </div>
+                        <span class="error-msg" id="err-minBid"></span>
+                    </div>
+
+                    <!-- Bid Increase By -->
+                    <div class="form-group">
+                        <label for="bidIncrease">Bid Increase By <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fa-solid fa-arrow-trend-up blue-text"></i></div>
+                            <input type="number" id="bidIncrease" name="bidIncrease" placeholder="e.g., 100" min="1" required>
+                        </div>
+                        <span class="error-msg" id="err-bidIncrease"></span>
+                    </div>
+                </div>
+
+                <!-- Auction Visibility -->
+                <div class="form-group visibility-group">
+                    <label>Auction Visibility <span class="required">*</span></label>
+                    <div class="visibility-options">
+                        
+                        <label class="visibility-card">
+                            <input type="radio" name="visibility" value="public" checked>
+                            <div class="card-content">
+                                <div class="radio-circle"></div>
+                                <div class="icon-circle public-icon"><i class="fa-solid fa-globe"></i></div>
+                                <div class="text-content">
+                                    <strong>Public</strong>
+                                    <p>Visible to everyone and listed in global search.</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="visibility-card">
+                            <input type="radio" name="visibility" value="private">
+                            <div class="card-content">
+                                <div class="radio-circle"></div>
+                                <div class="icon-circle private-icon"><i class="fa-solid fa-lock"></i></div>
+                                <div class="text-content">
+                                    <strong>Private</strong>
+                                    <p>Invite only. Not visible in global search.</p>
+                                </div>
+                            </div>
+                        </label>
+
+                    </div>
+                </div>
+
+                <div id="formGlobalError" class="error-msg global-error hidden"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fa-solid fa-gavel"></i> CREATE AUCTION
+                </button>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMessage">Auction created successfully!</span>
+    </div>
+
+    <script src="js/create-auction.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Auction Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Background Elements Wrapper to contain overflow -->
+    <div class="bg-wrapper">
+        <!-- Stadium Background Image -->
+        <div class="stadium-bg"></div>
+
+        <!-- Background graphical swooshes -->
+        <div class="bg-swoosh-1"></div>
+        <div class="bg-swoosh-2"></div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+
+        <!-- Left Side: Hero Section -->
+        <div class="left-panel">
+
+            <div class="left-content-wrapper">
+                <!-- Logo Section -->
+                <div class="brand">
+                    <div class="brand-shield">
+                        <i class="fa-solid fa-shield"></i>
+                        <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
+                    </div>
+                    <div class="brand-text">
+                        <div class="brand-title">CRICKET</div>
+                        <div class="brand-subtitle">
+                            <span class="text-green">AUCTION</span>
+                            <i class="fa-solid fa-gavel gavel-icon"></i>
+                        </div>
+                        <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                    </div>
+                </div>
+
+                <!-- Welcome Text -->
+                <div class="welcome-text">
+                    <h1>Welcome Back,<br><span class="text-green">Organizer!</span></h1>
+                    <p>Login to manage your cricket auctions,<br>teams, players and more.</p>
+                </div>
+            </div>
+
+            <!-- Foreground Image (Auction Elements) -->
+            <div class="auction-pic-container">
+                <img src="assets/images/login pic transparent.png" alt="Auction Elements" class="auction-image">
+            </div>
+
+        </div>
+
+        <!-- Right Side: Login Form -->
+        <div class="right-panel">
+            <div class="auth-card">
+
+                <div class="user-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+
+                <h2 class="form-title">Welcome Back, Organizer</h2>
+                <p class="form-subtitle">Login to manage your cricket auctions</p>
+
+                <form class="login-form" id="loginForm" novalidate>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <div class="input-field" id="emailField">
+                            <i class="fa-regular fa-envelope icon-left"></i>
+                            <input type="email" id="email" placeholder="Enter your email address" required>
+                        </div>
+                        <span class="error-text" id="emailError"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="input-field" id="passwordField">
+                            <i class="fa-solid fa-lock icon-left"></i>
+                            <input type="password" id="password" placeholder="Enter your password" required minlength="8">
+                            <i class="fa-regular fa-eye-slash icon-right toggle-password"></i>
+                        </div>
+                        <span class="error-text" id="passwordError"></span>
+                    </div>
+
+                    <div class="forgot-link">
+                        <a href="#">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        LOGIN
+                    </button>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <button type="button" class="btn-google">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+                        Continue with Google
+                    </button>
+                </form>
+
+                <div class="register-text">
+                    Don't have an account? <a href="register.html">Register</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>

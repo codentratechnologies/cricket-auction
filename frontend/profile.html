@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Cricket Auction Management System</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand">
+                <div class="brand-shield">
+                    <i class="fa-solid fa-shield"></i>
+                    <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">CRICKET</div>
+                    <div class="brand-subtitle">
+                        <span class="text-green">AUCTION</span>
+                        <i class="fa-solid fa-gavel gavel-icon"></i>
+                    </div>
+                    <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fa-solid fa-gavel"></i> Auctions
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="profile-menu" id="profileMenuToggle">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
+                <div class="profile-info">
+                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
+                    <span class="profile-role">Super Admin</span>
+                </div>
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                
+                <!-- Dropdown Menu -->
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        
+        <header class="dashboard-header" style="padding-bottom: 20px;">
+            <div class="header-text">
+                <h1>My Profile</h1>
+                <p>Manage your account details and settings.</p>
+            </div>
+        </header>
+
+        <section class="profile-section">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar-large">
+                        <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff&size=128" alt="Profile" id="largeAvatar">
+                        <button class="btn btn-icon edit-avatar-btn"><i class="fa-solid fa-camera"></i></button>
+                    </div>
+                    <div class="profile-title">
+                        <h2 id="userNameDisplay">Loading...</h2>
+                        <span class="role-badge">Super Admin</span>
+                    </div>
+                </div>
+
+                <div class="profile-details">
+                    <form id="profileForm" class="profile-form">
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Full Name</label>
+                                <div class="input-field">
+                                    <i class="fa-regular fa-user icon-left"></i>
+                                    <input type="text" id="userFullName" placeholder="Loading..." readonly>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Email Address</label>
+                                <div class="input-field">
+                                    <i class="fa-regular fa-envelope icon-left"></i>
+                                    <input type="email" id="userEmail" placeholder="Loading..." readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" disabled>Edit Profile (Coming Soon)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

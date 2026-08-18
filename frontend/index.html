@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricSquad - Run Auctions Smarter & Faster</title>
+    <link rel="stylesheet" href="css/landing.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        if (localStorage.getItem('organizer_id')) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</head>
+<body>
+    <div class="landing-container" style="background-image: url('assets/images/static bg.png');">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <span class="logo-text">CricSquad</span>
+            </div>
+            <div class="nav-links">
+                <a href="#">Features</a>
+                <a href="#">How it Works</a>
+                <a href="#">Pricing</a>
+                <a href="#">Live Auctions</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-outline">Login</a>
+                <a href="login.html" class="btn btn-primary">Start for Free &rarr;</a>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-left">
+                <div class="badge"><i class="fa-solid fa-bolt text-blue"></i> The Future of Cricket Auctions</div>
+                <h1>Run Auctions.<br><span class="text-gradient">Smarter</span> & <span class="text-purple">Faster.</span></h1>
+                <p>Go digital with real-time bidding, automated calculations and live streaming — all in one powerful platform.</p>
+                <div class="hero-cta">
+                    <a href="login.html" class="btn btn-primary btn-lg">Start Your Auction for Free &rarr;</a>
+                    <a href="#" class="btn btn-outline-light btn-lg watch-demo"><i class="fa-solid fa-play text-blue"></i> Watch Demo</a>
+                </div>
+            </div>
+            <div class="hero-center">
+                <img src="assets/images/player.png" alt="Cricket Player" class="player-img">
+            </div>
+            <div class="hero-right">
+                <!-- Auction Widget -->
+                <div class="auction-widget">
+                    <div class="widget-header">
+                        <div class="live-indicator"><span class="live-dot"></span> Live <span style="color: #333">Auction</span></div>
+                        <div class="time-left">Time Left <span class="time">00:02:45</span></div>
+                    </div>
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo bg-blue-dark">
+                                <span style="color: white; font-weight: bold; font-size: 20px;">AR</span>
+                            </div>
+                            <div class="team-info">
+                                <span class="team-name text-blue-dark">Azure Royals</span>
+                                <span class="team-bid">₹ 1,25,000</span>
+                                <span class="bid-label">Current Bid</span>
+                            </div>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="team text-right" style="flex-direction: row-reverse;">
+                            <div class="team-logo bg-red-dark">
+                                <i class="fa-solid fa-shield text-white" style="font-size: 20px;"></i>
+                            </div>
+                            <div class="team-info" style="align-items: flex-end; margin-right: 15px;">
+                                <span class="team-name text-red-dark">Crimson Titans</span>
+                                <span class="team-bid text-red-dark">₹ 1,20,000</span>
+                                <span class="bid-label">Current Bid</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-card">
+                        <div class="player-avatar">
+                            <img src="https://i.pravatar.cc/150?img=11" alt="Player" class="avatar-img">
+                        </div>
+                        <div class="player-info">
+                            <div class="player-name">Zero &ndash; The Phenom</div>
+                            <div class="player-role">All Rounder</div>
+                        </div>
+                        <div class="player-base-price">
+                            Base Price<br><strong>₹ 50,000</strong>
+                        </div>
+                    </div>
+                    <div class="widget-footer">
+                        <div class="next-bid">
+                            Next Bid<br><strong class="text-green">₹ 1,30,000</strong>
+                        </div>
+                        <button class="btn btn-primary place-bid-btn"><i class="fa-solid fa-gavel" style="margin-right: 8px;"></i> Place Bid</button>
+                        <div class="auto-bid">
+                            <span style="font-size: 12px; color: #555; font-weight: 500;">Auto Bid</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Strip -->
+        <div class="features-strip">
+            <div class="feature-item">
+                <div class="feature-icon text-blue bg-blue-light"><i class="fa-solid fa-bolt"></i></div>
+                <div class="feature-text">
+                    <strong>Real-time Bidding</strong>
+                    <span>No delays. Live and smooth.</span>
+                </div>
+            </div>
+            <div class="feature-divider"></div>
+            <div class="feature-item">
+                <div class="feature-icon text-green bg-green-light"><i class="fa-solid fa-calculator"></i></div>
+                <div class="feature-text">
+                    <strong>Automatic Calculations</strong>
+                    <span>Error-free purse & budget.</span>
+                </div>
+            </div>
+            <div class="feature-divider"></div>
+            <div class="feature-item">
+                <div class="feature-icon text-purple bg-purple-light"><i class="fa-solid fa-tv"></i></div>
+                <div class="feature-text">
+                    <strong>Live Streaming</strong>
+                    <span>Share with your audience.</span>
+                </div>
+            </div>
+            <div class="feature-divider"></div>
+            <div class="feature-item">
+                <div class="feature-icon text-red bg-red-light"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="feature-text">
+                    <strong>Secure & Reliable</strong>
+                    <span>Your data is always safe.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="how-it-works">
+            <h2 class="section-title"><span class="line"></span> How It Works <span class="line"></span></h2>
+            <p class="section-subtitle">Start your auction in 3 simple steps.</p>
+            
+            <div class="steps-container">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <div class="step-icon text-blue"><i class="fa-solid fa-trophy"></i></div>
+                    <div class="step-text">
+                        <strong>Create Tournament</strong>
+                        <span>Add basic details<br>and settings.</span>
+                    </div>
+                </div>
+                <div class="step-arrow"><i class="fa-solid fa-arrow-right-long text-blue"></i></div>
+                <div class="step-card">
+                    <div class="step-number text-blue">02</div>
+                    <div class="step-icon text-blue"><i class="fa-solid fa-users"></i></div>
+                    <div class="step-text">
+                        <strong>Add Players</strong>
+                        <span>Upload players and<br>set base prices.</span>
+                    </div>
+                </div>
+                <div class="step-arrow"><i class="fa-solid fa-arrow-right-long text-blue"></i></div>
+                <div class="step-card">
+                    <div class="step-number text-green">03</div>
+                    <div class="step-icon text-green"><i class="fa-solid fa-gavel"></i></div>
+                    <div class="step-text">
+                        <strong>Start Bidding</strong>
+                        <span>Go live and enjoy a<br>seamless auction.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom CTA -->
+        <div class="bottom-cta">
+            <div class="cta-inner">
+                <div class="cta-image-wrapper">
+                    <img src="assets/images/static ball fixed.png" alt="Cricket Ball" class="cta-img">
+                </div>
+                <div class="cta-content">
+                    <h2>Ready to step into the next era of cricket auctions?</h2>
+                    <p><a href="#" class="cta-link">Join thousands</a> of organizers running smarter, faster and stress-free auctions.</p>
+                    <a href="login.html" class="btn btn-primary btn-lg">Start Your Auction for Free &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

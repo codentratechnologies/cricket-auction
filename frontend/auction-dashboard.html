@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction Dashboard - Cricket Auction Management System</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/auction-dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Navigation (Shared) -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand">
+                <div class="brand-shield">
+                    <i class="fa-solid fa-shield"></i>
+                    <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">CRICKET</div>
+                    <div class="brand-subtitle">
+                        <span class="text-green">AUCTION</span>
+                        <i class="fa-solid fa-gavel gavel-icon"></i>
+                    </div>
+                    <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a href="#" class="nav-link active">
+                <i class="fa-solid fa-gavel"></i> Auctions
+            </a>
+        </div>
+
+        <div class="nav-search">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="profile-menu" id="profileMenuToggle">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
+                <div class="profile-info">
+                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
+                    <span class="profile-role">Super Admin</span>
+                </div>
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                
+                <!-- Dropdown Menu -->
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="auction-dashboard-container">
+        
+        <!-- Back Navigation -->
+        <div class="back-nav">
+            <a href="dashboard.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back to Auctions</a>
+        </div>
+
+        <!-- Premium Header Card -->
+        <section class="auction-header-card">
+            <div class="header-left">
+                <div class="logo-container">
+                    <img id="auctionLogo" src="https://ui-avatars.com/api/?name=Loading&background=f3f4f6" alt="Auction Logo">
+                </div>
+                <div class="auction-details">
+                    <div class="title-row">
+                        <h1 id="auctionName">Loading Auction...</h1>
+                        <span class="badge-status" id="auctionStatus">Upcoming</span>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fa-regular fa-id-badge icon-light"></i>
+                            <div class="info-text">
+                                <span class="label">Auction Code</span>
+                                <div class="val-group">
+                                    <span class="value" id="auctionCode">Loading...</span>
+                                    <i class="fa-regular fa-copy copy-icon" id="copyCodeBtn" title="Copy Code"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-regular fa-calendar icon-light"></i>
+                            <div class="info-text">
+                                <span class="label">Date & Time</span>
+                                <span class="value" id="auctionDateTime">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-solid fa-users icon-light"></i>
+                            <div class="info-text">
+                                <span class="label">Players Per Team</span>
+                                <span class="value" id="auctionPlayersPerTeam">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <i class="fa-solid fa-crown icon-gold"></i>
+                            <div class="stat-text">
+                                <span class="label">Plan</span>
+                                <span class="badge-plan" id="auctionPlan">Free Plan</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fa-regular fa-eye icon-dark"></i>
+                            <div class="stat-text">
+                                <span class="label">Views</span>
+                                <span class="value-bold" id="auctionViews">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fa-solid fa-link icon-dark"></i>
+                            <div class="stat-text">
+                                <span class="label">Live Link</span>
+                                <div class="val-group">
+                                    <span class="link-val" id="auctionLiveLink">loading...</span>
+                                    <button class="copy-btn" id="copyLinkBtn">Copy Link <i class="fa-regular fa-copy"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-item upgrade-box">
+                            <span class="upgrade-text">Upgrade to unlock more features</span>
+                            <a href="#" class="upgrade-link">Upgrade Now <i class="fa-solid fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="startAuctionBtn" class="btn btn-success btn-large">
+                    <i class="fa-solid fa-play"></i> START AUCTION
+                </button>
+                <button id="viewAuctionBtn" class="btn btn-outline-primary btn-large">
+                    <i class="fa-regular fa-eye"></i> VIEW AUCTION
+                </button>
+                <div id="startWarning" class="warning-text hidden"><i class="fa-solid fa-triangle-exclamation"></i> Add teams and players to start</div>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="teams"><i class="fa-solid fa-users-viewfinder"></i> Teams</button>
+                <button class="tab-btn" data-tab="players"><i class="fa-solid fa-user-plus"></i> Players</button>
+                <button class="tab-btn" data-tab="mvp"><i class="fa-solid fa-star"></i> MVP</button>
+                <button class="tab-btn" data-tab="sponsors"><i class="fa-solid fa-certificate"></i> Sponsors</button>
+                <button class="tab-btn" data-tab="link"><i class="fa-solid fa-link"></i> Link</button>
+                <button class="tab-btn" data-tab="about"><i class="fa-solid fa-circle-info"></i> About</button>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <section class="tab-content">
+            <!-- Teams Tab -->
+            <div class="tab-pane active" id="teams-tab">
+                <div class="pane-header">
+                    <div class="pane-title">
+                        <h2>Teams <span class="count">(3)</span></h2>
+                        <p>Manage all participating teams in this auction</p>
+                    </div>
+                    <div class="pane-actions">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" placeholder="Search teams...">
+                        </div>
+                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Team</button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table" id="teamsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>TEAM NAME</th>
+                                <th>SHORT NAME</th>
+                                <th>BALANCE</th>
+                                <th class="text-right">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Mock Data for initial view -->
+                            <tr>
+                                <td>1</td>
+                                <td><div class="team-name-cell"><img src="https://ui-avatars.com/api/?name=MI&background=0E48A0&color=fff" alt="MI"> Mumbai Indians</div></td>
+                                <td><span class="badge-gray">MI</span></td>
+                                <td class="text-green-bold">$100,000</td>
+                                <td class="actions-cell">
+                                    <button class="btn-action btn-view"><i class="fa-regular fa-eye"></i> View</button>
+                                    <button class="btn-action btn-edit"><i class="fa-regular fa-pen-to-square"></i> Edit</button>
+                                    <button class="btn-action btn-delete"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><div class="team-name-cell"><img src="https://ui-avatars.com/api/?name=CSK&background=FBBF24&color=fff" alt="CSK"> Chennai Super Kings</div></td>
+                                <td><span class="badge-gray">CSK</span></td>
+                                <td class="text-green-bold">$100,000</td>
+                                <td class="actions-cell">
+                                    <button class="btn-action btn-view"><i class="fa-regular fa-eye"></i> View</button>
+                                    <button class="btn-action btn-edit"><i class="fa-regular fa-pen-to-square"></i> Edit</button>
+                                    <button class="btn-action btn-delete"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td><div class="team-name-cell"><img src="https://ui-avatars.com/api/?name=KKR&background=3B0764&color=fff" alt="KKR"> Kolkata Knight Riders</div></td>
+                                <td><span class="badge-gray">KKR</span></td>
+                                <td class="text-green-bold">$100,000</td>
+                                <td class="actions-cell">
+                                    <button class="btn-action btn-view"><i class="fa-regular fa-eye"></i> View</button>
+                                    <button class="btn-action btn-edit"><i class="fa-regular fa-pen-to-square"></i> Edit</button>
+                                    <button class="btn-action btn-delete"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Other Tabs (Placeholders) -->
+            <div class="tab-pane" id="players-tab">
+                <div class="placeholder-content">Players Management Coming Soon</div>
+            </div>
+            <div class="tab-pane" id="mvp-tab">
+                <div class="placeholder-content">MVP Management Coming Soon</div>
+            </div>
+            <div class="tab-pane" id="sponsors-tab">
+                <div class="placeholder-content">Sponsors Management Coming Soon</div>
+            </div>
+            <div class="tab-pane" id="link-tab">
+                <div class="placeholder-content">Link Management Coming Soon</div>
+            </div>
+            <div class="tab-pane" id="about-tab">
+                <div class="placeholder-content">About Settings Coming Soon</div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Copied to clipboard!</span>
+    </div>
+
+    <script src="js/auction-dashboard.js"></script>
+</body>
+</html>
