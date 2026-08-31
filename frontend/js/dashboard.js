@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch data from Python backend
     const organizerId = localStorage.getItem('organizer_id');
     if (!organizerId) {
-        // If not logged in, redirect to login page
         window.location.href = 'index.html';
         return;
     }
@@ -92,15 +91,28 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (data.error) {
                 console.error("Dashboard error:", data.error);
-                if(data.error === "Organizer not found") {
+                if (data.error === "Organizer not found") {
                      window.location.href = 'index.html';
                 }
                 return;
             }
             
-            // Update UI with real data
+            // Update UI with real Firebase user data
             if (data.user) {
-                document.querySelector('.profile-name').textContent = data.user.name;
+                const userName = data.user.name || 'Organizer';
+                
+                const profileNameEls = document.querySelectorAll('.profile-name, #profileNameDisplay');
+                profileNameEls.forEach(el => el.textContent = userName);
+
+                const headerTitle = document.querySelector('.header-text h1');
+                if (headerTitle) {
+                    headerTitle.innerHTML = `Welcome back, ${userName}! 👋`;
+                }
+                
+                const profileAvatar = document.getElementById('profileAvatar');
+                if (profileAvatar) {
+                    profileAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=0D8ABC&color=fff`;
+                }
             }
             
             if (data.insights) {
@@ -108,21 +120,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('totalPlayersVal').textContent = data.insights.total_players || 0;
                 document.getElementById('totalTeamsVal').textContent = data.insights.total_teams || 0;
                 
-                // Format Total Spent
                 const totalSpent = data.insights.total_spent || 0;
-                document.getElementById('totalSpentVal').textContent = '$' + totalSpent.toLocaleString();
+                document.getElementById('totalSpentVal').textContent = typeof totalSpent === 'number' ? '₹' + totalSpent.toLocaleString() : totalSpent;
             }
 
             // Render Auctions
             const auctionsWrapper = document.getElementById('auctionsWrapper');
-            auctionsWrapper.innerHTML = ''; // Clear previous
+            auctionsWrapper.innerHTML = '';
             
-            // Get carousel controls
             const prevBtn = document.querySelector('.prev-btn');
             const nextBtn = document.querySelector('.next-btn');
             const carouselDots = document.querySelector('.carousel-dots');
             
-            // Add scroll logic
             if (prevBtn) {
                 prevBtn.onclick = () => {
                     auctionsWrapper.scrollBy({ left: -366, behavior: 'smooth' });
@@ -134,10 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
             
-            const auctions = data.auctions ? Object.values(data.auctions) : [];
+            const auctions = data.auctions ? (Array.isArray(data.auctions) ? data.auctions : Object.values(data.auctions)) : [];
             
             if (auctions.length === 0) {
-                auctionsWrapper.innerHTML = '<div style="text-align:center; padding: 40px; color: #666; width: 100%;">No auctions created yet.</div>';
+                auctionsWrapper.innerHTML = '<div style="text-align:center; padding: 40px; color: #64748B; width: 100%; font-weight: 500;">No auctions created yet. Click "Create Auction" above to start!</div>';
                 if (prevBtn) prevBtn.style.display = 'none';
                 if (nextBtn) nextBtn.style.display = 'none';
                 if (carouselDots) carouselDots.style.display = 'none';
@@ -147,62 +156,93 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (nextBtn) nextBtn.style.display = 'none';
                     if (carouselDots) carouselDots.style.display = 'none';
                 } else {
-                    if (prevBtn) prevBtn.style.display = 'flex'; // Usually flex for centering icons
+                    if (prevBtn) prevBtn.style.display = 'flex';
                     if (nextBtn) nextBtn.style.display = 'flex';
                     if (carouselDots) carouselDots.style.display = 'flex';
                 }
 
                 auctions.forEach(auction => {
                     const isLive = auction.status === 'live';
+                    const auctionId = auction.id || '';
+                    const isOwner = auction.is_owner || (auction.organizer_id === organizerId);
+                    const creatorName = auction.organizer_name || 'Organizer';
+
+                    const ownerBadge = isOwner 
+                        ? `<span class="badge-owner" style="background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;"><i class="fa-solid fa-crown"></i> OWNER</span>`
+                        : `<span class="badge-guest" style="background: #F3F4F6; color: #4B5563; border: 1px solid #E5E7EB; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-eye"></i> VIEW ONLY</span>`;
+
+                    const bgImageUrl = auction.logo_url ? auction.logo_url : '../assets/images/stadium-bg.png';
+                    
                     let cardHtml = '';
                     if (isLive) {
+                        const actionBtn = isOwner 
+                            ? `<button class="btn btn-block btn-success" style="padding: 0.6rem; font-size: 0.85rem;" onclick="window.location.href='auction-dashboard.html?id=${auctionId}'">Manage Live Auction <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i></button>`
+                            : `<button class="btn btn-block btn-success" style="padding: 0.6rem; font-size: 0.85rem;" onclick="window.location.href='auction-dashboard.html?id=${auctionId}'">Go to Auction <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i></button>`;
+
                         cardHtml = `
                             <div class="auction-card live-card">
-                                <div class="card-bg-stadium"></div>
-                                <div class="auction-card-header">
-                                    <span class="badge-live"><span class="dot"></span> LIVE</span>
-                                    <span class="watching-count"><i class="fa-regular fa-eye"></i> ${auction.watching || 0} watching</span>
+                                <div class="card-bg-stadium" style="background-image: url('${bgImageUrl}');"></div>
+                                <div class="auction-card-header" style="z-index: 10; position: absolute; top: 1.25rem; left: 1.25rem; right: 1.25rem;">
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <span class="badge-live"><span class="dot"></span> LIVE</span>
+                                        ${ownerBadge}
+                                    </div>
+                                    <span class="watching-count" style="align-self: flex-start;"><i class="fa-regular fa-eye"></i> ${auction.watching || 0} watching</span>
                                 </div>
-                                <div class="auction-info">
-                                    <h3>${auction.name || 'Untitled Auction'}</h3>
-                                    <div class="auction-meta">
+                                <div class="card-main-content" style="z-index: 1; margin-left: 170px; display: flex; flex-direction: column; gap: 0.8rem; margin-top: 2.5rem; flex: 1;">
+                                    <h3 style="margin: 0; font-size: 1.25rem; color: #111827;">${auction.name || 'Untitled Auction'}</h3>
+                                    <div class="auction-meta" style="font-weight: 600; color: #4B5563;">
+                                        <i class="fa-solid fa-user-tie text-blue"></i> ${creatorName}
+                                    </div>
+
+                                    <div class="auction-meta" style="font-size: 0.75rem; color: #6B7280; display: flex; gap: 0.3rem; white-space: nowrap;">
                                         <span>Teams: ${auction.teams || 0}</span> | <span>Players: ${auction.players || 0}</span> | <span>Budget: ${auction.budget || '$0'}</span>
                                     </div>
-                                </div>
-                                <div class="auction-progress">
-                                    <div class="progress-labels">
-                                        <span>Progress</span>
-                                        <span>${auction.progress || 0}%</span>
+                                    <div class="auction-progress" style="margin-top: 0.2rem;">
+                                        <div class="progress-labels" style="font-size: 0.75rem; margin-bottom: 0.25rem;">
+                                            <span>Progress</span>
+                                            <span>${auction.progress || 0}%</span>
+                                        </div>
+                                        <div class="progress-bar" style="height: 6px;">
+                                            <div class="progress-fill" style="width: ${auction.progress || 0}%;"></div>
+                                        </div>
                                     </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${auction.progress || 0}%;"></div>
+                                    <div style="margin-top: auto; padding-top: 0.5rem;">
+                                        ${actionBtn}
                                     </div>
                                 </div>
-                                <button class="btn btn-block btn-success">
-                                    <i class="fa-solid fa-gavel"></i> Go to Auction
-                                </button>
                             </div>
                         `;
                     } else {
                         const startsInText = auction.starts_in ? `STARTS IN ${auction.starts_in.toUpperCase()}` : 'UPCOMING';
+                        const actionBtn = isOwner 
+                            ? `<button class="btn btn-block btn-outline-primary" style="padding: 0.6rem; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="window.location.href='auction-dashboard.html?id=${auctionId}'">Manage Auction <i class="fa-solid fa-arrow-right"></i></button>`
+                            : `<button class="btn btn-block btn-outline-primary" style="padding: 0.6rem; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="window.location.href='auction-dashboard.html?id=${auctionId}'">View Details <i class="fa-solid fa-arrow-right"></i></button>`;
+
                         cardHtml = `
                             <div class="auction-card upcoming-card">
-                                <div class="card-bg-stadium"></div>
-                                <div class="auction-card-header">
-                                    <span class="badge-upcoming"><i class="fa-solid fa-hourglass-half"></i> ${startsInText}</span>
+                                <div class="card-bg-stadium" style="background-image: url('${bgImageUrl}');"></div>
+                                <div class="auction-card-header" style="z-index: 10; position: absolute; top: 1.25rem; left: 1.25rem; right: 1.25rem;">
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <span class="badge-upcoming"><i class="fa-solid fa-hourglass-half"></i> ${startsInText}</span>
+                                        ${ownerBadge}
+                                    </div>
                                 </div>
-                                <div class="auction-info">
-                                    <h3>${auction.name || 'Untitled Auction'}</h3>
-                                    <div class="auction-meta">
+                                <div class="card-main-content" style="z-index: 1; margin-left: 170px; display: flex; flex-direction: column; gap: 0.8rem; margin-top: 2.5rem; flex: 1;">
+                                    <h3 style="margin: 0; font-size: 1.25rem; color: #111827;">${auction.name || 'Untitled Auction'}</h3>
+                                    <div class="auction-meta" style="font-weight: 600; color: #4B5563;">
+                                        <i class="fa-solid fa-user-tie text-blue"></i> ${creatorName}
+                                    </div>
+                                    <div class="auction-meta" style="font-size: 0.75rem; color: #6B7280; display: flex; gap: 0.3rem; white-space: nowrap;">
                                         <span>Teams: ${auction.teams || 0}</span> | <span>Players: ${auction.players || 0}</span> | <span>Budget: ${auction.budget || '$0'}</span>
                                     </div>
-                                    <div class="auction-date">
+                                    <div class="auction-date" style="font-size: 0.75rem; color: #6B7280; display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem;">
                                         <i class="fa-regular fa-calendar"></i> Starts on ${auction.date || 'TBD'}
                                     </div>
+                                    <div style="margin-top: auto; padding-top: 0.5rem;">
+                                        ${actionBtn}
+                                    </div>
                                 </div>
-                                <button class="btn btn-block btn-outline-primary">
-                                    View Details <i class="fa-solid fa-arrow-right"></i>
-                                </button>
                             </div>
                         `;
                     }
@@ -214,9 +254,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const activityList = document.getElementById('activityList');
             activityList.innerHTML = '';
             
-            const activities = data.activities ? Object.values(data.activities) : [];
+            const activities = data.activities ? (Array.isArray(data.activities) ? data.activities : Object.values(data.activities)) : [];
             if (activities.length === 0) {
-                activityList.innerHTML = '<div style="text-align:center; padding: 20px; color: #666;">No recent activity.</div>';
+                activityList.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748B;">No recent activity logged yet.</div>';
             } else {
                 activities.forEach(activity => {
                     let iconHtml = '';

@@ -25,6 +25,16 @@ body {
     /* overflow-x: hidden is removed; bg-wrapper handles it safely */
 }
 
+/* --- Disable Number Input Spinners Globally --- */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 /* --- Decorative Backgrounds Layer --- */
 .bg-wrapper {
     position: absolute;

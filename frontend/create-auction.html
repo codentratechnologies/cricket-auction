@@ -28,29 +28,30 @@
                     <div class="brand-tagline">MANAGEMENT SYSTEM</div>
                 </div>
             </div>
-        </div>
-        
-        <div class="nav-center">
-            <a href="dashboard.html" class="nav-link">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
-            <a href="#" class="nav-link active">
-                <i class="fa-solid fa-gavel"></i> Auctions
-            </a>
-        </div>
-
-        <div class="nav-search">
-            <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Search auctions, players, teams...">
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link active">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
             </div>
         </div>
 
         <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+            
             <div class="notification">
                 <i class="fa-regular fa-bell"></i>
                 <span class="badge">3</span>
             </div>
+            
             <div class="profile-menu" id="profileMenuToggle">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
                 <div class="profile-info">
@@ -80,6 +81,11 @@
             <div class="header-text">
                 <h1>Create New Auction</h1>
                 <p>Fill out the details below to set up your tournament.</p>
+            </div>
+            <div class="header-actions" style="z-index: 1;">
+                <button type="submit" form="createAuctionForm" class="btn-submit" id="submitBtn">
+                    <i class="fa-solid fa-gavel"></i> CREATE AUCTION
+                </button>
             </div>
             <div class="header-icon-bg">
                 <i class="fa-solid fa-trophy"></i>
@@ -152,7 +158,7 @@
 
                     <!-- Balance Per Team -->
                     <div class="form-group">
-                        <label for="balancePerTeam">Balance Per Team <span class="required">*</span></label>
+                        <label for="balancePerTeam">Budget per Team (₹) *</label>
                         <div class="input-wrapper">
                             <div class="input-icon"><i class="fa-solid fa-wallet green-text"></i></div>
                             <input type="number" id="balancePerTeam" name="balancePerTeam" placeholder="e.g., 100000" min="1" required>
@@ -224,11 +230,6 @@
                 </div>
 
                 <div id="formGlobalError" class="error-msg global-error hidden"></div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="btn-submit" id="submitBtn">
-                    <i class="fa-solid fa-gavel"></i> CREATE AUCTION
-                </button>
             </form>
         </section>
 
@@ -241,5 +242,14 @@
     </div>
 
     <script src="js/create-auction.js"></script>
+
+    <!-- Global fix: Prevent mouse scroll from changing number inputs -->
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+    </script>
 </body>
 </html>

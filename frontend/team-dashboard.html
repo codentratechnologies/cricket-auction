@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Dashboard - Cricket Auction Management System</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/team-dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand">
+                <div class="brand-shield">
+                    <i class="fa-solid fa-shield"></i>
+                    <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">CRICKET</div>
+                    <div class="brand-subtitle">
+                        <span class="text-green">AUCTION</span>
+                        <i class="fa-solid fa-gavel gavel-icon"></i>
+                    </div>
+                    <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                </div>
+            </div>
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link active" id="navAuctions">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+            
+            <div class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            
+            <div class="profile-menu" id="profileMenuToggle">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
+                <div class="profile-info">
+                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
+                    <span class="profile-role">Super Admin</span>
+                </div>
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                
+                <!-- Dropdown Menu -->
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="team-dashboard-container">
+        
+        <!-- Back Navigation -->
+        <div class="back-nav">
+            <a href="#" id="backToTeamList" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back to Team List</a>
+        </div>
+
+        <!-- Premium Header Card -->
+        <section class="team-header-card">
+            <div class="thc-left">
+                <div class="thc-logo-wrap">
+                    <img id="teamLogo" src="https://ui-avatars.com/api/?name=Team&background=f3f4f6" alt="Team Logo">
+                </div>
+                <div class="thc-info">
+                    <h1 class="thc-title">
+                        <span id="teamName">Team Name</span> 
+                        <i class="fa-solid fa-circle-check text-primary"></i>
+                    </h1>
+                    <div class="thc-badge">
+                        <span class="badge-label">Team Short Name:</span>
+                        <span class="badge-value" id="teamShortName">--</span>
+                    </div>
+                </div>
+            </div>
+            <div class="thc-actions">
+                <button class="btn-export btn-excel"><i class="fa-solid fa-file-excel"></i> Excel Report</button>
+                <button class="btn-export btn-pdf"><i class="fa-solid fa-file-pdf"></i> PDF Export</button>
+                <button class="btn-export btn-tshirt"><i class="fa-solid fa-shirt"></i> T-Shirt Excel</button>
+                <button class="btn-export btn-balance"><i class="fa-solid fa-file-invoice-dollar"></i> Balance Report</button>
+            </div>
+        </section>
+
+        <!-- KPI Section -->
+        <section class="kpi-section">
+            <div class="kpi-header">
+                <h2>TEAM KPIs</h2>
+                <div class="kpi-badge">
+                    <i class="fa-solid fa-circle-info"></i> Total Reserved Players: 0
+                </div>
+            </div>
+            <div class="kpi-grid">
+                <!-- Total Points -->
+                <div class="kpi-card">
+                    <div class="kpi-icon-wrap bg-blue-light text-blue">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div class="kpi-title">Total Points</div>
+                    <div class="kpi-value">
+                        <span id="kpiTotalPoints">0</span> <span class="kpi-unit">PTS</span>
+                    </div>
+                </div>
+                <!-- Used Points -->
+                <div class="kpi-card">
+                    <div class="kpi-icon-wrap bg-red-light text-red">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                    <div class="kpi-title">Used Points</div>
+                    <div class="kpi-value text-red">
+                        <span id="kpiUsedPoints">0</span> <span class="kpi-unit bg-red-light">PTS</span>
+                    </div>
+                </div>
+                <!-- Available Points -->
+                <div class="kpi-card">
+                    <div class="kpi-icon-wrap bg-green-light text-green">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div class="kpi-title">Available Points</div>
+                    <div class="kpi-value">
+                        <span id="kpiAvailablePoints">0</span> <span class="kpi-unit">PTS</span>
+                    </div>
+                </div>
+                <!-- Max Bid Points -->
+                <div class="kpi-card">
+                    <div class="kpi-icon-wrap bg-purple-light text-purple">
+                        <i class="fa-solid fa-gavel"></i>
+                    </div>
+                    <div class="kpi-title">Max Bid Points</div>
+                    <div class="kpi-value">
+                        <span id="kpiMaxBidPoints">0</span> <span class="kpi-unit">PTS</span>
+                    </div>
+                </div>
+                <!-- Total Players -->
+                <div class="kpi-card">
+                    <div class="kpi-icon-wrap bg-orange-light text-orange">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="kpi-title">Total Players</div>
+                    <div class="kpi-value">
+                        <span id="kpiTotalPlayers">0 / 0</span> <span class="kpi-unit">PLAYERS</span>
+                    </div>
+                    <div class="kpi-subtitle">Current / Max</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabs & Content -->
+        <section class="team-content-section">
+            <div class="team-tabs">
+                <button class="team-tab active" data-tab="sold-players"><i class="fa-solid fa-user-group"></i> Sold Players</button>
+                <button class="team-tab" data-tab="balance-history"><i class="fa-regular fa-clock"></i> Balance History</button>
+                <button class="team-tab" data-tab="squad-poster"><i class="fa-regular fa-image"></i> Squad Poster</button>
+            </div>
+
+            <div class="tab-content active" id="sold-players">
+                <div class="table-header-bar">
+                    <div class="th-left">
+                        <h3>Sold Players (<span id="soldPlayersCount">0</span>)</h3>
+                        <p>List of players purchased by <span id="teamNameContext">this team</span></p>
+                    </div>
+                    <div class="th-right">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="playerSearch" placeholder="Search players...">
+                        </div>
+                        <button class="btn-filter"><i class="fa-solid fa-filter"></i></button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="playersTable">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Player</th>
+                                <th>Phone</th>
+                                <th>Sold Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-bar">
+                    <div class="page-info">Showing <span id="pageStart">0</span> to <span id="pageEnd">0</span> of <span id="pageTotal">0</span> players</div>
+                    <div class="page-controls">
+                        <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="balance-history">
+                <div class="placeholder-content">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <p>Balance history will appear here once the auction starts.</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="squad-poster">
+                <div class="placeholder-content">
+                    <i class="fa-regular fa-image"></i>
+                    <p>Squad poster generation will be available after squad is formed.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Action successful</span>
+    </div>
+
+    <!-- Global fix: Prevent mouse scroll from changing number inputs -->
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+    </script>
+
+    <script src="js/team-dashboard.js"></script>
+</body>
+</html>

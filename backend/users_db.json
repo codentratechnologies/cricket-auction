@@ -1,0 +1,15 @@
+{
+  "demo-organizer-id-001": {
+    "name": "Demo Organizer",
+    "email": "demo@cricsquad.com",
+    "password": "scrypt:32768:8:1$GUtHFAs6HWh2j20s$e71c379322580fee61ee06ad50ba4a5ff09ca6c208beba3da64334411a724e61beba1696694aef5d404cb71e9a65920be008ccf99576887f74670489f72aabe4",
+    "role": "Super Admin"
+  },
+  "d1e8c27c-dd59-41a0-bf07-00c40ab08e11": {
+    "name": "Prince Gajera",
+    "email": "princegajera486@gmail.com",
+    "password": "scrypt:32768:8:1$WkCdUtkWowTA0dpp$c63a76c54bd63d27f828721b62108d240cd7390a1495e0aee2cf4bb3df0478cf7563927f629ebe78c956407b4b4b895a6b52db4efe8cc7e52803bf662fa96b68",
+    "role": "Organizer",
+    "created_at": "2026-08-28T15:26:21.582340"
+  }
+}

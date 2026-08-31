@@ -28,29 +28,30 @@
                     <div class="brand-tagline">MANAGEMENT SYSTEM</div>
                 </div>
             </div>
-        </div>
-        
-        <div class="nav-center">
-            <a href="dashboard.html" class="nav-link">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
-            <a href="#" class="nav-link active">
-                <i class="fa-solid fa-gavel"></i> Auctions
-            </a>
-        </div>
-
-        <div class="nav-search">
-            <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Search auctions, players, teams...">
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link active">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
             </div>
         </div>
 
         <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+            
             <div class="notification">
                 <i class="fa-regular fa-bell"></i>
                 <span class="badge">3</span>
             </div>
+            
             <div class="profile-menu" id="profileMenuToggle">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
                 <div class="profile-info">
@@ -79,84 +80,115 @@
 
         <!-- Premium Header Card -->
         <section class="auction-header-card">
-            <div class="header-left">
-                <div class="logo-container">
+
+            <!-- Zone 1: Logo + Plan/Views -->
+            <div class="ahc-logo-zone">
+                <div class="ahc-logo-wrap">
                     <img id="auctionLogo" src="https://ui-avatars.com/api/?name=Loading&background=f3f4f6" alt="Auction Logo">
                 </div>
-                <div class="auction-details">
-                    <div class="title-row">
-                        <h1 id="auctionName">Loading Auction...</h1>
-                        <span class="badge-status" id="auctionStatus">Upcoming</span>
+                <div class="ahc-logo-meta">
+                    <div class="ahc-meta-chip">
+                        <i class="fa-solid fa-crown" style="color:#F59E0B;font-size:0.75rem;"></i>
+                        <span class="ahc-meta-label">Plan</span>
+                        <span class="ahc-meta-badge" id="auctionPlan">Free</span>
                     </div>
-                    
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <i class="fa-regular fa-id-badge icon-light"></i>
-                            <div class="info-text">
-                                <span class="label">Auction Code</span>
-                                <div class="val-group">
-                                    <span class="value" id="auctionCode">Loading...</span>
-                                    <i class="fa-regular fa-copy copy-icon" id="copyCodeBtn" title="Copy Code"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <i class="fa-regular fa-calendar icon-light"></i>
-                            <div class="info-text">
-                                <span class="label">Date & Time</span>
-                                <span class="value" id="auctionDateTime">Loading...</span>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <i class="fa-solid fa-users icon-light"></i>
-                            <div class="info-text">
-                                <span class="label">Players Per Team</span>
-                                <span class="value" id="auctionPlayersPerTeam">Loading...</span>
+                    <div class="ahc-meta-chip">
+                        <i class="fa-regular fa-eye" style="color:#6B7280;font-size:0.75rem;"></i>
+                        <span class="ahc-meta-label">Views</span>
+                        <span class="ahc-meta-value" id="auctionViews">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zone 2: Details (2-row layout) -->
+            <div class="ahc-details-zone">
+
+                <!-- Title row -->
+                <div class="ahc-title-row">
+                    <h1 class="ahc-title" id="auctionName">Loading Auction...</h1>
+                    <div class="ahc-badges">
+                        <span class="ahc-badge-status" id="auctionStatus">Upcoming</span>
+                        <span class="ahc-badge-role" id="auctionOwnerBadge" style="display:none;">
+                            <i class="fa-solid fa-crown"></i> OWNER
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="ahc-divider"></div>
+
+                <!-- Info row 1: Code | Date | Players -->
+                <div class="ahc-info-row">
+                    <div class="ahc-info-chip">
+                        <div class="ahc-chip-icon"><i class="fa-regular fa-id-badge"></i></div>
+                        <div class="ahc-chip-text">
+                            <span class="ahc-chip-label">Auction Code</span>
+                            <div class="ahc-chip-val-row">
+                                <span class="ahc-chip-value" id="auctionCode">Loading...</span>
+                                <i class="fa-regular fa-copy ahc-copy-icon" id="copyCodeBtn" title="Copy Code"></i>
                             </div>
                         </div>
                     </div>
 
-                    <div class="stats-row">
-                        <div class="stat-item">
-                            <i class="fa-solid fa-crown icon-gold"></i>
-                            <div class="stat-text">
-                                <span class="label">Plan</span>
-                                <span class="badge-plan" id="auctionPlan">Free Plan</span>
-                            </div>
+                    <div class="ahc-info-sep"></div>
+
+                    <div class="ahc-info-chip">
+                        <div class="ahc-chip-icon"><i class="fa-regular fa-calendar"></i></div>
+                        <div class="ahc-chip-text">
+                            <span class="ahc-chip-label">Date & Time</span>
+                            <span class="ahc-chip-value" id="auctionDateTime">Loading...</span>
                         </div>
-                        <div class="stat-item">
-                            <i class="fa-regular fa-eye icon-dark"></i>
-                            <div class="stat-text">
-                                <span class="label">Views</span>
-                                <span class="value-bold" id="auctionViews">0</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fa-solid fa-link icon-dark"></i>
-                            <div class="stat-text">
-                                <span class="label">Live Link</span>
-                                <div class="val-group">
-                                    <span class="link-val" id="auctionLiveLink">loading...</span>
-                                    <button class="copy-btn" id="copyLinkBtn">Copy Link <i class="fa-regular fa-copy"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="stat-item upgrade-box">
-                            <span class="upgrade-text">Upgrade to unlock more features</span>
-                            <a href="#" class="upgrade-link">Upgrade Now <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+
+                    <div class="ahc-info-sep"></div>
+
+                    <div class="ahc-info-chip">
+                        <div class="ahc-chip-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="ahc-chip-text">
+                            <span class="ahc-chip-label">Players / Team</span>
+                            <span class="ahc-chip-value" id="auctionPlayersPerTeam">Loading...</span>
                         </div>
                     </div>
                 </div>
+
+                <!-- Info row 2: Live Link + Upgrade -->
+                <div class="ahc-info-row ahc-info-row--secondary">
+                    <div class="ahc-info-chip">
+                        <div class="ahc-chip-icon ahc-chip-icon--blue"><i class="fa-solid fa-link"></i></div>
+                        <div class="ahc-chip-text">
+                            <span class="ahc-chip-label">Live Link</span>
+                            <div class="ahc-chip-val-row">
+                                <span class="ahc-link-val" id="auctionLiveLink">loading...</span>
+                                <button class="ahc-copy-btn" id="copyLinkBtn">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ahc-info-sep"></div>
+
+                    <div class="ahc-upgrade-chip">
+                        <div class="ahc-upgrade-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="ahc-chip-text">
+                            <span class="ahc-chip-label">Want more features?</span>
+                            <a href="#" class="ahc-upgrade-link">Upgrade Now <i class="fa-solid fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div class="header-right">
-                <button id="startAuctionBtn" class="btn btn-success btn-large">
-                    <i class="fa-solid fa-play"></i> START AUCTION
+
+            <!-- Zone 3: Action Buttons -->
+            <div class="ahc-actions-zone">
+                <button id="startAuctionBtn" class="ahc-btn ahc-btn--primary" title="Start Auction">
+                    <i class="fa-solid fa-play"></i>
                 </button>
-                <button id="viewAuctionBtn" class="btn btn-outline-primary btn-large">
-                    <i class="fa-regular fa-eye"></i> VIEW AUCTION
+                <button id="viewAuctionBtn" class="ahc-btn ahc-btn--outline" title="View Auction">
+                    <i class="fa-regular fa-eye"></i>
                 </button>
-                <div id="startWarning" class="warning-text hidden"><i class="fa-solid fa-triangle-exclamation"></i> Add teams and players to start</div>
             </div>
+
         </section>
 
         <!-- Navigation Tabs -->
@@ -177,18 +209,18 @@
             <div class="tab-pane active" id="teams-tab">
                 <div class="pane-header">
                     <div class="pane-title">
-                        <h2>Teams <span class="count">(3)</span></h2>
+                        <h2>Teams <span class="count" id="teamsCount">(0)</span></h2>
                         <p>Manage all participating teams in this auction</p>
                     </div>
                     <div class="pane-actions">
                         <div class="search-box">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" placeholder="Search teams...">
+                            <input type="text" id="teamSearchInput" placeholder="Search teams...">
                         </div>
-                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Team</button>
+                        <button class="btn btn-primary" id="addTeamBtn"><i class="fa-solid fa-plus"></i> Add Team</button>
                     </div>
                 </div>
-                
+
                 <div class="table-responsive">
                     <table class="data-table" id="teamsTable">
                         <thead>
@@ -197,44 +229,14 @@
                                 <th>TEAM NAME</th>
                                 <th>SHORT NAME</th>
                                 <th>BALANCE</th>
+                                <th>PLAYERS</th>
                                 <th class="text-right">ACTIONS</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Mock Data for initial view -->
-                            <tr>
-                                <td>1</td>
-                                <td><div class="team-name-cell"><img src="https://ui-avatars.com/api/?name=MI&background=0E48A0&color=fff" alt="MI"> Mumbai Indians</div></td>
-                                <td><span class="badge-gray">MI</span></td>
-                                <td class="text-green-bold">$100,000</td>
-                                <td class="actions-cell">
-                                    <button class="btn-action btn-view"><i class="fa-regular fa-eye"></i> View</button>
-                                    <button class="btn-action btn-edit"><i class="fa-regular fa-pen-to-square"></i> Edit</button>
-                                    <button class="btn-action btn-delete"><i class="fa-regular fa-trash-can"></i> Delete</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><div class="team-name-cell"><img src="https://ui-avatars.com/api/?name=CSK&background=FBBF24&color=fff" alt="CSK"> Chennai Super Kings</div></td>
-                                <td><span class="badge-gray">CSK</span></td>
-                                <td class="text-green-bold">$100,000</td>
-                                <td class="actions-cell">
-                                    <button class="btn-action btn-view"><i class="fa-regular fa-eye"></i> View</button>
-                                    <button class="btn-action btn-edit"><i class="fa-regular fa-pen-to-square"></i> Edit</button>
-                                    <button class="btn-action btn-delete"><i class="fa-regular fa-trash-can"></i> Delete</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td><div class="team-name-cell"><img src="https://ui-avatars.com/api/?name=KKR&background=3B0764&color=fff" alt="KKR"> Kolkata Knight Riders</div></td>
-                                <td><span class="badge-gray">KKR</span></td>
-                                <td class="text-green-bold">$100,000</td>
-                                <td class="actions-cell">
-                                    <button class="btn-action btn-view"><i class="fa-regular fa-eye"></i> View</button>
-                                    <button class="btn-action btn-edit"><i class="fa-regular fa-pen-to-square"></i> Edit</button>
-                                    <button class="btn-action btn-delete"><i class="fa-regular fa-trash-can"></i> Delete</button>
-                                </td>
-                            </tr>
+                        <tbody id="teamsTableBody">
+                            <tr><td colspan="6" style="text-align:center;padding:3rem;color:#9CA3AF;">
+                                <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i><br><br>Loading teams...
+                            </td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -261,6 +263,68 @@
 
     </main>
 
+    <!-- Add / Edit Team Modal -->
+    <div id="teamModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="teamModalTitle"><i class="fa-solid fa-users"></i> Add Team</h3>
+                <button class="modal-close" id="closeTeamModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="teamForm" enctype="multipart/form-data">
+                <input type="hidden" id="editTeamId">
+                <div class="modal-logo-section">
+                    <div class="modal-logo-preview" id="logoPreview">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <label class="upload-label" for="teamLogoInput">
+                            <i class="fa-solid fa-upload"></i> Upload Team Logo
+                        </label>
+                        <input type="file" id="teamLogoInput" accept="image/*" style="display:none;">
+                        <p style="font-size:0.75rem;color:#9CA3AF;margin-top:0.3rem;">PNG, JPG up to 2MB</p>
+                    </div>
+                </div>
+                <div class="modal-fields">
+                    <div class="field-group">
+                        <label>Team Name <span class="req">*</span></label>
+                        <input type="text" id="teamName" placeholder="e.g. Mumbai Indians" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Short Name <span class="req">*</span></label>
+                        <input type="text" id="teamShortName" placeholder="e.g. MI" maxlength="5" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Budget / Balance (₹)</label>
+                        <input type="number" id="teamBalance" placeholder="e.g. 1000000" min="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="cancelTeamModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveTeamBtn">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Team
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div id="deleteModal" class="modal-overlay hidden">
+        <div class="modal-box modal-box--sm">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation" style="color:#EF4444;"></i> Delete Team</h3>
+                <button class="modal-close" id="closeDeleteModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p style="color:#6B7280;margin:1rem 0 1.5rem;">Are you sure you want to delete <strong id="deleteTeamName"></strong>? This action cannot be undone.</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" id="cancelDeleteModal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="toast hidden">
         <i class="fa-solid fa-circle-check"></i>
@@ -268,5 +332,14 @@
     </div>
 
     <script src="js/auction-dashboard.js"></script>
+
+    <!-- Global fix: Prevent mouse scroll from changing number inputs -->
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+    </script>
 </body>
 </html>

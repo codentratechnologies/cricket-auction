@@ -29,29 +29,30 @@
                     <div class="brand-tagline">MANAGEMENT SYSTEM</div>
                 </div>
             </div>
-        </div>
-        
-        <div class="nav-center">
-            <a href="#" class="nav-link active">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fa-solid fa-gavel"></i> Auctions
-            </a>
-        </div>
-
-        <div class="nav-search">
-            <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Search auctions, players, teams...">
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link active">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
             </div>
         </div>
 
         <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+            
             <div class="notification">
                 <i class="fa-regular fa-bell"></i>
                 <span class="badge">3</span>
             </div>
+            
             <div class="profile-menu" id="profileMenuToggle">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
                 <div class="profile-info">
@@ -168,7 +169,7 @@
                         <div class="card-title">Total Spent</div>
                     </div>
                     <div class="card-body">
-                        <div class="card-value" id="totalSpentVal">$1.2M</div>
+                        <div class="card-value" id="totalSpentVal">₹1.2M</div>
                         <div class="card-stats">
                             <span class="stat-trend positive">↑ 25%</span>
                             <span class="stat-label">All Time</span>
@@ -219,5 +220,14 @@
     </main>
 
     <script src="js/dashboard.js"></script>
+
+    <!-- Global fix: Prevent mouse scroll from changing number inputs -->
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+    </script>
 </body>
 </html>
