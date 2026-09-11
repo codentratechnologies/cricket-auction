@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.textContent = "Logging in...";
                 btn.disabled = true;
 
-                fetch('http://localhost:5000/api/login', {
+                fetch('http://127.0.0.1:5000/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email.value.trim(), password: password.value })
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const email = emailInput.value.trim();
                 const password = passInput.value;
 
-                fetch('http://localhost:5000/api/register', {
+                fetch('http://127.0.0.1:5000/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ fullname, email, password })

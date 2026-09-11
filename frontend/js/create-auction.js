@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Append organizerId
             formData.append('organizer_id', organizerId);
 
-            const response = await fetch('http://localhost:5000/api/auctions', {
+            const response = await fetch('http://127.0.0.1:5000/api/auctions', {
                 method: 'POST',
                 body: formData // Sending as multipart/form-data because of the image
             });

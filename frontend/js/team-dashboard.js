@@ -48,9 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadData() {
         try {
             const [auctionRes, teamRes, playersRes] = await Promise.all([
-                fetch(`http://localhost:5000/api/auctions/${auctionId}`),
-                fetch(`http://localhost:5000/api/auctions/${auctionId}/teams/${teamId}`),
-                fetch(`http://localhost:5000/api/auctions/${auctionId}/teams/${teamId}/players`)
+                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}`),
+                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams/${teamId}`),
+                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams/${teamId}/players`)
             ]);
 
             auctionData = await auctionRes.json();

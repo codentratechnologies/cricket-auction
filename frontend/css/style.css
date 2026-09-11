@@ -15,6 +15,12 @@
     font-family: 'Inter', sans-serif;
 }
 
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
 body {
     background-color: var(--bg-page);
     min-height: 100vh;
@@ -22,7 +28,6 @@ body {
     justify-content: center;
     align-items: center;
     position: relative;
-    /* overflow-x: hidden is removed; bg-wrapper handles it safely */
 }
 
 /* --- Disable Number Input Spinners Globally --- */
@@ -505,7 +510,7 @@ input[type="number"] {
 
     .stadium-bg {
         width: 100%;
-        height: 40%;
+        height: 250px;
         mask-image: none;
         -webkit-mask-image: none;
     }
@@ -514,6 +519,11 @@ input[type="number"] {
         padding: 40px 20px;
         align-items: center;
         text-align: center;
+    }
+
+    .left-content-wrapper {
+        width: 100%;
+        align-items: center;
     }
 
     .brand {
@@ -525,16 +535,41 @@ input[type="number"] {
     }
 
     .auction-pic-container {
-        position: relative;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        justify-content: center;
-        margin-top: 20px;
+        display: none; /* Hide huge image on mobile for better UX */
     }
 
     .right-panel {
         padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .left-panel {
+        padding: 20px 10px;
+    }
+
+    .welcome-text h1 {
+        font-size: 32px;
+    }
+
+    .welcome-text p {
+        font-size: 14px;
+    }
+
+    .auth-card {
+        padding: 30px 20px;
+        margin: 20px 0;
+    }
+
+    .form-title {
+        font-size: 20px;
+    }
+
+    .input-field input {
+        font-size: 13px;
+    }
+
+    .btn-login, .btn-google {
+        font-size: 14px;
     }
 }

@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    fetch(`http://localhost:5000/api/dashboard/${organizerId}`)
+    fetch(`http://127.0.0.1:5000/api/dashboard/${organizerId}`)
         .then(res => res.json())
         .then(data => {
             if (data.error) {

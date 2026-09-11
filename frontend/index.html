@@ -21,16 +21,23 @@
                 <i class="fa-solid fa-shield-halved logo-icon"></i>
                 <span class="logo-text">CricSquad</span>
             </div>
-            <div class="nav-links">
-                <a href="#">Features</a>
-                <a href="#">How it Works</a>
-                <a href="#">Pricing</a>
-                <a href="#">Live Auctions</a>
-                <a href="#">FAQ</a>
-            </div>
-            <div class="nav-actions">
-                <a href="login.html" class="btn btn-outline">Login</a>
-                <a href="register.html" class="btn btn-primary">Start for Free &rarr;</a>
+            
+            <button class="hamburger-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div class="nav-menu-wrapper" id="navMenuWrapper">
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#how-it-works">How it Works</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#live-auctions">Live Auctions</a>
+                    <a href="#faq">FAQ</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="login.html" class="btn btn-outline">Login</a>
+                    <a href="register.html" class="btn btn-primary">Start for Free &rarr;</a>
+                </div>
             </div>
         </nav>
 
@@ -193,7 +200,7 @@
         </div>
 
         <!-- Main Features Section -->
-        <div class="main-features">
+        <div class="main-features" id="features">
             <div class="features-header">
                 <div class="badge features-badge">
                     <i class="fa-solid fa-bolt"></i> Powerful Features
@@ -269,8 +276,8 @@
                 </div>
             </div>
         </div>
-        <!-- How CricSquad Works - 6 Steps -->
-        <div class="how-it-works-modern">
+        <!-- How It Works Modern Section -->
+        <div class="how-it-works-modern" id="how-it-works">
             <div class="hw-header">
                 <div class="badge hw-badge">
                     <i class="fa-solid fa-rocket"></i> Simple. Fast. Powerful.
@@ -1048,27 +1055,41 @@
                 </div>
             </div>
         </div>
-    </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const faqItems = document.querySelectorAll('.faq-item');
-            faqItems.forEach(item => {
-                const question = item.querySelector('.faq-question');
-                question.addEventListener('click', () => {
-                    const isOpen = item.classList.contains('open');
-                    faqItems.forEach(i => {
-                        i.classList.remove('open');
-                        i.querySelector('.q-toggle-icon i').className = 'fa-solid fa-plus';
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const faqItems = document.querySelectorAll('.faq-item');
+                faqItems.forEach(item => {
+                    const question = item.querySelector('.faq-question');
+                    question.addEventListener('click', () => {
+                        const isOpen = item.classList.contains('open');
+                        faqItems.forEach(i => {
+                            i.classList.remove('open');
+                            i.querySelector('.q-toggle-icon i').className = 'fa-solid fa-plus';
+                        });
+                        if (!isOpen) {
+                            item.classList.add('open');
+                            item.querySelector('.q-toggle-icon i').className = 'fa-solid fa-minus';
+                        }
                     });
-                    if (!isOpen) {
-                        item.classList.add('open');
-                        item.querySelector('.q-toggle-icon i').className = 'fa-solid fa-minus';
-                    }
                 });
+
+                // Mobile Menu Toggle
+                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                const navMenuWrapper = document.getElementById('navMenuWrapper');
+                if (mobileMenuBtn && navMenuWrapper) {
+                    mobileMenuBtn.addEventListener('click', () => {
+                        navMenuWrapper.classList.toggle('active');
+                        const icon = mobileMenuBtn.querySelector('i');
+                        if (navMenuWrapper.classList.contains('active')) {
+                            icon.classList.replace('fa-bars', 'fa-xmark');
+                        } else {
+                            icon.classList.replace('fa-xmark', 'fa-bars');
+                        }
+                    });
+                }
             });
-        });
-    </script>
+        </script>
+    </footer>
 
     <!-- Global fix: Prevent mouse scroll from changing number inputs -->
     <script>

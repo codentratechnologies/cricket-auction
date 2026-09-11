@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Profile - Cricket Auction</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/view-player.css">
+</head>
+<body class="bg-light">
+
+    <!-- Main Content Layout -->
+    <main class="page-content">
+        <div class="profile-container">
+            
+            <!-- Back Action -->
+            <a href="#" id="backBtn" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i> Back to Players
+            </a>
+
+            <!-- Page Header -->
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <h1>Player Profile</h1>
+                    <p style="margin: 0;">View complete player information and auction details.</p>
+                </div>
+                <div class="page-actions" style="display: flex; gap: 1rem; margin-bottom: 0.5rem;" id="playerActions">
+                    <!-- Actions will be populated by JS -->
+                </div>
+            </div>
+
+            <div id="loadingState" class="loading-state">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading Player Profile...
+            </div>
+
+            <div id="playerProfileContent" class="profile-layout hidden">
+                
+                <!-- Main Header Grid -->
+                <div class="profile-top-grid">
+                    
+                    <!-- Player Main Card -->
+                    <div class="card player-main-card">
+                        <div class="player-photo-wrapper">
+                            <img id="playerPhoto" src="" alt="Player Photo">
+                        </div>
+                        <div class="player-basic-info">
+                            <div class="name-status-row">
+                                <h2 id="playerName">Player Name</h2>
+                                <span id="playerStatusBadge" class="status-badge">Status</span>
+                            </div>
+                            
+                            <div class="contact-row">
+                                <i class="fa-solid fa-phone"></i> Mobile No: <strong id="playerPhone">N/A</strong>
+                            </div>
+
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <div class="stat-icon"><i class="fa-regular fa-calendar"></i></div>
+                                    <div class="stat-text">
+                                        <span class="stat-label">Age</span>
+                                        <span class="stat-val" id="playerAge">--</span>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                                    <div class="stat-text">
+                                        <span class="stat-label">Category</span>
+                                        <span class="stat-val" id="playerCategory">--</span>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon dot-icon"><span class="pulse-dot" id="statusDot"></span></div>
+                                    <div class="stat-text">
+                                        <span class="stat-label">Status</span>
+                                        <span class="stat-val" id="playerStatusText">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auction Information Card -->
+                    <div class="card auction-info-card">
+                        <div class="card-header">
+                            <div class="icon-wrapper bg-blue-light"><i class="fa-solid fa-gavel text-blue"></i></div>
+                            <h3>Auction Information</h3>
+                        </div>
+                        <div class="info-list">
+                            <div class="info-row">
+                                <span>Base Value</span>
+                                <strong id="infoBaseValue">--</strong>
+                            </div>
+                            <div class="info-row highlight-row" id="soldPriceRow">
+                                <span>Sold Price</span>
+                                <strong id="infoSoldPrice" class="text-green">--</strong>
+                            </div>
+                            <div class="info-row" id="soldToRow">
+                                <span>Sold To Team</span>
+                                <div class="team-badge" id="infoSoldToTeam">
+                                    <img src="" id="teamLogo" alt="" class="hidden">
+                                    <strong id="teamName">--</strong>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <span>Sold Sequence</span>
+                                <strong id="infoSequence">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Details Grid -->
+                <div class="details-grid mt-6">
+                    
+                    <!-- Specifications -->
+                    <div class="card detail-card">
+                        <div class="card-header">
+                            <div class="icon-wrapper bg-indigo-light"><i class="fa-solid fa-bolt text-indigo"></i></div>
+                            <h3>Specifications</h3>
+                        </div>
+                        <div class="info-list compact">
+                            <div class="info-row">
+                                <span>Batting Style</span>
+                                <strong id="specBatting">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Bowling Style</span>
+                                <strong id="specBowling">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Player Role</span>
+                                <strong id="specRole">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sizing Details -->
+                    <div class="card detail-card">
+                        <div class="card-header">
+                            <div class="icon-wrapper bg-green-light"><i class="fa-solid fa-shirt text-green"></i></div>
+                            <h3>Sizing Details</h3>
+                        </div>
+                        <div class="info-list compact">
+                            <div class="info-row">
+                                <span>Jersey Name</span>
+                                <strong id="sizeJerseyName">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Jersey Number</span>
+                                <strong id="sizeJerseyNumber">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Jersey Size</span>
+                                <strong id="sizeJersey">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Trouser Size</span>
+                                <strong id="sizeTrouser">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Stats -->
+                    <div class="card detail-card">
+                        <div class="card-header">
+                            <div class="icon-wrapper bg-purple-light"><i class="fa-solid fa-chart-column text-purple"></i></div>
+                            <h3>Performance Statistics</h3>
+                        </div>
+                        <div class="info-list compact">
+                            <div class="info-row">
+                                <span>Matches Played</span>
+                                <strong id="statMatches">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Runs Scored</span>
+                                <strong id="statRuns">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Wickets Taken</span>
+                                <strong id="statWickets">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bottom Sections -->
+                <div class="bottom-grid mt-6">
+                    
+                    <!-- Extra Details -->
+                    <div class="card extra-details-card">
+                        <div class="card-header">
+                            <div class="icon-wrapper bg-yellow-light"><i class="fa-regular fa-file-lines text-yellow"></i></div>
+                            <h3>Extra Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <p id="extraDetailsText" class="text-muted">No extra details provided.</p>
+                        </div>
+                    </div>
+
+                    <!-- Availability Status -->
+                    <div class="card availability-card" id="availabilityCard">
+                        <div class="card-header">
+                            <div class="icon-wrapper bg-blue-light"><i class="fa-regular fa-clock text-blue"></i></div>
+                            <h3>Availability Status</h3>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="availabilityStatusHeading" class="status-heading text-red">Sold</h4>
+                            <p id="availabilityStatusDesc" class="text-muted">This player has been sold in the auction.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Info -->
+                <div class="footer-info mt-6">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div class="footer-texts">
+                        <strong>Additional Information</strong>
+                        <p>Player added on <span id="addedDate">--</span> <span class="divider">|</span> Last updated on <span id="updatedDate">--</span></p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Delete Confirm Modal -->
+    <div id="deleteModal" class="modal-overlay hidden">
+        <div class="modal-box modal-box--sm">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation" style="color:#EF4444;"></i> Delete Player</h3>
+                <button class="modal-close" id="closeDeleteModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p style="color:#6B7280;margin:1rem 0 1.5rem;">Are you sure you want to delete <strong id="deletePlayerName"></strong>? This action cannot be undone.</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" id="cancelDeleteModal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Action successful!</span>
+    </div>
+
+    <script src="js/view-player.js"></script>
+</body>
+</html>

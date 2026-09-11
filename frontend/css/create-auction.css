@@ -25,6 +25,12 @@
     margin-bottom: 30px;
     position: relative;
     overflow: hidden;
+    animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .page-header h1 {
@@ -45,6 +51,13 @@
     font-size: 5rem;
     color: rgba(47, 128, 237, 0.05);
     z-index: 0;
+    animation: floatBg 6s ease-in-out infinite;
+}
+
+@keyframes floatBg {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0); }
 }
 
 /* Form Section */
@@ -55,6 +68,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     position: relative;
     z-index: 1;
+    animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s backwards;
 }
 
 /* Upload Container */
@@ -81,6 +95,8 @@
 .upload-dropzone:hover {
     border-color: #2F80ED;
     background: #f0f6ff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(47, 128, 237, 0.12);
 }
 
 .upload-icon-circle {
@@ -179,12 +195,18 @@
     left: 15px;
     color: #888;
     font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-wrapper:focus-within .input-icon {
+    transform: scale(1.2);
 }
 
 .input-wrapper input {
     width: 100%;
     padding: 12px 15px 12px 45px;
-    border: 1px solid #e1e1e1;
+    background: #F8FAFC;
+    border: 1px solid transparent;
     border-radius: 8px;
     font-size: 0.95rem;
     font-family: inherit;
@@ -194,8 +216,9 @@
 
 .input-wrapper input:focus {
     outline: none;
+    background: #ffffff;
     border-color: #2F80ED;
-    box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1);
+    box-shadow: 0 0 0 4px rgba(47, 128, 237, 0.15);
 }
 
 .input-wrapper input::placeholder {
@@ -254,6 +277,8 @@
 
 .visibility-card:hover .card-content {
     border-color: #bbd2f5;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
 .radio-circle {
@@ -268,6 +293,8 @@
 .visibility-card input:checked ~ .card-content {
     border-color: #2F80ED;
     background: #f8fbff;
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(47, 128, 237, 0.15);
 }
 
 .visibility-card input:checked ~ .card-content .radio-circle {
@@ -329,15 +356,32 @@
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
+    animation: btnGlowPulse 2.5s infinite;
+}
+
+@keyframes btnGlowPulse {
+    0% { box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.4); }
+    70% { box-shadow: 0 0 0 12px rgba(26, 86, 219, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(26, 86, 219, 0); }
+}
+
+.btn-submit i {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-submit:hover {
     background: #1546b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 86, 219, 0.35);
+}
+
+.btn-submit:hover i {
+    transform: rotate(-25deg) scale(1.1);
 }
 
 .btn-submit:disabled {

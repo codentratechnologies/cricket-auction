@@ -42,6 +42,14 @@ except Exception as e:
 # Local User Database Fallback File
 LOCAL_USERS_FILE = os.path.join(os.path.dirname(__file__), 'users_db.json')
 
+def normalize_dict(data):
+    """Firebase returns lists if keys are sequential numbers. Normalize back to dict."""
+    if isinstance(data, list):
+        return {str(i): v for i, v in enumerate(data) if v is not None}
+    elif isinstance(data, dict):
+        return data
+    return {}
+
 def load_local_users():
     import json
     if os.path.exists(LOCAL_USERS_FILE):
@@ -224,7 +232,15 @@ def get_dashboard_data(organizer_id):
                         if is_owner:
                             my_auctions_count += 1
                             my_teams_count += adata.get('teams', 0)
-                            my_players_count += adata.get('players', 0)
+                            
+                            p_val = adata.get('players_count', 0)
+                            if not p_val:
+                                p_data = adata.get('players', 0)
+                                if isinstance(p_data, dict):
+                                    p_val = len(p_data)
+                                elif isinstance(p_data, int):
+                                    p_val = p_data
+                            my_players_count += p_val
                             
                         auctions_list.append(adata)
 
@@ -355,6 +371,14 @@ def create_auction():
     else:
         new_id = f"A001"
 
+    # Generate Auction Code from Initials (e.g., "Gokuldham Premier League" -> "GPL-2026-A01")
+    words = auction_name.split()
+    initials = "".join([w[0].upper() for w in words if w[0].isalpha()])
+    if not initials:
+        initials = "AUC"
+    current_year = datetime.now().year
+    auction_code = f"{initials}-{current_year}-{new_id[-3:]}"
+
     auction_data = {
         "id": new_id,
         "organizer_id": organizer_id,
@@ -373,6 +397,7 @@ def create_auction():
         "status": "upcoming",
         "progress": 0,
         "watching": 0,
+        "auction_code": auction_code,
         "created_at": datetime.now().isoformat()
     }
     
@@ -402,6 +427,38 @@ def create_auction():
     else:
         return jsonify({"message": "Auction created locally", "auction_id": new_id}), 201
 
+@app.route('/api/auctions/<auction_id>', methods=['PUT'])
+def update_auction(auction_id):
+    try:
+        data = request.json or {}
+        organizer_id = data.get('organizer_id')
+        if not organizer_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        if not firebase_initialized:
+            return jsonify({'message': 'Auction updated (local)'}), 200
+
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get()
+        if not auction or auction.get('organizer_id') != organizer_id:
+            return jsonify({'error': 'Auction not found or unauthorized'}), 404
+
+        update_fields = {}
+        if 'name' in data: update_fields['name'] = data['name']
+        if 'venue' in data: update_fields['venue'] = data['venue']
+        if 'date' in data: update_fields['date'] = data['date']
+        if 'time' in data: update_fields['time'] = data['time']
+        if 'budget' in data: update_fields['budget'] = f"₹{int(data['budget']):,}"
+        if 'players_per_team' in data: update_fields['players_per_team'] = int(data['players_per_team'])
+        if 'min_bid' in data: update_fields['min_bid'] = int(data['min_bid'])
+        if 'bid_increase' in data: update_fields['bid_increase'] = int(data['bid_increase'])
+        if 'visibility' in data: update_fields['visibility'] = data['visibility']
+
+        auction_ref.update(update_fields)
+        return jsonify({'message': 'Auction updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/auctions/<auction_id>', methods=['GET'])
 def get_auction(auction_id):
     if not firebase_initialized:
@@ -424,9 +481,10 @@ def get_auction(auction_id):
             "status": "upcoming",
             "progress": 0,
             "watching": 1200,
-            "auction_code": f"PL-2026-{auction_id[:3].upper()}" if len(auction_id) >= 3 else "PL-2026-X8F",
+            "auction_code": f"PL-2026-{auction_id[-3:].upper()}" if len(auction_id) >= 3 else "PL-2026-X8F",
             "views": "1.2K",
-            "plan": "Free Plan"
+            "plan": "Free Plan",
+            "hidden_fields": []
         }
         return jsonify(mock_auction), 200
         
@@ -438,12 +496,21 @@ def get_auction(auction_id):
             
         auction_data["id"] = auction_id
         
+        # Strip heavy nested data — players and teams are fetched separately
+        auction_data.pop("players", None)
+        auction_data.pop("teamList", None)
+
         all_users = db.reference('/users').get() or {}
         creator_info = all_users.get(auction_data.get('organizer_id'), {})
         auction_data['organizer_name'] = creator_info.get('name', 'Organizer')
 
         if "auction_code" not in auction_data:
-            auction_data["auction_code"] = f"PL-2026-{auction_id[:3].upper()}"
+            auction_name = auction_data.get('name', 'Auction')
+            words = auction_name.split()
+            initials = "".join([w[0].upper() for w in words if w[0].isalpha()])
+            if not initials:
+                initials = "AUC"
+            auction_data["auction_code"] = f"{initials}-2026-{auction_id[-3:].upper()}"
         if "views" not in auction_data:
             auction_data["views"] = "1.2K"
         if "plan" not in auction_data:
@@ -482,6 +549,460 @@ def update_profile(organizer_id):
             save_local_users(users)
             return jsonify({"message": "Profile updated successfully"}), 200
         return jsonify({"error": "Organizer not found"}), 404
+
+@app.route('/api/auctions/<auction_id>/players', methods=['GET'])
+def get_auction_players(auction_id):
+    if not firebase_initialized:
+        return jsonify([]), 200
+    try:
+        players_ref = db.reference(f'/auctions/{auction_id}/players')
+        players_data = normalize_dict(players_ref.get())
+        players_list = []
+        for pid, pdata in players_data.items():
+            if isinstance(pdata, dict):
+                pdata['id'] = str(pid)
+                players_list.append(pdata)
+        # For now, if the database is empty, we return an empty list. 
+        # The frontend will render mock data if the list is completely empty to match the design.
+        return jsonify(players_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/preferences', methods=['PUT'])
+def update_auction_preferences(auction_id):
+    organizer_id = request.json.get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    hidden_fields = request.json.get('hidden_fields', [])
+
+    if not firebase_initialized:
+        return jsonify({"message": "Preferences updated (local)", "hidden_fields": hidden_fields}), 200
+
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get()
+        if not auction or auction.get('organizer_id') != organizer_id:
+            return jsonify({"error": "Auction not found or unauthorized"}), 404
+            
+        auction_ref.update({"hidden_fields": hidden_fields})
+        return jsonify({"message": "Preferences updated successfully", "hidden_fields": hidden_fields}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/players/bulk', methods=['POST'])
+def add_players_bulk(auction_id):
+    organizer_id = request.json.get('organizer_id')
+    players_data = request.json.get('players', [])
+    
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not players_data or not isinstance(players_data, list):
+        return jsonify({"error": "Invalid data format"}), 400
+
+    if not firebase_initialized:
+        return jsonify({"message": f"{len(players_data)} players added (local)"}), 201
+
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get()
+        if not auction or auction.get('organizer_id') != organizer_id:
+            return jsonify({"error": "Auction not found or unauthorized"}), 404
+
+        players_ref = db.reference(f'/auctions/{auction_id}/players')
+        all_players = players_ref.get() or {}
+        
+        max_num = 0
+        for pid in all_players.keys():
+            if pid.startswith('P') and pid[1:].isdigit():
+                num = int(pid[1:])
+                if num > max_num:
+                    max_num = num
+
+        updates = {}
+        added_count = 0
+        
+        for player in players_data:
+            name = str(player.get('name', '')).strip()
+            if not name:
+                continue
+                
+            max_num += 1
+            player_id = str(max_num)
+            
+            player_obj = {
+                "name": name,
+                "category": str(player.get('category', 'Uncategorized')).strip(),
+                "age": str(player.get('age', '')),
+                "phone": str(player.get('phone', '')),
+                "photo_url": "",
+                "batting_style": str(player.get('batting_style', '')),
+                "bowling_style": str(player.get('bowling_style', '')),
+                "player_role": str(player.get('player_role', '')),
+                "base_value": str(player.get('base_value', '')),
+                "jersey_size": str(player.get('jersey_size', '')),
+                "trouser_size": str(player.get('trouser_size', '')),
+                "jersey_name": str(player.get('jersey_name', '')),
+                "jersey_number": str(player.get('jersey_number', '')),
+                "matches": str(player.get('matches', '')),
+                "runs": str(player.get('runs', '')),
+                "wickets": str(player.get('wickets', '')),
+                "status": str(player.get('status', 'Available')),
+                "extra_details": str(player.get('extra_details', '')),
+                "created_at": datetime.now().isoformat()
+            }
+            updates[player_id] = player_obj
+            added_count += 1
+            
+        if updates:
+            players_ref.update(updates)
+            
+            # Update players_count
+            current_count = auction.get('players_count', 0)
+            auction_ref.update({"players_count": current_count + added_count})
+            
+        return jsonify({"message": f"{added_count} players added successfully"}), 201
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/register', methods=['POST'])
+def public_register_player(auction_id):
+    """Public endpoint — no login required. Players self-register for an auction."""
+    try:
+        # Verify auction exists and is public
+        if firebase_initialized:
+            auction_ref = db.reference(f'/auctions/{auction_id}')
+            auction_data = auction_ref.get()
+            if not auction_data:
+                return jsonify({'error': 'Auction not found'}), 404
+
+        if request.is_json:
+            data = request.json or {}
+        else:
+            data = request.form
+
+        name = str(data.get('name', '')).strip()
+        category = str(data.get('category', '')).strip()
+        if not name or not category:
+            return jsonify({'error': 'Name and category are required'}), 400
+
+        photo_url = ''
+        if 'photo' in request.files:
+            photo_file = request.files['photo']
+            if photo_file and photo_file.filename != '':
+                try:
+                    upload_result = cloudinary.uploader.upload(photo_file, folder="cricket-auction/players")
+                    photo_url = upload_result.get('secure_url', '')
+                except Exception as e:
+                    print(f"Photo upload warning: {e}")
+
+        player_obj = {
+            'name': name,
+            'category': category,
+            'age': str(data.get('age', '')),
+            'phone': str(data.get('phone', '')),
+            'photo_url': photo_url,
+            'batting_style': str(data.get('batting_style', '')),
+            'bowling_style': str(data.get('bowling_style', '')),
+            'player_role': str(data.get('player_role', '')),
+            'base_value': str(data.get('base_value', '')),
+            'jersey_size': str(data.get('jersey_size', '')),
+            'trouser_size': str(data.get('trouser_size', '')),
+            'jersey_name': str(data.get('jersey_name', '')),
+            'jersey_number': str(data.get('jersey_number', '')),
+            'matches': str(data.get('matches', '')),
+            'runs': str(data.get('runs', '')),
+            'wickets': str(data.get('wickets', '')),
+            'extra_details': str(data.get('extra_details', '')),
+            'status': 'Available',
+            'registered_via': 'public_form',
+            'created_at': datetime.now().isoformat()
+        }
+
+        if firebase_initialized:
+            players_ref = db.reference(f'/auctions/{auction_id}/players')
+            existing = normalize_dict(players_ref.get())
+            max_num = 0
+            for pid in existing.keys():
+                # Support both old P001 format and new numeric format
+                if pid.startswith('P') and pid[1:].isdigit():
+                    max_num = max(max_num, int(pid[1:]))
+                elif pid.isdigit():
+                    max_num = max(max_num, int(pid))
+            player_id = str(max_num + 1)
+            while player_id in existing:
+                max_num += 1
+                player_id = str(max_num)
+            players_ref.child(player_id).set(player_obj)
+            return jsonify({'message': 'Registration successful! You have been added to the auction.', 'id': player_id}), 201
+        else:
+            return jsonify({'message': 'Registration successful! (local mode)'}), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/players', methods=['POST'])
+def add_player(auction_id):
+    organizer_id = request.form.get('organizer_id') or (request.json or {}).get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if request.is_json:
+        data = request.json or {}
+        name = data.get('name', '').strip()
+        category = data.get('category', '').strip()
+        age = data.get('age', '')
+        phone = data.get('phone', '')
+        photo_url = data.get('photo_url', '')
+        batting_style = data.get('batting_style', '')
+        bowling_style = data.get('bowling_style', '')
+        player_role = data.get('player_role', '')
+        base_value = data.get('base_value', '')
+        jersey_size = data.get('jersey_size', '')
+        trouser_size = data.get('trouser_size', '')
+        jersey_name = data.get('jersey_name', '')
+        jersey_number = data.get('jersey_number', '')
+        matches = data.get('matches', '')
+        runs = data.get('runs', '')
+        wickets = data.get('wickets', '')
+        status = data.get('status', 'Available')
+        extra_details = data.get('extra_details', '')
+    else:
+        name = (request.form.get('name') or '').strip()
+        category = (request.form.get('category') or '').strip()
+        age = request.form.get('age') or ''
+        phone = request.form.get('phone') or ''
+        photo_url = ''
+        batting_style = request.form.get('batting_style', '')
+        bowling_style = request.form.get('bowling_style', '')
+        player_role = request.form.get('player_role', '')
+        base_value = request.form.get('base_value', '')
+        jersey_size = request.form.get('jersey_size', '')
+        trouser_size = request.form.get('trouser_size', '')
+        jersey_name = request.form.get('jersey_name', '')
+        jersey_number = request.form.get('jersey_number', '')
+        matches = request.form.get('matches', '')
+        runs = request.form.get('runs', '')
+        wickets = request.form.get('wickets', '')
+        status = request.form.get('status', 'Available')
+        extra_details = request.form.get('extra_details', '')
+
+    if not name or not category:
+        return jsonify({"error": "Name and category are required"}), 400
+
+    if 'photo' in request.files:
+        photo_file = request.files['photo']
+        if photo_file and photo_file.filename != '':
+            try:
+                upload_result = cloudinary.uploader.upload(photo_file, folder="cricket-auction/players")
+                photo_url = upload_result.get('secure_url', '')
+            except Exception as e:
+                print(f"Photo upload warning: {e}")
+
+    if firebase_initialized:
+        try:
+            players_ref = db.reference(f'/auctions/{auction_id}/players')
+            all_players = normalize_dict(players_ref.get())
+            max_num = 0
+            for pid in all_players.keys():
+                # Support both old P001 format and new numeric format
+                if pid.startswith('P') and pid[1:].isdigit():
+                    num = int(pid[1:])
+                    if num > max_num:
+                        max_num = num
+                elif pid.isdigit():
+                    num = int(pid)
+                    if num > max_num:
+                        max_num = num
+            player_id = str(max_num + 1)
+        except Exception as e:
+            player_id = str(int(datetime.now().timestamp()))
+    else:
+        player_id = "1"
+
+    player_data = {
+        "id": player_id,
+        "name": name,
+        "category": category,
+        "age": age,
+        "phone": phone,
+        "photo_url": photo_url,
+        "batting_style": batting_style,
+        "bowling_style": bowling_style,
+        "player_role": player_role,
+        "base_value": base_value,
+        "jersey_size": jersey_size,
+        "trouser_size": trouser_size,
+        "jersey_name": jersey_name,
+        "jersey_number": jersey_number,
+        "matches": matches,
+        "runs": runs,
+        "wickets": wickets,
+        "status": status,
+        "extra_details": extra_details,
+        "auction_id": auction_id,
+        "organizer_id": organizer_id,
+        "created_at": datetime.now().isoformat()
+    }
+
+    if not firebase_initialized:
+        return jsonify({"message": "Player added (local)", "player": player_data}), 201
+
+    try:
+        db.reference(f'/auctions/{auction_id}/players/{player_id}').set(player_data)
+        
+        # Increment player count on auction
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get() or {}
+        current_count = auction.get('players_count', 0)
+        auction_ref.update({'players_count': current_count + 1})
+        
+        return jsonify({"message": "Player added successfully", "player": player_data}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/players/<player_id>', methods=['GET'])
+def get_player(auction_id, player_id):
+    if not firebase_initialized:
+        return jsonify({
+            "id": player_id, "name": "Mock Player", "category": "Batsman", 
+            "age": "25", "status": "Available", "base_value": 50000
+        }), 200
+        
+    try:
+        player_ref = db.reference(f'/auctions/{auction_id}/players/{player_id}')
+        player_data = player_ref.get()
+        if not player_data:
+            return jsonify({"error": "Player not found"}), 404
+            
+        player_data['id'] = player_id
+        
+        # If player is sold, fetch team name and logo
+        if player_data.get('status') == 'Sold' and player_data.get('sold_to_team'):
+            team_id = player_data.get('sold_to_team')
+            team_ref = db.reference(f'/auctions/{auction_id}/teamList/{team_id}')
+            team_data = team_ref.get()
+            if team_data:
+                player_data['sold_to_team_name'] = team_data.get('name')
+                player_data['sold_to_team_logo'] = team_data.get('logo_url')
+
+        return jsonify(player_data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/players/<player_id>', methods=['PUT'])
+def update_player(auction_id, player_id):
+    organizer_id = request.form.get('organizer_id') or (request.json or {}).get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if request.is_json:
+        data = request.json or {}
+    else:
+        data = request.form.to_dict()
+
+    updates = {}
+    
+    fields = [
+        'name', 'category', 'age', 'phone', 
+        'batting_style', 'bowling_style', 'player_role', 'base_value',
+        'jersey_size', 'trouser_size', 'jersey_name', 'jersey_number',
+        'matches', 'runs', 'wickets', 'status', 'extra_details'
+    ]
+    for field in fields:
+        if field in data:
+            if isinstance(data[field], str):
+                updates[field] = data[field].strip()
+            else:
+                updates[field] = data[field]
+
+    if 'photo' in request.files:
+        photo_file = request.files['photo']
+        if photo_file and photo_file.filename != '':
+            try:
+                upload_result = cloudinary.uploader.upload(photo_file, folder="cricket-auction/players")
+                updates['photo_url'] = upload_result.get('secure_url', '')
+            except Exception as e:
+                pass
+
+    if not firebase_initialized:
+        return jsonify({"message": "Player updated (local)"}), 200
+
+    try:
+        db.reference(f'/auctions/{auction_id}/players/{player_id}').update(updates)
+        return jsonify({"message": "Player updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/sell', methods=['POST'])
+def sell_player(auction_id):
+    organizer_id = request.json.get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    player_id = request.json.get('player_id')
+    team_id = request.json.get('team_id')
+    sold_price = request.json.get('sold_price')
+
+    if not player_id or not team_id or sold_price is None:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    if not firebase_initialized:
+        return jsonify({"error": "Firebase not initialized"}), 500
+
+    try:
+        # Atomic-like update using update() across multiple paths if possible, 
+        # or just sequential updates since it's a simple app.
+        
+        # 1. Get current team balance
+        team_ref = db.reference(f'/auctions/{auction_id}/teams/{team_id}')
+        team_data = team_ref.get()
+        if not team_data:
+            return jsonify({"error": "Team not found"}), 404
+            
+        current_balance = int(team_data.get('balance', 0))
+        sold_price = int(sold_price)
+        
+        # 2. Update player
+        db.reference(f'/auctions/{auction_id}/players/{player_id}').update({
+            'status': 'Sold',
+            'team_id': team_id,
+            'sold_price': sold_price
+        })
+        
+        # 3. Update team balance
+        team_ref.update({
+            'balance': current_balance - sold_price
+        })
+        
+        return jsonify({"message": "Player sold successfully"}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/players/<player_id>', methods=['DELETE'])
+def delete_player(auction_id, player_id):
+    organizer_id = request.args.get('organizer_id') or (request.json or {}).get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not firebase_initialized:
+        return jsonify({"message": "Player deleted (local)"}), 200
+
+    try:
+        db.reference(f'/auctions/{auction_id}/players/{player_id}').delete()
+        
+        # Decrement player count on auction
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get() or {}
+        new_count = max(0, auction.get('players_count', 1) - 1)
+        auction_ref.update({'players_count': new_count})
+        
+        return jsonify({"message": "Player deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/auctions/<auction_id>/teams', methods=['GET'])
 def get_teams(auction_id):
@@ -663,6 +1184,145 @@ def delete_team(auction_id, team_id):
         return jsonify({"message": "Team deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+# ==========================================
+# SPONSORS ROUTES
+# ==========================================
+
+@app.route('/api/auctions/<auction_id>/sponsors', methods=['GET'])
+def get_sponsors(auction_id):
+    try:
+        sponsors_ref = db.reference(f'auctions/{auction_id}/sponsors')
+        sponsors_data = sponsors_ref.get()
+        
+        sponsors_list = []
+        if sponsors_data:
+            for s_id, s_info in sponsors_data.items():
+                s_info['id'] = s_id
+                sponsors_list.append(s_info)
+                
+        return jsonify(sponsors_list), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/sponsors', methods=['POST'])
+def add_sponsor(auction_id):
+    try:
+        organizer_id = request.form.get('organizer_id') or (request.json or {}).get('organizer_id')
+        
+        # Verify ownership
+        auction_ref = db.reference(f'auctions/{auction_id}')
+        auction_data = auction_ref.get()
+        if not auction_data or auction_data.get('organizer_id') != organizer_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        if request.is_json:
+            data = request.json or {}
+            name = data.get('name', '')
+            sponsor_type = data.get('type', '')
+            logo_url = data.get('logo', '')
+        else:
+            name = request.form.get('name', '')
+            sponsor_type = request.form.get('type', '')
+            logo_url = request.form.get('logo_url', '')
+
+        if 'logo' in request.files:
+            logo_file = request.files['logo']
+            if logo_file and logo_file.filename != '':
+                try:
+                    upload_result = cloudinary.uploader.upload(logo_file, folder="cricket-auction/sponsors")
+                    logo_url = upload_result.get('secure_url', '')
+                except Exception as e:
+                    print(f"Logo upload warning: {e}")
+                    
+        sponsor_data = {
+            'name': name,
+            'type': sponsor_type,
+            'logo': logo_url,
+            'created_at': datetime.utcnow().isoformat()
+        }
+        
+        # Use simple IDs like SP01, SP02...
+        sponsors_ref = db.reference(f'auctions/{auction_id}/sponsors')
+        existing = sponsors_ref.get() or {}
+        next_num = len(existing) + 1
+        sponsor_id = f"SP{next_num:02d}"
+        
+        # Ensure ID doesn't already exist
+        while sponsor_id in existing:
+            next_num += 1
+            sponsor_id = f"SP{next_num:02d}"
+            
+        sponsors_ref.child(sponsor_id).set(sponsor_data)
+        return jsonify({'message': 'Sponsor added successfully', 'id': sponsor_id}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/sponsors/<sponsor_id>', methods=['PUT'])
+def update_sponsor(auction_id, sponsor_id):
+    try:
+        organizer_id = request.form.get('organizer_id') or (request.json or {}).get('organizer_id')
+        
+        # Verify ownership
+        auction_ref = db.reference(f'auctions/{auction_id}')
+        auction_data = auction_ref.get()
+        if not auction_data or auction_data.get('organizer_id') != organizer_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        sponsors_ref = db.reference(f'auctions/{auction_id}/sponsors/{sponsor_id}')
+        existing_sponsor = sponsors_ref.get()
+        if not existing_sponsor:
+            return jsonify({'error': 'Sponsor not found'}), 404
+            
+        if request.is_json:
+            data = request.json or {}
+            name = data.get('name', existing_sponsor.get('name'))
+            sponsor_type = data.get('type', existing_sponsor.get('type'))
+            logo_url = data.get('logo', existing_sponsor.get('logo'))
+        else:
+            name = request.form.get('name', existing_sponsor.get('name'))
+            sponsor_type = request.form.get('type', existing_sponsor.get('type'))
+            logo_url = request.form.get('logo_url', existing_sponsor.get('logo'))
+            
+        if 'logo' in request.files:
+            logo_file = request.files['logo']
+            if logo_file and logo_file.filename != '':
+                try:
+                    upload_result = cloudinary.uploader.upload(logo_file, folder="cricket-auction/sponsors")
+                    logo_url = upload_result.get('secure_url', '')
+                except Exception as e:
+                    print(f"Logo upload warning: {e}")
+                    
+        existing_sponsor.update({
+            'name': name,
+            'type': sponsor_type,
+            'logo': logo_url,
+            'updated_at': datetime.utcnow().isoformat()
+        })
+        
+        sponsors_ref.update(existing_sponsor)
+        return jsonify({'message': 'Sponsor updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/sponsors/<sponsor_id>', methods=['DELETE'])
+def delete_sponsor(auction_id, sponsor_id):
+    try:
+        organizer_id = request.args.get('organizer_id')
+        
+        # Verify ownership
+        auction_ref = db.reference(f'auctions/{auction_id}')
+        auction_data = auction_ref.get()
+        if not auction_data or auction_data.get('organizer_id') != organizer_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        sponsor_ref = db.reference(f'auctions/{auction_id}/sponsors/{sponsor_id}')
+        if not sponsor_ref.get():
+            return jsonify({'error': 'Sponsor not found'}), 404
+            
+        sponsor_ref.delete()
+        return jsonify({'message': 'Sponsor deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

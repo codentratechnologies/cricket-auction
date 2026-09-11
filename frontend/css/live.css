@@ -1,0 +1,499 @@
+/* ============================================================
+   live.css  —  Full-viewport, zero-scroll live auction screen
+============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+    /* Add a cinematic dark gradient over the stadium to make text pop! */
+    background: 
+        linear-gradient(to bottom, 
+            rgba(6, 15, 36, 0.85) 0%,     /* Darker at top for header */
+            rgba(6, 15, 36, 0.4) 50%,     /* Clearer in middle for cards */
+            rgba(6, 15, 36, 0.85) 100%),  /* Darker at bottom for footer */
+        url('../assets/stadium_bg.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Root: 3 rows that sum exactly to 100vh */
+.lv-root {
+    display: grid;
+    grid-template-rows: 72px 1fr 105px;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+/* ============================================================
+   HEADER — 72px
+============================================================ */
+.lv-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 2vw;
+    background: transparent;
+    position: relative;
+    z-index: 20;
+}
+
+/* ---- Logo ---- */
+.lv-logo { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+.logo-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.1rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.4); flex-shrink: 0;
+}
+.logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+.logo-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: 0.3px;
+}
+.logo-tagline {
+    font-size: 0.45rem; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: #94a3b8;
+}
+
+/* ---- Centre ---- */
+.lv-center {
+    flex: 1; text-align: center;
+    display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 12px;
+}
+
+/* Trophy row: ★ ★ 🏆 ★ ★ */
+.title-stars {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.star-sm { color: #f5c842; font-size: 0.6rem; filter: drop-shadow(0 0 3px #f5c842); }
+.star-lg { color: #f5c842; font-size: 0.8rem; filter: drop-shadow(0 0 5px #f5c842); }
+
+.trophy-icon-wrap {
+    width: 32px; height: 32px;
+    background: linear-gradient(160deg, #ffe066, #f5c842, #c9970a);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(201,151,10,.45), 0 0 0 3px rgba(245,200,66,.25);
+}
+.trophy-icon-wrap i { color: #fff; font-size: 0.95rem; text-shadow: 0 1px 3px rgba(0,0,0,.2); }
+
+.auction-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+    font-weight: 700; letter-spacing: 1.5px; color: #fff;
+    white-space: nowrap; line-height: 1;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* ---- Nav ---- */
+.lv-nav { display: flex; gap: 2rem; min-width: 200px; justify-content: flex-end; align-items: center; }
+.nav-btn {
+    display: flex; flex-direction: row; align-items: center; gap: 8px;
+    text-decoration: none; color: #94a3b8;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    padding: 8px 0; border-radius: 0;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+}
+.nav-btn i { font-size: 1.2rem; color: #94a3b8; transition: color 0.3s; }
+.nav-btn .nav-text {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-btn.active, .nav-btn:hover { color: #fff; }
+.nav-btn.active i, .nav-btn:hover i { color: #3b82f6; }
+.nav-btn.active {
+    border-bottom: 2px solid #3b82f6;
+}
+.nav-btn.active .nav-text {
+    max-width: 120px;
+    opacity: 1;
+}
+
+/* ============================================================
+   MAIN — fills remaining height between header+footer+ticker
+============================================================ */
+.lv-main {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2vw;
+    padding: 2vh 2.8vw 1.5vh 2.8vw;
+    overflow: hidden;
+    align-items: center;  /* vertically center both zones */
+}
+
+/* ---- PLAYER ZONE ---- */
+.lv-player {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    position: relative;
+}
+
+/*
+  Photo ring:
+  Main area height = 100vh - 106px header - 82px footer - 26px ticker = ~554px (at 768px screen)
+  We want the ring to be ~68% of main height → 376px max, but let's cap at 260px for aesthetics.
+  Using min() so it shrinks gracefully on smaller screens.
+*/
+.photo-ring {
+    flex-shrink: 0;
+    position: relative;
+    width: min(260px, 46vh);
+    height: min(260px, 46vh);
+    z-index: 5;
+}
+
+.ring-glow {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    /* Let the stadium bleed through the ring */
+    background: radial-gradient(circle at center,
+        rgba(255,255,255,0.9) 0%,
+        rgba(255,255,255,0.6) 60%,
+        rgba(255,255,255,0.2) 100%);
+    backdrop-filter: blur(12px);
+    box-shadow:
+        0 0 0 7px rgba(255,255,255,0.8),
+        0 0 0 13px rgba(255,255,255,0.2),
+        0 20px 50px rgba(0,0,0,.4);
+    overflow: hidden;
+    border: 4px solid rgba(255,255,255,0.9);
+    display: flex; align-items: center; justify-content: center;
+}
+.ring-glow img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top center;
+    border-radius: 50%;
+    display: block;
+}
+
+/* ID badge — anchored at the bottom center of the ring */
+.id-badge {
+    position: absolute;
+    bottom: 2px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 3px solid #c0d9f5;
+    border-radius: 50%;
+    width: min(80px, 13vh);
+    height: min(80px, 13vh);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    box-shadow: 0 5px 16px rgba(10,25,75,.16);
+    z-index: 10;
+}
+.id-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: min(2rem, 3.5vh);
+    font-weight: 700; color: #0b1d4a; line-height: 1;
+}
+.id-lbl {
+    font-size: min(0.5rem, 1vh);
+    font-weight: 700; color: #5a6e99; letter-spacing: 0.5px; text-transform: uppercase;
+}
+
+/*
+  Player card:
+  - margin-left: negative half the ring width so it slides under the ring
+  - padding-left: enough to clear the visible half of the ring + some breathing room
+  - height: matches the ring height for visual alignment
+*/
+.player-card {
+    flex: 1;
+    background: rgba(255,255,255,0.85); /* Translucent glass */
+    backdrop-filter: blur(24px);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow: 0 15px 50px rgba(0,0,0,.3);
+    /* ring is min(260px,46vh); half = ~130px. We pull the card under by 100px */
+    margin-left: -100px;
+    /* left padding = 100px overlap + ~40px breathing = 140px */
+    padding: 2.2vh 2.5vw 2.2vh 140px;
+    z-index: 3;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    gap: 0.7vh;
+    align-self: center;   /* use grid alignment, not stretch */
+    height: min(220px, 40vh); /* same visual band as the ring */
+}
+
+.p-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(2.2rem, 3.6vw, 3rem);
+    font-weight: 700; color: #0b1d4a; letter-spacing: 1px; line-height: 1;
+    white-space: nowrap;
+}
+.gold-bar {
+    height: 3px; width: 55px;
+    background: linear-gradient(90deg, #c9970a, #f5c842);
+    border-radius: 2px;
+    margin-bottom: 0.3vh;
+}
+.p-detail {
+    display: flex; align-items: center; gap: 12px;
+    font-size: clamp(0.8rem, 1.1vw, 0.96rem);
+    color: #2d3e6e; font-weight: 500;
+}
+.p-icon {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #eff6ff; color: #1a3a8c;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem; flex-shrink: 0;
+}
+.p-styles {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: clamp(0.74rem, 1vw, 0.88rem);
+    color: #5a6e99; font-style: italic;
+    margin-top: 0.2vh;
+}
+.p-pipe { color: #c5d3e8; }
+
+/* ---- BID ZONE ---- */
+.lv-bid {
+    height: 100%;
+    display: flex; align-items: center;
+    /* Extra top padding to ensure the ribbon (-14px absolute) doesn't clip */
+    padding-top: 20px;
+}
+
+.bid-card {
+    width: 100%;
+    background: rgba(255,255,255,0.85); /* Translucent glass */
+    backdrop-filter: blur(24px);
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow: 0 15px 50px rgba(0,0,0,.3);
+    padding: 2.5vh 2vw 2vh;
+    padding-top: calc(2.5vh + 14px); /* extra for ribbon height */
+    text-align: center;
+    position: relative;
+    border-bottom: 4px solid #c9970a;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 1.2vh;
+}
+
+.bid-ribbon {
+    position: absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #2563eb, #1e3a8a);
+    color: #fff; white-space: nowrap;
+    padding: 6px 28px;
+    border-radius: 30px;
+    font-size: clamp(0.6rem, 0.85vw, 0.78rem);
+    font-weight: 700; letter-spacing: 1.5px;
+    box-shadow: 0 4px 14px rgba(37,99,235,.45);
+    z-index: 10;
+}
+
+.team-logo {
+    height: clamp(80px, 12vh, 120px);
+    object-fit: contain;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,.14));
+}
+.team-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    font-weight: 700; color: #0b1d4a; letter-spacing: 1px;
+}
+.bid-pill {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 14px;
+    padding: clamp(10px, 1.4vh, 16px) 1.5vw;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    box-shadow: 0 8px 24px rgba(37,99,235,.45);
+    width: 100%;
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.6); }
+    70% { box-shadow: 0 0 0 15px rgba(37,99,235,0); }
+    100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+}
+.coin { font-size: clamp(1.6rem, 2.2vh, 2.2rem); }
+.bid-val {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(1.8rem, 3.4vw, 3.2rem);
+    font-weight: 700; color: #fff; letter-spacing: 1px; font-style: italic;
+}
+.capacity-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: #eff6ff; border-radius: 30px;
+    padding: clamp(5px, 0.7vh, 9px) 1.5vw;
+    width: 100%;
+}
+.cap-lbl { font-size: clamp(0.52rem, 0.75vw, 0.68rem); font-weight: 700; color: #5a6e99; letter-spacing: 1px; text-transform: uppercase; }
+.cap-val { font-family: 'Rajdhani', sans-serif; font-size: clamp(0.95rem, 1.4vw, 1.2rem); font-weight: 700; color: #0b1d4a; }
+
+/* ============================================================
+   FOOTER - 105px
+============================================================ */
+.lv-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2vw 15px 2vw; /* Added 15px bottom padding so it sits above taskbar */
+    background: transparent;
+    gap: 2vw;
+    overflow: hidden;
+}
+
+.sponsors-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 85px; /* Increased to fit */
+}
+.sponsors-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+.sponsors-marquee-wrapper {
+    overflow: hidden;
+    width: 180px; /* Increased width */
+    height: 100%;
+}
+.sponsors-marquee {
+    display: flex;
+    height: 100%;
+    /* width and transition set dynamically via JS */
+}
+.sponsor-card {
+    background: #fff;
+    border-radius: 12px; /* Rounder edges */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 180px;
+    flex-shrink: 0;
+    height: 100%;
+}
+.sponsor-logo {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px; /* Small padding so logos don't touch the edges */
+}
+.sponsor-logo img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain; /* Contain ensures the entire logo is visible and centered */
+    object-position: center;
+}
+.sponsor-text {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+    padding: 4px 0;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Integrated Ticker */
+.ft-center {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: #e2e8f0;
+    flex: 1;
+}
+.ft-center i { color: #ef4444; animation: blink 1.5s infinite; }
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.ft-stats {
+    display: flex; align-items: center; gap: 1.5vw;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 6px 1.5vw;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+.ft-stat { display: flex; align-items: center; gap: 10px; }
+.ft-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem; color: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,.3); flex-shrink: 0;
+}
+.ft-icon.green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.ft-icon.red   { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.ft-icon.blue  { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.ft-meta { display: flex; flex-direction: column; line-height: 1.1; }
+.ft-lbl { font-size: 0.52rem; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
+.ft-val { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: 700; color: #fff; }
+.ft-sep { width: 1px; height: 30px; background: rgba(255,255,255,0.15); }
+
+/* ============================================================
+   NOT LIVE OVERLAY
+============================================================ */
+.not-live-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 15, 36, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #fff;
+    text-align: center;
+}
+
+.not-live-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 3rem 4rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.not-live-icon {
+    font-size: 4rem;
+    color: #3b82f6;
+    margin-bottom: 1.5rem;
+    animation: pulseGlow 2s infinite;
+}
+
+.not-live-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+}
+
+.not-live-msg {
+    font-size: 1.2rem;
+    color: #94a3b8;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

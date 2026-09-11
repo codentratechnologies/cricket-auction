@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Registration - Cricket Auction</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/add-player.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Force body styles to override dashboard.css leaking */
+        body {
+            background-color: #F8FAFC !important;
+            /* Allow stadium background from dashboard.css to show */
+            display: flex;
+            justify-content: center;
+            padding: 20px 16px 60px;
+        }
+
+        .main-content {
+            margin-left: 0 !important;
+            margin-top: 40px !important; /* Push down to avoid unreadable text over the stadium image */
+            max-width: 1400px !important;
+            width: 100%;
+            background: transparent !important;
+            padding: 0 1rem !important;
+            box-shadow: none !important;
+        }
+
+        .auction-banner {
+            background: linear-gradient(to bottom, #ffffff, #f8fafc);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-top: 4px solid #3B82F6;
+            border-radius: 16px;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 12px;
+            margin: 0 auto 32px auto;
+            max-width: 500px;
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        .auction-icon {
+            width: 64px;
+            height: 64px;
+            background: #EFF6FF;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #2563EB;
+            flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border: 2px solid #ffffff;
+        }
+
+        .auction-meta { flex: none; width: 100%; }
+        .auction-meta h2 { 
+            font-family: 'Playfair Display', serif;
+            font-size: 24px; 
+            font-weight: 800; 
+            color: #0F172A; 
+            margin: 0 0 6px 0; 
+            letter-spacing: -0.01em;
+        }
+        .auction-meta p { font-size: 13px; color: #64748B; margin: 0; }
+        
+        .status-badge {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            color: #059669;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .brand-shield {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            position: relative;
+        }
+
+        .brand-text .title { font-size: 18px; font-weight: 800; color: #0F172A; line-height: 1; margin-bottom: 4px; }
+        .brand-text .subtitle { font-size: 11px; font-weight: 600; color: #2563EB; letter-spacing: 0.08em; text-transform: uppercase; }
+
+        /* Hide fields that players shouldn't set themselves in public form */
+        #wrapper-status, #wrapper-baseValue {
+            display: none !important;
+        }
+
+        .success-screen {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid #E2E8F0;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            color: white;
+        }
+
+        .success-screen h3 { font-size: 24px; font-weight: 800; color: #0F172A; margin-bottom: 12px; }
+        .success-screen p { font-size: 15px; color: #64748B; line-height: 1.6; }
+
+        #errorBanner { display: none; text-align: center; padding: 60px 20px; }
+        #errorBanner i { font-size: 48px; color: #EF4444; margin-bottom: 16px; }
+        #errorBanner h3 { font-size: 20px; font-weight: 700; color: #0F172A; margin-bottom: 8px; }
+        #errorBanner p { font-size: 14px; color: #64748B; }
+
+        #loadingBanner { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; }
+    </style>
+</head>
+<body>
+
+    <main class="main-content">
+        
+        <div class="brand-header">
+            <!-- Platform Branding -->
+            <div class="brand-shield"><i class="fa-solid fa-shield"></i></div>
+            <div class="brand-text">
+                <div class="title">CRICKET AUCTION</div>
+                <div class="subtitle">Management System</div>
+            </div>
+            
+            <span style="color:#CBD5E1; margin:0 8px; font-weight:300; font-size:28px;">|</span>
+            
+            <!-- Tournament Branding -->
+            <div class="brand-shield" id="headerLogo" style="overflow:hidden; background:#EFF6FF; color:#2563EB;"><i class="fa-solid fa-trophy"></i></div>
+            <div class="brand-text">
+                <div class="title" id="headerAuctionName" style="font-family:'Playfair Display', serif; color:#1E293B; font-weight:800; font-size:24px; letter-spacing: -0.01em;">Loading...</div>
+                <div class="subtitle" id="headerAuctionMeta" style="color:#64748B; font-weight:500; font-size:13px; text-transform:none; letter-spacing:0;">Fetching details...</div>
+            </div>
+            <span class="status-badge" id="headerStatus" style="position:static; margin-left:12px;">Open</span>
+        </div>
+
+        <div id="loadingBanner">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:24px; color:#3B82F6;"></i>
+            <span style="font-size:15px; color:#64748B; font-weight:600;">Loading auction details...</span>
+        </div>
+
+        <div id="errorBanner">
+            <i class="fa-solid fa-circle-xmark"></i>
+            <h3>Auction Not Found</h3>
+            <p id="errorMsg">This registration link is invalid or the auction no longer exists.</p>
+        </div>
+
+        <div id="formSection" style="display:none;">
+            
+            <div class="page-header" style="margin-bottom: 24px; display:block;">
+                <h1 id="pageTitle">Player Registration</h1>
+                <p style="color:#64748B; font-size:14px; margin-top:8px;">Fill in your details below to register for the auction. Fields marked * are required.</p>
+            </div>
+
+            <form id="playerRegForm" class="player-form-container">
+                <div class="form-content">
+                    <!-- Top Row: Photo and Basic Info -->
+                    <div class="form-top-row">
+                        <div class="photo-upload-col" id="wrapper-playerPhoto">
+                            <label class="field-label">Player Photo</label>
+                            <div class="photo-upload-box" id="photoUploadBox">
+                                <input type="file" id="playerPhoto" accept="image/png, image/jpeg" hidden>
+                                <div class="upload-placeholder" id="uploadPlaceholder">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <span>Upload Photo</span>
+                                    <small>JPG, PNG (Max 2MB)</small>
+                                </div>
+                                <img id="photoPreview" class="hidden" src="" alt="Player preview">
+                            </div>
+                        </div>
+                        
+                        <div class="basic-info-col">
+                            <div class="form-grid-2">
+                                <div class="field-group" id="wrapper-playerName">
+                                    <label class="field-label">Full Name <span class="req">*</span></label>
+                                    <div class="input-with-icon">
+                                        <input type="text" id="playerName" class="form-input" placeholder="e.g., Virat Kohli" required>
+                                        <i class="fa-regular fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="field-group" id="wrapper-playerPhone">
+                                    <label class="field-label">Mobile No <span class="req">*</span></label>
+                                    <div class="input-with-icon">
+                                        <input type="tel" id="playerPhone" class="form-input" placeholder="e.g., 9876543210" required>
+                                        <i class="fa-solid fa-phone"></i>
+                                    </div>
+                                </div>
+                                <div class="field-group" id="wrapper-playerAge">
+                                    <label class="field-label">Age <span class="req">*</span></label>
+                                    <div class="input-with-icon">
+                                        <input type="number" id="playerAge" class="form-input" placeholder="e.g., 25" min="10" max="65" required>
+                                        <i class="fa-regular fa-calendar"></i>
+                                    </div>
+                                </div>
+                                <div class="field-group" id="wrapper-playerCategory">
+                                    <label class="field-label">Category <span class="req">*</span></label>
+                                    <select id="playerCategory" class="form-select" required>
+                                        <option value="" disabled selected>Select category</option>
+                                        <option value="Batsman">Batsman</option>
+                                        <option value="Bowler">Bowler</option>
+                                        <option value="All-Rounder">All-Rounder</option>
+                                        <option value="Wicket-Keeper">Wicket-Keeper</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle Section: Specs & Role -->
+                    <div class="form-grid-4 mt-6">
+                        <div class="field-group" id="wrapper-battingStyle">
+                            <label class="field-label">Specification 1</label>
+                            <select id="battingStyle" class="form-select">
+                                <option value="" disabled selected>Batting Style / Speciality</option>
+                                <option value="Right Hand">Right Hand</option>
+                                <option value="Left Hand">Left Hand</option>
+                                <option value="Opener">Opener</option>
+                                <option value="Finisher">Finisher</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="field-group" id="wrapper-bowlingStyle">
+                            <label class="field-label">Specification 2</label>
+                            <select id="bowlingStyle" class="form-select">
+                                <option value="" disabled selected>Bowling Style</option>
+                                <option value="Right Arm Fast">Right Arm Fast</option>
+                                <option value="Left Arm Orthodox">Left Arm Orthodox</option>
+                                <option value="Right Arm Spin">Right Arm Spin</option>
+                                <option value="Left Arm Spin">Left Arm Spin</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="field-group" id="wrapper-playerRole">
+                            <label class="field-label">Specification 3</label>
+                            <select id="playerRole" class="form-select">
+                                <option value="" disabled selected>Player Role</option>
+                                <option value="Pure Batsman">Pure Batsman</option>
+                                <option value="Wicket Keeper">Wicket Keeper</option>
+                                <option value="Captain">Captain</option>
+                                <option value="All Rounder">All Rounder</option>
+                                <option value="Bowler">Bowler</option>
+                            </select>
+                        </div>
+                        <div class="field-group" id="wrapper-baseValue">
+                            <!-- Hidden for public registration, defaults to empty on backend -->
+                            <label class="field-label">Base Value</label>
+                            <div class="input-with-icon">
+                                <span class="currency-symbol">₹</span>
+                                <input type="number" id="baseValue" class="form-input pl-8" value="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lower Section: Stats & Apparel -->
+                    <div class="form-grid-4 mt-4">
+                        <div class="field-group" id="wrapper-jerseySize">
+                            <label class="field-label">Jersey Size</label>
+                            <select id="jerseySize" class="form-select">
+                                <option value="" disabled selected>Select size</option>
+                                <option value="XS">XS</option>
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="XXL">XXL</option>
+                                <option value="3XL">3XL</option>
+                                <option value="4XL">4XL</option>
+                                <option value="5XL">5XL</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="field-group" id="wrapper-trouserSize">
+                            <label class="field-label">Trouser Size</label>
+                            <select id="trouserSize" class="form-select">
+                                <option value="" disabled selected>Select size</option>
+                                <option value="26">26</option>
+                                <option value="28">28</option>
+                                <option value="30">30</option>
+                                <option value="32">32</option>
+                                <option value="34">34</option>
+                                <option value="36">36</option>
+                                <option value="38">38</option>
+                                <option value="40">40</option>
+                                <option value="42">42</option>
+                                <option value="44">44</option>
+                                <option value="46">46</option>
+                                <option value="48">48</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="field-group" id="wrapper-jerseyName">
+                            <label class="field-label">Jersey Name</label>
+                            <input type="text" id="jerseyName" class="form-input" placeholder="e.g., VIRAT">
+                        </div>
+                        <div class="field-group" id="wrapper-jerseyNumber">
+                            <label class="field-label">Jersey Number</label>
+                            <input type="text" id="jerseyNumber" class="form-input" placeholder="e.g., 18">
+                        </div>
+
+                        <div class="field-group" id="wrapper-matches">
+                            <label class="field-label">Match</label>
+                            <input type="number" id="matches" class="form-input" placeholder="e.g., 250">
+                        </div>
+                        <div class="field-group" id="wrapper-runs">
+                            <label class="field-label">Run</label>
+                            <input type="number" id="runs" class="form-input" placeholder="e.g., 12000">
+                        </div>
+                        <div class="field-group" id="wrapper-wickets">
+                            <label class="field-label">Wickets</label>
+                            <input type="number" id="wickets" class="form-input" placeholder="e.g., 4">
+                        </div>
+                        
+                        <div class="field-group" id="wrapper-status">
+                            <!-- Hidden for public form, defaults to Available in backend -->
+                            <input type="hidden" id="status" value="Available">
+                        </div>
+                    </div>
+
+                    <!-- Extra Details -->
+                    <div class="field-group mt-6" id="wrapper-extraDetails">
+                        <label class="field-label">Extra Details</label>
+                        <textarea id="extraDetails" class="form-textarea" placeholder="Enter any additional info or notes..." maxlength="500"></textarea>
+                        <div class="char-count" id="charCount">0/500</div>
+                    </div>
+
+                </div>
+                
+                <!-- Sticky Footer Actions -->
+                <div class="form-footer" style="display: flex; justify-content: center;">
+                    <button type="submit" class="btn btn-primary" id="saveBtn" style="min-width: 300px; justify-content:center; padding: 14px 32px; font-size:16px;">
+                        <i class="fa-solid fa-paper-plane"></i> SUBMIT REGISTRATION
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="success-screen" id="successScreen">
+            <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+            <h3>Registration Successful! 🎉</h3>
+            <p id="successMsg">You have been successfully registered for the auction. The organizer will review your details.</p>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Action successful</span>
+    </div>
+
+    <!-- Global fix: Prevent mouse scroll from changing number inputs -->
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+    </script>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const auctionId = params.get('auction');
+
+        const loadingBanner = document.getElementById('loadingBanner');
+        const errorBanner   = document.getElementById('errorBanner');
+        const formSection   = document.getElementById('formSection');
+        const successScreen = document.getElementById('successScreen');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+
+        function showToast(message, isError = false) {
+            toastMsg.textContent = message;
+            if (isError) {
+                toast.querySelector('i').classList.replace('fa-circle-check', 'fa-circle-xmark');
+                toast.style.borderLeftColor = '#ef4444';
+            } else {
+                toast.querySelector('i').classList.replace('fa-circle-xmark', 'fa-circle-check');
+                toast.style.borderLeftColor = '#10b981';
+            }
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // Photo Preview Logic
+        const photoUploadBox = document.getElementById('photoUploadBox');
+        const playerPhotoInput = document.getElementById('playerPhoto');
+        const photoPreview = document.getElementById('photoPreview');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+        photoUploadBox.addEventListener('click', () => {
+            playerPhotoInput.click();
+        });
+
+        playerPhotoInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    photoPreview.src = ev.target.result;
+                    photoPreview.classList.remove('hidden');
+                    uploadPlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Character counter
+        const extraDetails = document.getElementById('extraDetails');
+        const charCount = document.getElementById('charCount');
+        if (extraDetails) {
+            extraDetails.addEventListener('input', () => {
+                charCount.textContent = `${extraDetails.value.length}/500`;
+            });
+        }
+
+        // Load auction info
+        if (!auctionId) {
+            loadingBanner.style.display = 'none';
+            errorBanner.style.display = 'block';
+            document.getElementById('errorMsg').textContent = 'No auction ID found in this link. Please use the correct registration link.';
+        } else {
+            fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}`)
+                .then(r => r.json())
+                .then(data => {
+                    loadingBanner.style.display = 'none';
+                    if (data.error) {
+                        errorBanner.style.display = 'block';
+                        document.getElementById('errorMsg').textContent = data.error;
+                        return;
+                    }
+                    document.getElementById('headerAuctionName').textContent = data.name || 'Cricket Auction';
+                    const dateStr = data.date ? new Date(data.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '';
+                    document.getElementById('headerAuctionMeta').textContent = dateStr ? `${dateStr}${data.venue ? ' · ' + data.venue : ''}` : (data.venue || 'Open for registration');
+                    document.getElementById('headerStatus').textContent = data.status === 'upcoming' ? 'Open' : (data.status || 'Open');
+                    
+                    if (data.logo_url) {
+                        const iconContainer = document.getElementById('headerLogo');
+                        iconContainer.style.background = 'none';
+                        iconContainer.innerHTML = `<img src="${data.logo_url}" alt="Tournament Logo" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+                    }
+
+                    formSection.style.display = 'block';
+                    document.title = `Register – ${data.name}`;
+                })
+                .catch(() => {
+                    loadingBanner.style.display = 'none';
+                    errorBanner.style.display = 'block';
+                    document.getElementById('errorMsg').textContent = 'Could not connect to server. Please try again later.';
+                });
+        }
+
+        // Form Submit
+        document.getElementById('playerRegForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name     = document.getElementById('playerName').value.trim();
+            const phone    = document.getElementById('playerPhone').value.trim();
+            const age      = document.getElementById('playerAge').value.trim();
+            const category = document.getElementById('playerCategory').value;
+
+            if (!name || !phone || !age || !category) {
+                showToast('Please fill in all required fields!', true);
+                return;
+            }
+
+            const submitBtn = document.getElementById('saveBtn');
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('phone', phone);
+            formData.append('age', age);
+            formData.append('category', category);
+            formData.append('batting_style', document.getElementById('battingStyle').value);
+            formData.append('bowling_style', document.getElementById('bowlingStyle').value);
+            formData.append('player_role',   document.getElementById('playerRole').value);
+            formData.append('matches',       document.getElementById('matches').value);
+            formData.append('runs',          document.getElementById('runs').value);
+            formData.append('wickets',       document.getElementById('wickets').value);
+            formData.append('jersey_number', document.getElementById('jerseyNumber').value);
+            formData.append('jersey_name',   document.getElementById('jerseyName').value);
+            formData.append('jersey_size',   document.getElementById('jerseySize').value);
+            formData.append('trouser_size',  document.getElementById('trouserSize').value);
+            formData.append('extra_details', document.getElementById('extraDetails').value);
+
+            if (playerPhotoInput.files[0]) {
+                formData.append('photo', playerPhotoInput.files[0]);
+            }
+
+            try {
+                const res = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/register`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'Registration failed');
+
+                formSection.style.display = 'none';
+                document.getElementById('successMsg').textContent = result.message || 'You have been successfully registered!';
+                successScreen.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (err) {
+                showToast(err.message || 'Registration failed. Please try again.', true);
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> SUBMIT REGISTRATION';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

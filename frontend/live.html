@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricAuction — Live View</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/live.css">
+</head>
+<body>
+
+<div class="lv-root">
+
+    <!-- ===== HEADER ===== -->
+    <header class="lv-header">
+
+        <!-- Logo -->
+        <div class="lv-logo">
+            <div class="logo-icon">
+                <i class="fa-solid fa-cricket-bat-ball"></i>
+            </div>
+            <div class="logo-text">
+                <span class="logo-name">CricAuction</span>
+                <span class="logo-tagline">Dream Teams. Real Glory.</span>
+            </div>
+        </div>
+
+        <!-- Center Title -->
+        <div class="lv-center">
+            <img id="auctionLogo" src="" alt="Tournament Logo" style="display: none; height: clamp(30px, 4vh, 45px); border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); object-fit: cover;">
+            <h1 class="auction-title" id="auctionTitle">--</h1>
+        </div>
+
+        <!-- Nav -->
+        <nav class="lv-nav" id="liveNav">
+            <button class="nav-btn active" data-tab="auction"><i class="fa-solid fa-gavel"></i><span class="nav-text">Auction</span></button>
+            <button class="nav-btn" data-tab="teams"><i class="fa-solid fa-users"></i><span class="nav-text">Teams</span></button>
+            <button class="nav-btn" data-tab="players"><i class="fa-solid fa-user-group"></i><span class="nav-text">Players</span></button>
+            <button class="nav-btn" data-tab="settings"><i class="fa-solid fa-gear"></i><span class="nav-text">Settings</span></button>
+        </nav>
+
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <main class="lv-main">
+
+        <!-- Left: Player -->
+        <div class="lv-player" id="livePlayerCard" style="display: none;">
+            <!-- Circular photo ring -->
+            <div class="photo-ring">
+                <div class="ring-glow">
+                    <img id="playerPhoto"
+                         src=""
+                         alt="Player"
+                         style="display: none;"
+                         onerror="this.src='https://ui-avatars.com/api/?name=Player&background=b8d4f0&color=1e3a8a&size=300'; this.style.display='block';">
+                </div>
+                <div class="id-badge">
+                    <span class="id-num" id="playerIdDisplay">110</span>
+                    <span class="id-lbl">PLAYER ID</span>
+                </div>
+            </div>
+
+            <!-- Info card -->
+            <div class="player-card">
+                <h2 class="p-name" id="playerName">--</h2>
+                <div class="gold-bar"></div>
+                <div class="p-detail" id="playerLocationContainer" style="display: none;"><span class="p-icon"><i class="fa-solid fa-location-dot"></i></span><span id="playerLocation">--</span></div>
+                <div class="p-detail"><span class="p-icon"><i class="fa-regular fa-user"></i></span><span id="playerRole">--</span></div>
+                <div class="p-styles" id="playerStylesContainer" style="display: none;">
+                    <span id="battingStyle">--</span>
+                    <span class="p-pipe">|</span>
+                    <span id="bowlingStyle">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Bid card -->
+        <div class="lv-bid" id="liveBidCard" style="display: none;">
+            <div class="bid-card">
+                <div class="bid-ribbon">CURRENT HIGHEST BID</div>
+                <img id="teamLogo"
+                     src=""
+                     alt="Team"
+                     class="team-logo"
+                     style="display: none;"
+                     onerror="this.style.display='none'">
+                <h3 class="team-name" id="teamName">--</h3>
+                <div class="bid-pill">
+                    <span class="coin">🪙</span>
+                    <span class="bid-val" id="bidAmount">--</span>
+                </div>
+                <div class="capacity-row">
+                    <span class="cap-lbl">MAX BID CAPACITY</span>
+                    <span class="cap-val" id="maxBidCapacity">89,00,000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Not Live Message (centered in main) -->
+        <div id="notLiveMessage" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white;">
+            <div class="not-live-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 3rem 4rem; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);">
+                <i class="fa-solid fa-tower-broadcast not-live-icon" style="font-size: 4rem; color: #3b82f6; margin-bottom: 1.5rem; animation: pulseGlow 2s infinite;"></i>
+                <h2 class="not-live-title" style="font-family: 'Rajdhani', sans-serif; font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 2px;">AUCTION IS NOT LIVE</h2>
+                <p class="not-live-msg" style="font-size: 1.2rem; color: #94a3b8;">Please wait for the organizer to start the auction.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="lv-footer">
+        <!-- Sponsors Marquee -->
+        <div class="sponsors-container">
+            <div class="sponsors-label">SPONSOR</div>
+            <div class="sponsors-marquee-wrapper">
+                <div class="sponsors-marquee">
+                    <!-- Sponsor 1 -->
+                    <div class="sponsor-card">
+                        <div class="sponsor-logo" style="background-color: #0b328a;">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8d/Board_of_Control_for_Cricket_in_India_logo.svg/1200px-Board_of_Control_for_Cricket_in_India_logo.svg.png" alt="BCCI">
+                        </div>
+                        <div class="sponsor-text">Bcci - Organizer</div>
+                    </div>
+                    <!-- Sponsor 2 -->
+                    <div class="sponsor-card">
+                        <div class="sponsor-logo" style="background-color: #fff;">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Dream11_logo.svg/1200px-Dream11_logo.svg.png" alt="Dream11">
+                        </div>
+                        <div class="sponsor-text">Dream11 - Title</div>
+                    </div>
+                    <!-- Sponsor 3 -->
+                    <div class="sponsor-card">
+                        <div class="sponsor-logo" style="background-color: #fff;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Tata_logo.svg/1200px-Tata_logo.svg.png" alt="Tata">
+                        </div>
+                        <div class="sponsor-text">Tata - Associate</div>
+                    </div>
+                    <!-- Duplicate of Sponsor 1 for seamless loop -->
+                    <div class="sponsor-card">
+                        <div class="sponsor-logo" style="background-color: #0b328a;">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8d/Board_of_Control_for_Cricket_in_India_logo.svg/1200px-Board_of_Control_for_Cricket_in_India_logo.svg.png" alt="BCCI">
+                        </div>
+                        <div class="sponsor-text">Bcci - Organizer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center area empty (removed ticker) -->
+
+        <!-- Stats -->
+        <div class="ft-stats">
+            <div class="ft-stat">
+                <div class="ft-icon green"><i class="fa-solid fa-gavel"></i></div>
+                <div class="ft-meta">
+                    <span class="ft-lbl">SOLD</span>
+                    <span class="ft-val" id="soldCount">0</span>
+                </div>
+            </div>
+            <div class="ft-sep"></div>
+            <div class="ft-stat">
+                <div class="ft-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+                <div class="ft-meta">
+                    <span class="ft-lbl">UNSOLD</span>
+                    <span class="ft-val" id="unsoldCount">0</span>
+                </div>
+            </div>
+            <div class="ft-sep"></div>
+            <div class="ft-stat">
+                <div class="ft-icon blue"><i class="fa-solid fa-users"></i></div>
+                <div class="ft-meta">
+                    <span class="ft-lbl">AVAILABLE</span>
+                    <span class="ft-val" id="availableCount">0</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<script src="js/live.js"></script>
+</body>
+</html>

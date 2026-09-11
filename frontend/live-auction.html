@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Auction — Cricket Auction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/live-auction.css">
+</head>
+<body>
+
+    <!-- ══ TOP NAV ══ -->
+    <nav class="la-topnav">
+        <div class="la-brand">
+            <div class="la-brand-mark">
+                <i class="fa-solid fa-cricket-bat-ball"></i>
+            </div>
+            <span>Cricket Auction</span>
+        </div>
+        <div class="la-topnav-center">
+            <span class="la-live-badge"><span class="la-pulse"></span> LIVE</span>
+            <span class="la-auction-title" id="liveTournamentName">Indian Premier League 2026</span>
+        </div>
+        <div class="la-nav-right">
+            <div class="la-timer-box">
+                <i class="fa-regular fa-clock"></i>
+                <span id="auctionTimer" class="la-timer-val">00:00:00</span>
+            </div>
+            <button class="la-back-btn" id="backToManageBtn">
+                <i class="fa-solid fa-arrow-left"></i> Manage Auction
+            </button>
+        </div>
+    </nav>
+
+    <!-- ══ STAGE ══ -->
+    <div class="la-stage">
+
+        <!-- ▌ LEFT: PLAYER PANEL -->
+        <div class="la-player-panel">
+
+            <!-- Player Hero -->
+            <div class="la-player-hero">
+                <div class="la-avatar-wrap">
+                    <div class="la-avatar" id="playerAvatar">
+                        <img src="" id="currentPlayerImg" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                        <span class="la-initials" id="playerInitials">JB</span>
+                        <span class="la-jersey" id="currentPlayerNum">141</span>
+                    </div>
+                </div>
+                <h2 class="la-player-name" id="currentPlayerName">Jasprit Bumrah</h2>
+                <p class="la-player-role" id="playerRole">Fast Bowler</p>
+                <div class="la-tag-row" id="playerTags">
+                    <span class="la-tag la-tag-cat" id="currentPlayerCat">Category D</span>
+                    <span class="la-tag">Right-handed</span>
+                    <span class="la-tag">Bowler</span>
+                </div>
+            </div>
+
+            <div class="la-divider"></div>
+
+            <!-- Next Player -->
+            <div class="la-panel-block">
+                <h4 class="la-block-title">Bring up a player</h4>
+                <p class="la-block-hint">Pull the next player onto the block</p>
+                <div class="la-btn-row">
+                    <button class="la-soft-btn" id="randomBtn">
+                        <i class="fa-solid fa-shuffle"></i> Random
+                    </button>
+                    <button class="la-soft-btn" id="manualBtn">
+                        <i class="fa-regular fa-user"></i> Manual
+                    </button>
+                </div>
+                <div class="la-manual-entry" id="manualEntry">
+                    <input id="manualInput" type="text" placeholder="Player number, e.g. 205" class="la-manual-input">
+                    <button id="manualSubmitBtn" class="la-manual-submit">Bring up</button>
+                </div>
+            </div>
+
+            <div class="la-divider"></div>
+
+            <!-- Pool Status -->
+            <div class="la-panel-block">
+                <h4 class="la-block-title">Pool status</h4>
+                <p class="la-block-hint">Updates live as the auction runs</p>
+                <div class="la-stat-grid">
+                    <div class="la-stat-tile la-stat-sold">
+                        <div class="la-stat-v" id="statSold">0</div>
+                        <div class="la-stat-l">Sold</div>
+                    </div>
+                    <div class="la-stat-tile la-stat-avail">
+                        <div class="la-stat-v" id="statAvail">228</div>
+                        <div class="la-stat-l">Available</div>
+                    </div>
+                    <div class="la-stat-tile la-stat-unsold">
+                        <div class="la-stat-v" id="statUnsold">0</div>
+                        <div class="la-stat-l">Unsold</div>
+                    </div>
+                    <div class="la-stat-tile la-stat-teams">
+                        <div class="la-stat-v" id="statTeams">10</div>
+                        <div class="la-stat-l">Teams</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="la-divider"></div>
+
+            <!-- Activity Feed -->
+            <div class="la-panel-block la-panel-grow">
+                <h4 class="la-block-title">Recent activity</h4>
+                <p class="la-block-hint">Sales and passes from this session</p>
+                <div class="la-activity-list" id="activityList">
+                    <div class="la-activity-empty">
+                        No activity yet — sales will appear here as the auction runs
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ▌ RIGHT: TEAMS + BID DOCK -->
+        <div class="la-teams-col">
+
+            <!-- Teams Board Header -->
+            <div class="la-teams-head">
+                <p class="la-section-label">Franchise purses <span class="la-label-sub">— tap a team to assign the bid</span></p>
+                <button class="la-sort-btn">
+                    <i class="fa-solid fa-arrow-down-a-z"></i> Sort
+                </button>
+            </div>
+
+            <!-- Teams Grid -->
+            <div class="la-teams-grid" id="teamsGrid">
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="CSK" style="--team-color:#C9A227">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#C9A227">CSK</span>
+                        <span class="la-team-name-label">CSK</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:80%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="DC" style="--team-color:#2E86C1">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#2E86C1">DC</span>
+                        <span class="la-team-name-label">DC</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:60%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="GT" style="--team-color:#1B2A4A">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#1B2A4A">GT</span>
+                        <span class="la-team-name-label">GT</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:75%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="KKR" style="--team-color:#5B3E8F">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#5B3E8F">KKR</span>
+                        <span class="la-team-name-label">KKR</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:50%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="MI" style="--team-color:#1C3F94">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#1C3F94">MI</span>
+                        <span class="la-team-name-label">MI</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:90%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="PBKS" style="--team-color:#B4552E">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#B4552E">PBKS</span>
+                        <span class="la-team-name-label">PBKS</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:45%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="RR" style="--team-color:#B14E93">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#B14E93">RR</span>
+                        <span class="la-team-name-label">RR</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:65%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="RCB" style="--team-color:#8C1D1D">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#8C1D1D">RCB</span>
+                        <span class="la-team-name-label">RCB</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:55%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="SRH" style="--team-color:#C06A1F">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#C06A1F">SRH</span>
+                        <span class="la-team-name-label">SRH</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:70%"></div></div>
+                    </div>
+                </div>
+                <div class="la-team-tile" onclick="selectTeam(this)" data-team-code="LSG" style="--team-color:#237D8C">
+                    <span class="la-lead-ribbon">Selected</span>
+                    <div class="la-team-top">
+                        <span class="la-team-badge" style="background:#237D8C">LSG</span>
+                        <span class="la-team-name-label">LSG</span>
+                    </div>
+                    <div class="la-team-purse">
+                        <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹1 Cr</span></div>
+                        <div class="la-purse-bar"><div style="width:85%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ BID DOCK ══ -->
+            <div class="la-bid-dock">
+                <div class="la-bid-left">
+                    <div class="la-bid-figure-wrap">
+                        <span class="la-bid-eyebrow">Current bid</span>
+                        <div class="la-bid-figure-row">
+                            <span class="la-bid-figure" id="currentBid">₹10,000</span>
+                            <button class="la-edit-pencil" id="editBidBtn" title="Edit bid">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="la-stepper">
+                        <button class="la-step-btn" id="bidDownBtn" title="Bid down">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <div class="la-step-div"></div>
+                        <button class="la-step-btn" id="bidUpBtn" title="Bid up">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="la-bid-right">
+                    <button class="la-action-btn la-btn-unsold" id="unsoldBtn">
+                        <i class="fa-solid fa-xmark"></i> UNSOLD
+                    </button>
+                    <button class="la-action-btn la-btn-sold" id="soldBtn">
+                        <i class="fa-solid fa-gavel"></i> SOLD
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="la-toast-wrap" id="toastWrap"></div>
+
+    <script src="js/live-auction.js"></script>
+    <script>
+        // Team selection
+        function selectTeam(el) {
+            document.querySelectorAll('.la-team-tile').forEach(t => t.classList.remove('la-team-selected'));
+            el.classList.add('la-team-selected');
+        }
+
+        // Toggle manual entry
+        document.getElementById('manualBtn').addEventListener('click', function () {
+            const entry = document.getElementById('manualEntry');
+            entry.classList.toggle('la-show');
+            if (entry.classList.contains('la-show')) document.getElementById('manualInput').focus();
+        });
+
+        // Live timer
+        let secs = 0;
+        setInterval(() => {
+            secs++;
+            const h = String(Math.floor(secs / 3600)).padStart(2, '0');
+            const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
+            const s = String(secs % 60).padStart(2, '0');
+            const el = document.getElementById('auctionTimer');
+            if (el) el.textContent = `${h}:${m}:${s}`;
+        }, 1000);
+
+        // Toast utility
+        function showToast(msg, kind) {
+            const wrap = document.getElementById('toastWrap');
+            const el = document.createElement('div');
+            el.className = 'la-toast';
+            if (kind === 'sold') el.classList.add('la-toast-sold');
+            el.textContent = msg;
+            wrap.appendChild(el);
+            requestAnimationFrame(() => el.classList.add('la-toast-show'));
+            setTimeout(() => { el.classList.remove('la-toast-show'); setTimeout(() => el.remove(), 300); }, 3200);
+        }
+    </script>
+</body>
+</html>

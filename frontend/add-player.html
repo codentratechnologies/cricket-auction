@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Player - Cricket Auction</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/add-player.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand">
+                <div class="brand-shield">
+                    <i class="fa-solid fa-shield"></i>
+                    <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">CRICKET</div>
+                    <div class="brand-subtitle">
+                        <span class="text-green">AUCTION</span>
+                        <i class="fa-solid fa-gavel gavel-icon"></i>
+                    </div>
+                    <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                </div>
+            </div>
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link active">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+            
+            <div class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            
+            <div class="profile-menu" id="profileMenuToggle">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
+                <div class="profile-info">
+                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
+                    <span class="profile-role">Super Admin</span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+                
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                    <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+                    <a href="billing.html"><i class="fa-regular fa-credit-card"></i> Billing & Plan</a>
+                    <div class="divider"></div>
+                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="back-link-container">
+        <a href="#" id="backToAuctionBtn" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Player List</a>
+    </div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 id="pageTitle">Add New Player</h1>
+            <div class="header-actions">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline" id="addViaLinkBtn"><i class="fa-solid fa-link"></i> Add via Link</button>
+                    <button type="button" class="btn btn-outline" id="bulkUploadBtn"><i class="fa-solid fa-upload"></i> Bulk Upload</button>
+                </div>
+                <button type="button" class="btn btn-outline btn-customize" id="openCustomizeModal"><i class="fa-solid fa-gear"></i> Customize Fields</button>
+            </div>
+        </div>
+
+        <form id="addPlayerForm" class="player-form-container">
+            <input type="hidden" id="editPlayerId">
+            <div class="form-content">
+                <!-- Top Row: Photo and Basic Info -->
+                <div class="form-top-row">
+                    <div class="photo-upload-col" id="wrapper-playerPhoto">
+                        <label class="field-label">Player Photo</label>
+                        <div class="photo-upload-box" id="photoUploadBox">
+                            <input type="file" id="playerPhoto" accept="image/png, image/jpeg" hidden>
+                            <div class="upload-placeholder" id="uploadPlaceholder">
+                                <i class="fa-solid fa-camera"></i>
+                                <span>Upload Photo</span>
+                                <small>JPG, PNG (Max 2MB)</small>
+                            </div>
+                            <img id="photoPreview" class="hidden" src="" alt="Player preview">
+                        </div>
+                    </div>
+                    
+                    <div class="basic-info-col">
+                        <div class="form-grid-2">
+                            <div class="field-group" id="wrapper-playerName">
+                                <label class="field-label">Full Name <span class="req">*</span></label>
+                                <div class="input-with-icon">
+                                    <input type="text" id="playerName" class="form-input" placeholder="e.g., Virat Kohli">
+                                    <i class="fa-regular fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="field-group" id="wrapper-playerPhone">
+                                <label class="field-label">Mobile No <span class="req">*</span></label>
+                                <div class="input-with-icon">
+                                    <input type="tel" id="playerPhone" class="form-input" placeholder="e.g., 9876543210">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                            </div>
+                            <div class="field-group" id="wrapper-playerAge">
+                                <label class="field-label">Age <span class="req">*</span></label>
+                                <div class="input-with-icon">
+                                    <input type="number" id="playerAge" class="form-input" placeholder="e.g., 35" min="10" max="60">
+                                    <i class="fa-regular fa-calendar"></i>
+                                </div>
+                            </div>
+                            <div class="field-group" id="wrapper-playerCategory">
+                                <label class="field-label">Category <span class="req">*</span></label>
+                                <select id="playerCategory" class="form-select">
+                                    <option value="" disabled selected>Select category</option>
+                                    <option value="Batsman">Batsman</option>
+                                    <option value="Bowler">Bowler</option>
+                                    <option value="All-Rounder">All-Rounder</option>
+                                    <option value="Wicket-Keeper">Wicket-Keeper</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle Section: Specs & Role -->
+                <div class="form-grid-4 mt-6">
+                    <div class="field-group" id="wrapper-battingStyle">
+                        <label class="field-label">Specification 1</label>
+                        <select id="battingStyle" class="form-select">
+                            <option value="" disabled selected>Batting Style / Speciality</option>
+                            <option value="Right Hand">Right Hand</option>
+                            <option value="Left Hand">Left Hand</option>
+                            <option value="Opener">Opener</option>
+                            <option value="Finisher">Finisher</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="wrapper-bowlingStyle">
+                        <label class="field-label">Specification 2</label>
+                        <select id="bowlingStyle" class="form-select">
+                            <option value="" disabled selected>Bowling Style</option>
+                            <option value="Right Arm Fast">Right Arm Fast</option>
+                            <option value="Left Arm Orthodox">Left Arm Orthodox</option>
+                            <option value="Right Arm Spin">Right Arm Spin</option>
+                            <option value="Left Arm Spin">Left Arm Spin</option>
+                            <option value="None">None</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="wrapper-playerRole">
+                        <label class="field-label">Specification 3</label>
+                        <select id="playerRole" class="form-select">
+                            <option value="" disabled selected>Player Role</option>
+                            <option value="Pure Batsman">Pure Batsman</option>
+                            <option value="Wicket Keeper">Wicket Keeper</option>
+                            <option value="Captain">Captain</option>
+                            <option value="All Rounder">All Rounder</option>
+                            <option value="Bowler">Bowler</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="wrapper-baseValue">
+                        <label class="field-label">Base Value <span class="req">*</span></label>
+                        <div class="input-with-icon">
+                            <span class="currency-symbol">₹</span>
+                            <input type="number" id="baseValue" class="form-input pl-8" placeholder="e.g., 20000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lower Section: Stats & Apparel -->
+                <div class="form-grid-4 mt-4">
+                    <div class="field-group" id="wrapper-jerseySize">
+                        <label class="field-label">Jersey Size</label>
+                        <select id="jerseySize" class="form-select">
+                            <option value="" disabled selected>Select size (XS to 5XL)</option>
+                            <option value="XS">XS</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                            <option value="3XL">3XL</option>
+                            <option value="4XL">4XL</option>
+                            <option value="5XL">5XL</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="wrapper-trouserSize">
+                        <label class="field-label">Trouser Size</label>
+                        <select id="trouserSize" class="form-select">
+                            <option value="" disabled selected>Select size (26 to 48)</option>
+                            <option value="26">26</option>
+                            <option value="28">28</option>
+                            <option value="30">30</option>
+                            <option value="32">32</option>
+                            <option value="34">34</option>
+                            <option value="36">36</option>
+                            <option value="38">38</option>
+                            <option value="40">40</option>
+                            <option value="42">42</option>
+                            <option value="44">44</option>
+                            <option value="46">46</option>
+                            <option value="48">48</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="wrapper-jerseyName">
+                        <label class="field-label">Jersey Name</label>
+                        <input type="text" id="jerseyName" class="form-input" placeholder="e.g., VIRAT">
+                    </div>
+                    <div class="field-group" id="wrapper-jerseyNumber">
+                        <label class="field-label">Jersey Number</label>
+                        <input type="text" id="jerseyNumber" class="form-input" placeholder="e.g., 18">
+                    </div>
+
+                    <div class="field-group" id="wrapper-matches">
+                        <label class="field-label">Match</label>
+                        <input type="number" id="matches" class="form-input" placeholder="e.g., 250">
+                    </div>
+                    <div class="field-group" id="wrapper-runs">
+                        <label class="field-label">Run</label>
+                        <input type="number" id="runs" class="form-input" placeholder="e.g., 12000">
+                    </div>
+                    <div class="field-group" id="wrapper-wickets">
+                        <label class="field-label">Wickets</label>
+                        <input type="number" id="wickets" class="form-input" placeholder="e.g., 4">
+                    </div>
+                    <div class="field-group" id="wrapper-status">
+                        <label class="field-label">Status <span class="req">*</span></label>
+                        <select id="status" class="form-select">
+                            <option value="Available">Available</option>
+                            <option value="Sold">Sold</option>
+                            <option value="Unsold">Unsold</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Custom Field Banner -->
+                <div class="custom-field-banner mt-6">
+                    <button type="button" class="btn-link"><i class="fa-solid fa-plus"></i> Add Custom Field</button>
+                    <span class="custom-field-hint">Add extra fields like Food Preference, Shoe Size, etc.</span>
+                </div>
+
+                <!-- Extra Details -->
+                <div class="field-group mt-6" id="wrapper-extraDetails">
+                    <label class="field-label">Extra Details</label>
+                    <textarea id="extraDetails" class="form-textarea" placeholder="Enter any additional info or notes about the player..." maxlength="500"></textarea>
+                    <div class="char-count" id="charCount">0/500</div>
+                </div>
+
+            </div>
+            
+            <!-- Sticky Footer Actions -->
+            <div class="form-footer">
+                <button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveBtn"><i class="fa-regular fa-floppy-disk"></i> SAVE PLAYER</button>
+            </div>
+        </form>
+
+    </main>
+
+    <!-- Customize Fields Modal -->
+    <div id="customizeModal" class="modal-overlay hidden">
+        <div class="modal-box modal-box--lg">
+            <div class="modal-header">
+                <div>
+                    <h3 style="margin-bottom:0.25rem;">Customize Fields</h3>
+                    <p style="font-size:0.85rem;color:#64748B;">Choose which fields to show in the Add Player form. Mandatory fields cannot be hidden.</p>
+                </div>
+                <button class="modal-close" id="closeCustomizeModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body">
+                <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:1rem; color:#1E293B;">Default Fields</h4>
+                <div class="customize-grid">
+                    <!-- Checkboxes will be injected by JS here -->
+                </div>
+
+                <h4 style="font-size:0.9rem; font-weight:700; margin-top:2rem; margin-bottom:1rem; color:#1E293B;">Other Fields</h4>
+                <div class="customize-grid-other">
+                    <!-- Checkboxes for other fields injected by JS -->
+                </div>
+
+                <div style="background:#EFF6FF; border-radius:6px; padding:0.75rem; display:flex; gap:0.5rem; align-items:center; margin-top:1.5rem;">
+                    <i class="fa-solid fa-circle-info" style="color:#3B82F6;"></i>
+                    <span style="font-size:0.8rem; color:#1E40AF;">Mandatory fields are marked with a lock icon and cannot be disabled.</span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="resetPreferencesBtn">Reset to Default</button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button type="button" class="btn btn-outline" id="cancelCustomizeBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="savePreferencesBtn">SAVE PREFERENCES</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Upload Modal -->
+    <div id="bulkUploadModal" class="modal-overlay hidden">
+        <div class="modal-box modal-box--lg">
+            <div class="modal-header">
+                <div>
+                    <h3 style="margin-bottom:0.25rem;">Bulk Upload Players</h3>
+                    <p style="font-size:0.85rem;color:#64748B;">Upload multiple players at once by downloading our template and filling in the details.</p>
+                </div>
+                <button class="modal-close" id="closeBulkModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Step 1 -->
+                <div class="bulk-step-card">
+                    <div class="bulk-icon-wrapper blue">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <div class="bulk-step-content">
+                        <h4>Step 1: Download Template</h4>
+                        <p>Download the sample Excel template and fill in player details.</p>
+                        <button type="button" class="btn btn-outline btn-download" id="downloadTemplateBtn">
+                            <i class="fa-solid fa-download"></i> Download Sample Excel Template
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bulk-step-card mt-4">
+                    <div class="bulk-icon-wrapper green">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div class="bulk-step-content w-100">
+                        <h4>Step 2: Upload Filled Data</h4>
+                        <p>Upload the filled Excel file to import players into the system.</p>
+                        
+                        <div class="drag-drop-zone" id="dragDropZone">
+                            <input type="file" id="bulkFileInput" accept=".xlsx, .xls, .csv" hidden>
+                            <div class="drop-content">
+                                <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+                                <p class="primary-text">Drag & Drop your Excel file here</p>
+                                <p class="or-text">or</p>
+                                <button type="button" class="btn btn-outline btn-browse" id="browseFileBtn">
+                                    <i class="fa-regular fa-folder-open"></i> Browse Files
+                                </button>
+                                <p class="file-name hidden" id="selectedFileName"></p>
+                            </div>
+                        </div>
+                        <p class="file-hint">Only .xls or .xlsx files are supported. Max file size: 10MB</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelBulkBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmBulkBtn"><i class="fa-solid fa-upload"></i> ADD PLAYERS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Action successful</span>
+    </div>
+
+    <!-- Global fix: Prevent mouse scroll from changing number inputs -->
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/add-player.js"></script>
+</body>
+</html>

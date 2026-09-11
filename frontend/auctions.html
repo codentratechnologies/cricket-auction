@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auctions - Cricket Auction Management System</title>
+    <meta name="description" content="Manage your cricket auctions, track live bids, and build champion teams.">
+    <link rel="stylesheet" href="css/auctions.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="nav-left">
+            <div class="brand">
+                <div class="brand-shield">
+                    <i class="fa-solid fa-shield"></i>
+                    <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">CRICKET</div>
+                    <div class="brand-subtitle">
+                        <span class="text-green">AUCTION</span>
+                        <i class="fa-solid fa-gavel gavel-icon"></i>
+                    </div>
+                    <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                </div>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link" id="navDashboard">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="auctions.html" class="nav-link active" id="navAuctions">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="globalSearch" placeholder="Search auctions, players, teams...">
+                <div class="search-dropdown" id="searchDropdown"></div>
+            </div>
+
+            <div class="notification">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+
+            <div class="profile-menu" id="profileMenuToggle">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
+                <div class="profile-info">
+                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
+                    <span class="profile-role">Super Admin</span>
+                </div>
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO COMMAND CENTER BANNER -->
+    <section class="hero-banner" id="heroBanner">
+        <div class="hero-bg-image"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">YOUR <span class="hero-highlight">COMMAND CENTER</span></h1>
+                <p class="hero-subtitle">Manage your tournaments, track live bids,<br>and build champion teams.</p>
+                <button class="hero-cta-btn" id="createAuctionHeroBtn" onclick="window.location.href='create-auction.html'">
+                    <i class="fa-solid fa-plus"></i> CREATE NEW AUCTION
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main class="auctions-main">
+
+        <!-- Tournaments Header Row -->
+        <div class="tournaments-header">
+            <div class="tournaments-title-group">
+                <h2 class="tournaments-heading">Your Tournaments <span class="count-badge" id="auctionCountBadge">(0)</span></h2>
+            </div>
+            <div class="tournaments-controls">
+                <div class="filter-dropdown-wrap">
+                    <select class="filter-select" id="statusFilter">
+                        <option value="all">All Status</option>
+                        <option value="live">Live</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down filter-chevron"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carousel Container -->
+        <div class="carousel-container" id="carouselContainer">
+            <button class="carousel-nav-btn prev-btn" id="prevBtn" aria-label="Previous">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <div class="cards-track-wrapper">
+                <div class="cards-track" id="cardsTrack">
+                    <!-- Auction cards rendered by JS -->
+                    <div class="cards-loading" id="cardsLoading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your auctions...</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="carousel-nav-btn next-btn" id="nextBtn" aria-label="Next">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Carousel Dots -->
+        <div class="carousel-dots-row" id="carouselDots"></div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="emptyState">
+            <div class="empty-icon">
+                <i class="fa-solid fa-gavel"></i>
+            </div>
+            <h3>No Auctions Yet</h3>
+            <p>Create your first cricket auction and start building champion teams!</p>
+            <button class="btn-create-first" onclick="window.location.href='create-auction.html'">
+                <i class="fa-solid fa-plus"></i> Create Your First Auction
+            </button>
+        </div>
+
+    </main>
+
+    <script src="js/auctions.js"></script>
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+    </script>
+</body>
+</html>
