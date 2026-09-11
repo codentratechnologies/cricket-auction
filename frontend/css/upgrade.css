@@ -27,36 +27,28 @@ body {
     padding: 2rem;
 }
 
-.back-link {
+.close-modal {
     position: absolute;
-    top: 2rem;
-    left: 2rem;
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: 600;
+    top: 20px;
+    right: 25px;
+    color: #4B5563;
+    font-size: 1.25rem;
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 0.75rem 1.25rem;
-    border-radius: 12px;
-    backdrop-filter: blur(4px);
-    transition: background 0.2s, transform 0.2s;
+    transition: color 0.2s, transform 0.2s;
 }
 
-.back-link:hover {
-    background: rgba(0, 0, 0, 0.7);
-    transform: translateX(-5px);
+.close-modal:hover {
+    color: #111827;
+    transform: scale(1.1);
 }
 
 .upgrade-box {
     background: #fff;
-    border-radius: 20px;
-    padding: 2.5rem;
+    border-radius: 12px;
+    padding: 2.5rem 3.5rem;
     width: 100%;
-    max-width: 850px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+    max-width: 900px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.15);
     position: relative;
     animation: fadeIn 0.4s ease;
 }
@@ -68,13 +60,13 @@ body {
 
 .upgrade-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .upgrade-header h2 {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 800;
-    color: #111827;
+    color: #0f172a;
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -83,9 +75,10 @@ body {
 }
 
 .upgrade-header p {
-    color: #4B5563;
-    font-size: 1rem;
-    line-height: 1.5;
+    color: #475569;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    font-weight: 500;
 }
 
 .upgrade-grid {
@@ -95,9 +88,9 @@ body {
 }
 
 .plan-card {
-    border: 1.5px solid #E5E7EB;
-    border-radius: 16px;
-    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
     text-align: center;
     position: relative;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -110,18 +103,17 @@ body {
 }
 
 .plan-card.current {
-    border-color: #3b82f6;
-    background: #F8FAFC;
-    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+    border: 2px solid #3b82f6;
+    background: #f8fafc;
 }
 
 .current-badge {
     position: absolute;
-    top: -12px;
+    top: 10px;
     right: 15px;
-    background: #3b82f6;
-    color: #fff;
-    font-size: 0.75rem;
+    background: #dbeafe;
+    color: #2563eb;
+    font-size: 0.7rem;
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 12px;
@@ -131,35 +123,47 @@ body {
 }
 
 .plan-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--theme);
+    background: var(--theme-bg);
 }
 
 .plan-card h3 {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 800;
-    color: #111827;
-    margin: 0 0 0.25rem 0;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
 }
 
 .plan-teams {
-    font-size: 0.9rem;
-    color: #2563EB;
-    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--theme);
+    background: var(--theme-bg);
+    font-weight: 700;
     margin-bottom: 1rem;
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
 }
 
 .plan-price {
     font-size: 1.6rem;
     font-weight: 800;
-    color: #111827;
-    margin-bottom: 1.25rem;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
 }
 
 .btn-upgrade {
     width: 100%;
     padding: 0.75rem;
-    background: #1D4ED8;
+    background: #0052FF;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -170,14 +174,14 @@ body {
 }
 
 .btn-upgrade:hover {
-    background: #1e3a8a;
+    background: #003ECC;
 }
 
 .btn-current-plan {
     width: 100%;
     padding: 0.75rem;
-    background: #E0E7FF;
-    color: #3730A3;
+    background: #e2e8f0;
+    color: #475569;
     border: none;
     border-radius: 8px;
     font-weight: 600;

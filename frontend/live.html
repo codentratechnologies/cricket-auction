@@ -46,6 +46,8 @@
 
     <!-- ===== MAIN ===== -->
     <main class="lv-main">
+        <!-- Tab: Auction (Active by default) -->
+        <div id="tab-auction" class="tab-pane active">
 
         <!-- Left: Player -->
         <div class="lv-player" id="livePlayerCard" style="display: none;">
@@ -106,6 +108,28 @@
                 <i class="fa-solid fa-tower-broadcast not-live-icon" style="font-size: 4rem; color: #3b82f6; margin-bottom: 1.5rem; animation: pulseGlow 2s infinite;"></i>
                 <h2 class="not-live-title" style="font-family: 'Rajdhani', sans-serif; font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 2px;">AUCTION IS NOT LIVE</h2>
                 <p class="not-live-msg" style="font-size: 1.2rem; color: #94a3b8;">Please wait for the organizer to start the auction.</p>
+            </div>
+        </div>
+        </div> <!-- End Tab: Auction -->
+
+        <!-- Tab: Teams -->
+        <div id="tab-teams" class="tab-pane">
+            <div id="teamsGrid">
+                <!-- Team cards dynamically injected here -->
+            </div>
+        </div>
+        
+        <!-- Tab: Players -->
+        <div id="tab-players" class="tab-pane">
+            <div id="playersGrid">
+                <!-- Player cards dynamically injected here -->
+            </div>
+        </div>
+
+        <!-- Tab: Settings (Placeholder) -->
+        <div id="tab-settings" class="tab-pane">
+            <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; color:#94a3b8; font-size:2rem; font-family:'Rajdhani';">
+                SETTINGS COMING SOON
             </div>
         </div>
 

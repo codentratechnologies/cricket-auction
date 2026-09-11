@@ -176,19 +176,148 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Setup Tab Switching
     const navBtns = document.querySelectorAll('.nav-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
     navBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            // Remove active from all
+            // Remove active from all buttons
             navBtns.forEach(b => b.classList.remove('active'));
-            // Add to clicked
+            // Add to clicked button
             btn.classList.add('active');
             
             const tabName = btn.dataset.tab;
-            console.log("Switched to tab:", tabName);
-            // Future logic to show/hide respective sections (teams, players, etc.)
+            
+            // Hide all tab panes
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+            
+            // Show corresponding tab pane
+            const targetPane = document.getElementById(`tab-${tabName}`);
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+            
+            // Toggle Footer visibility
+            const footer = document.querySelector('.lv-footer');
+            if (footer) {
+                if (tabName === 'auction') {
+                    footer.style.display = 'flex';
+                } else {
+                    footer.style.display = 'none';
+                }
+            }
+            
+            // Fetch teams if teams tab is selected
+            if (tabName === 'teams') {
+                fetchAndRenderTeams();
+            }
+            
+            // Fetch players if players tab is selected
+            if (tabName === 'players') {
+                fetchAndRenderPlayers();
+            }
         });
     });
+
+    async function fetchAndRenderTeams() {
+        const teamsGrid = document.getElementById('teamsGrid');
+        if (!teamsGrid) return;
+
+        teamsGrid.innerHTML = '<div style="color: #94a3b8; font-family: \'Rajdhani\'; font-size: 1.5rem; grid-column: 1/-1; text-align: center;">Loading teams...</div>';
+
+        try {
+            const res = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionCode}/teams`);
+            if (!res.ok) throw new Error("Failed to fetch teams");
+            
+            const teams = await res.json();
+            
+            if (!teams || teams.length === 0) {
+                teamsGrid.innerHTML = '<div style="color: #94a3b8; font-family: \'Rajdhani\'; font-size: 1.5rem; grid-column: 1/-1; text-align: center;">No teams added yet.</div>';
+                return;
+            }
+
+            let html = '';
+            teams.forEach(t => {
+                const logoSrc = t.logo_url || `https://ui-avatars.com/api/?name=${t.short_name || 'T'}&background=ffffff&color=000000`;
+                const balanceFormatted = (t.balance || 0).toLocaleString('en-IN');
+                
+                html += `
+                <div class="team-card">
+                    <div class="team-card-logo">
+                        <img src="${logoSrc}" alt="${t.name}">
+                    </div>
+                    <div class="team-card-name">${t.name}</div>
+                    <div class="team-card-short">${t.short_name || 'N/A'}</div>
+                    <div class="team-card-balance-lbl">REMAINING PURSE</div>
+                    <div class="team-card-balance">₹${balanceFormatted}</div>
+                </div>
+                `;
+            });
+            
+            teamsGrid.innerHTML = html;
+        } catch (error) {
+            console.error("Error fetching teams:", error);
+            teamsGrid.innerHTML = '<div style="color: #ef4444; font-family: \'Rajdhani\'; font-size: 1.5rem; grid-column: 1/-1; text-align: center;">Failed to load teams.</div>';
+        }
+    }
+
+    async function fetchAndRenderPlayers() {
+        const playersGrid = document.getElementById('playersGrid');
+        if (!playersGrid) return;
+
+        playersGrid.innerHTML = '<div style="color: #94a3b8; font-family: \'Rajdhani\'; font-size: 1.5rem; grid-column: 1/-1; text-align: center;">Loading players...</div>';
+
+        try {
+            const res = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionCode}/players`);
+            if (!res.ok) throw new Error("Failed to fetch players");
+            
+            const players = await res.json();
+            
+            if (!players || players.length === 0) {
+                playersGrid.innerHTML = '<div style="color: #94a3b8; font-family: \'Rajdhani\'; font-size: 1.5rem; grid-column: 1/-1; text-align: center;">No players registered yet.</div>';
+                return;
+            }
+
+            let html = '';
+            players.forEach(p => {
+                const photoSrc = p.photo_url || `https://ui-avatars.com/api/?name=${p.name || 'Player'}&background=b8d4f0&color=1e3a8a`;
+                const priceFormatted = (p.base_price || 0).toLocaleString('en-IN');
+                
+                let statusClass = 'status-upcoming';
+                let statusText = p.status || 'Upcoming';
+                
+                if (statusText.toLowerCase() === 'sold') {
+                    statusClass = 'status-sold';
+                    // We can also append the team name here if needed, but 'SOLD' is clean for the badge.
+                } else if (statusText.toLowerCase() === 'unsold') {
+                    statusClass = 'status-unsold';
+                } else {
+                    statusClass = 'status-upcoming';
+                }
+                
+                html += `
+                <div class="player-mini-card">
+                    <div class="player-mini-photo">
+                        <img src="${photoSrc}" alt="${p.name}">
+                    </div>
+                    <div class="player-mini-info">
+                        <div class="player-mini-name">${p.name}</div>
+                        <div class="player-mini-role"><i class="fa-solid fa-medal"></i> ${p.role || 'Player'}</div>
+                        <div class="player-mini-details">
+                            <div class="player-mini-price">₹${priceFormatted}</div>
+                            <div class="player-mini-status ${statusClass}">${statusText}</div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            playersGrid.innerHTML = html;
+        } catch (error) {
+            console.error("Error fetching players:", error);
+            playersGrid.innerHTML = '<div style="color: #ef4444; font-family: \'Rajdhani\'; font-size: 1.5rem; grid-column: 1/-1; text-align: center;">Failed to load players.</div>';
+        }
+    }
 
     // 3. UI Update Logic
     function updateLiveUI(data) {
