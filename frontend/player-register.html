@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Registration - Cricket Auction</title>
+    <title>Player Registration - Cricsquad</title>
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/add-player.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
@@ -129,7 +129,7 @@
 
         .success-icon {
             width: 80px;
-            height: 80px;
+            height: 120px;
             background: linear-gradient(135deg, #10B981, #059669);
             border-radius: 50%;
             display: flex;
@@ -159,8 +159,9 @@
             <!-- Platform Branding -->
             <div class="brand-shield"><i class="fa-solid fa-shield"></i></div>
             <div class="brand-text">
-                <div class="title">CRICKET AUCTION</div>
-                <div class="subtitle">Management System</div>
+                <div class="title">CRICSQUAD</div>
+                
+                
             </div>
             
             <span style="color:#CBD5E1; margin:0 8px; font-weight:300; font-size:28px;">|</span>
@@ -471,7 +472,7 @@
                         document.getElementById('errorMsg').textContent = data.error;
                         return;
                     }
-                    document.getElementById('headerAuctionName').textContent = data.name || 'Cricket Auction';
+                    document.getElementById('headerAuctionName').textContent = data.name || 'Cricsquad';
                     const dateStr = data.date ? new Date(data.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '';
                     document.getElementById('headerAuctionMeta').textContent = dateStr ? `${dateStr}${data.venue ? ' · ' + data.venue : ''}` : (data.venue || 'Open for registration');
                     document.getElementById('headerStatus').textContent = data.status === 'upcoming' ? 'Open' : (data.status || 'Open');

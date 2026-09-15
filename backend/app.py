@@ -799,7 +799,7 @@ def add_player(auction_id):
                 upload_result = cloudinary.uploader.upload(photo_file, folder="cricket-auction/players")
                 photo_url = upload_result.get('secure_url', '')
             except Exception as e:
-                print(f"Photo upload warning: {e}")
+                return jsonify({"error": f"Failed to upload photo. Please ensure it's a valid JPG/PNG under 2MB. Error: {str(e)}"}), 400
 
     if firebase_initialized:
         try:
@@ -925,13 +925,24 @@ def update_player(auction_id, player_id):
                 upload_result = cloudinary.uploader.upload(photo_file, folder="cricket-auction/players")
                 updates['photo_url'] = upload_result.get('secure_url', '')
             except Exception as e:
-                pass
+                return jsonify({"error": f"Failed to upload photo. Please ensure it's a valid JPG/PNG under 2MB. Error: {str(e)}"}), 400
 
     if not firebase_initialized:
         return jsonify({"message": "Player updated (local)"}), 200
 
     try:
         db.reference(f'/auctions/{auction_id}/players/{player_id}').update(updates)
+        
+        # Log UNSOLD history
+        if updates.get('status') == 'Unsold':
+            try:
+                history_ref = db.reference(f'/auctions/{auction_id}/history/{player_id}')
+                history_ref.update({
+                    'status': 'Unsold'
+                })
+            except Exception as e:
+                print(f"Error logging unsold history: {e}")
+
         return jsonify({"message": "Player updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -957,7 +968,7 @@ def sell_player(auction_id):
         # or just sequential updates since it's a simple app.
         
         # 1. Get current team balance
-        team_ref = db.reference(f'/auctions/{auction_id}/teams/{team_id}')
+        team_ref = db.reference(f'/auctions/{auction_id}/teamList/{team_id}')
         team_data = team_ref.get()
         if not team_data:
             return jsonify({"error": "Team not found"}), 404
@@ -968,7 +979,7 @@ def sell_player(auction_id):
         # 2. Update player
         db.reference(f'/auctions/{auction_id}/players/{player_id}').update({
             'status': 'Sold',
-            'team_id': team_id,
+            'sold_to_team': team_id,
             'sold_price': sold_price
         })
         
@@ -976,6 +987,32 @@ def sell_player(auction_id):
         team_ref.update({
             'balance': current_balance - sold_price
         })
+        
+        # 4. Add to history
+        try:
+            player_ref = db.reference(f'/auctions/{auction_id}/players/{player_id}')
+            player_data = player_ref.get() or {}
+            player_name = player_data.get('name', 'Player')
+            team_name = team_data.get('name', 'Team')
+            team_short_name = team_data.get('short_name') or team_name
+            
+            history_ref = db.reference(f'/auctions/{auction_id}/history/{player_id}')
+            
+            # Update top-level history metadata
+            history_ref.update({
+                'sold_team_name': team_short_name,
+                'status': 'Sold'
+            })
+            
+            # Push the final sold bid record
+            history_ref.push({
+                'team_short_name': team_short_name,
+                'amount': sold_price,
+                'type': 'SOLD',
+                'timestamp': datetime.utcnow().isoformat()
+            })
+        except Exception as e:
+            print(f"Error logging sold history: {e}")
         
         return jsonify({"message": "Player sold successfully"}), 200
         
@@ -1001,6 +1038,43 @@ def delete_player(auction_id, player_id):
         auction_ref.update({'players_count': new_count})
         
         return jsonify({"message": "Player deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/live', methods=['GET', 'PATCH'])
+def live_state(auction_id):
+    if request.method == 'GET':
+        if not firebase_initialized:
+            return jsonify({}), 200
+        try:
+            live_ref = db.reference(f'/live_auctions/{auction_id}')
+            data = live_ref.get()
+            return jsonify(data or {}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    # PATCH logic
+    organizer_id = request.json.get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not firebase_initialized:
+        return jsonify({"message": "Live state updated (local)"}), 200
+
+    data = request.json
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get()
+        if not auction or auction.get('organizer_id') != organizer_id:
+            return jsonify({"error": "Auction not found or unauthorized"}), 404
+
+        # Remove organizer_id from data before saving to Firebase
+        payload = {k: v for k, v in data.items() if k != 'organizer_id'}
+        
+        live_ref = db.reference(f'/live_auctions/{auction_id}')
+        live_ref.update(payload)
+        
+        return jsonify({"message": "Live state updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -1182,6 +1256,138 @@ def delete_team(auction_id, team_id):
         new_count = max(0, auction.get('teams', 1) - 1)
         auction_ref.update({'teams': new_count})
         return jsonify({"message": "Team deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ==========================================
+# HISTORY ROUTES
+# ==========================================
+
+@app.route('/api/auctions/<auction_id>/history', methods=['GET'])
+def get_auction_history(auction_id):
+    if not firebase_initialized:
+        return jsonify([]), 200
+    try:
+        history_ref = db.reference(f'/auctions/{auction_id}/history')
+        history_data = history_ref.get() or {}
+        history_list = []
+        if isinstance(history_data, dict):
+            for player_id, player_data in history_data.items():
+                if isinstance(player_data, dict):
+                    player_name = player_data.get('player_name', f'Player {player_id}')
+                    # Loop through individual push records inside the player's history
+                    for push_id, record in player_data.items():
+                        if isinstance(record, dict) and 'timestamp' in record:
+                            record['id'] = push_id
+                            record['player_id'] = player_id
+                            record['player_name'] = player_name
+                            
+                            # Format message for UI if not present
+                            if 'message' not in record:
+                                amount = record.get('amount', 0)
+                                team = record.get('team_short_name', '')
+                                if record.get('type') == 'SOLD':
+                                    record['message'] = f"SOLD: {player_name} -> {team} (₹{amount:,})"
+                                elif record.get('type') == 'UNSOLD':
+                                    record['message'] = f"UNSOLD: {player_name}"
+                                else:
+                                    record['message'] = f"{player_name} -> {team} (₹{amount:,})"
+                            
+                            history_list.append(record)
+                            
+        # Sort by timestamp descending (newest first)
+        history_list.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        return jsonify(history_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/history', methods=['POST'])
+def add_auction_history(auction_id):
+    organizer_id = request.json.get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not firebase_initialized:
+        return jsonify({"message": "History added (local)"}), 201
+
+    data = request.json
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get()
+        if not auction or auction.get('organizer_id') != organizer_id:
+            return jsonify({"error": "Auction not found or unauthorized"}), 404
+
+        history_ref = db.reference(f'/auctions/{auction_id}/history')
+        history_id = f"H{int(datetime.now().timestamp() * 1000)}"
+        
+        history_item = {
+            'id': history_id,
+            'type': data.get('type', 'INFO'),
+            'message': data.get('message', ''),
+            'player_id': data.get('player_id', ''),
+            'team_id': data.get('team_id', ''),
+            'amount': data.get('amount', 0),
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        history_ref.child(history_id).set(history_item)
+        return jsonify({"message": "History added successfully", "history": history_item}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/history/<player_id>', methods=['POST'])
+def add_player_history(auction_id, player_id):
+    organizer_id = request.json.get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not firebase_initialized:
+        return jsonify({"message": "History added (local)"}), 201
+
+    data = request.json
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get()
+        if not auction or auction.get('organizer_id') != organizer_id:
+            return jsonify({"error": "Auction not found or unauthorized"}), 404
+
+        history_ref = db.reference(f'/auctions/{auction_id}/history/{player_id}')
+        
+        if data.get('init_only'):
+            history_ref.update({
+                'player_name': data.get('player_name', ''),
+                'base_price': data.get('base_price', 0)
+            })
+            return jsonify({"message": "History initialized"}), 200
+
+        history_item = {
+            'team_short_name': data.get('team_short_name', ''),
+            'amount': data.get('amount', 0),
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        history_ref.push(history_item)
+        return jsonify({"message": "Bid logged successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/history/<history_id>', methods=['DELETE'])
+def delete_auction_history(auction_id, history_id):
+    organizer_id = request.args.get('organizer_id') or (request.json or {}).get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not firebase_initialized:
+        return jsonify({"message": "History deleted (local)"}), 200
+
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get()
+        if not auction or auction.get('organizer_id') != organizer_id:
+            return jsonify({"error": "Auction not found or unauthorized"}), 404
+
+        db.reference(f'/auctions/{auction_id}/history/{history_id}').delete()
+        return jsonify({"message": "History deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 # ==========================================

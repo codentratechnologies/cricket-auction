@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auction Dashboard - Cricket Auction Management System</title>
+    <title>Auction Dashboard - Cricsquad</title>
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/auction-dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,17 +17,12 @@
     <nav class="navbar">
         <div class="nav-left">
             <div class="brand">
-                <div class="brand-shield">
-                    <i class="fa-solid fa-shield"></i>
-                    <i class="fa-solid fa-baseball-bat-ball batsman-icon"></i>
-                </div>
+                <div class="brand-shield"><img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo"></div>
                 <div class="brand-text">
-                    <div class="brand-title">CRICKET</div>
-                    <div class="brand-subtitle">
-                        <span class="text-green">AUCTION</span>
-                        <i class="fa-solid fa-gavel gavel-icon"></i>
-                    </div>
-                    <div class="brand-tagline">MANAGEMENT SYSTEM</div>
+                    <div class="brand-title">CRICSQUAD</div>
+                    
+                    
+                    
                 </div>
             </div>
             
@@ -637,7 +632,7 @@
                     <div style="border: 1.5px dashed #E5E7EB; border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; position: relative; background: #FAFAFA; transition: border-color 0.2s;" id="sponsorDropzone">
                         <input type="file" id="sponsorLogoFile" accept=".jpg,.jpeg,.png" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
                         <div id="sponsorLogoPreviewArea" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                            <div style="width: 48px; height: 48px; background: #EFF6FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #2563EB;">
+                            <div style="width: 48px; height: 120px; background: #EFF6FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #2563EB;">
                                 <i class="fa-solid fa-camera" style="font-size: 20px;"></i>
                             </div>
                             <div style="font-size: 14px; font-weight: 600; color: #2563EB; margin-bottom: 4px;">Click to upload logo</div>
@@ -730,11 +725,32 @@
                 <h3 id="deleteModalTitle"><i class="fa-solid fa-triangle-exclamation" style="color:#EF4444;"></i> Delete Item</h3>
                 <button class="modal-close" id="closeDeleteModal"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p style="color:#6B7280;margin:1rem 0 1.5rem;">Are you sure you want to delete <strong id="deleteTargetName"></strong>? This action cannot be undone.</p>
+            <div class="modal-body" style="padding-top:0.5rem; color:#4B5563; font-size:15px; margin-bottom:1.5rem;">
+                Are you sure you want to delete <strong id="deleteTargetName" style="color:#111827;"></strong>?<br>
+                This action cannot be undone.
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" id="cancelDeleteModal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fa-solid fa-trash-can"></i> Delete
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><i class="fa-solid fa-trash-can"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Auction Confirm Modal -->
+    <div id="startAuctionConfirmModal" class="modal-overlay hidden">
+        <div class="modal-box modal-box--sm">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-rocket" style="color:#3B82F6;"></i> Start Auction</h3>
+                <button class="modal-close" id="closeStartConfirmModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="padding-top:0.5rem; color:#4B5563; font-size:15px; margin-bottom:1.5rem;">
+                This auction is scheduled for a future date.<br><br>
+                Are you sure you want to start it early and change the status to <strong>LIVE</strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" id="cancelStartConfirmModal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmStartAuctionBtn" style="background:#3B82F6; border-color:#3B82F6;">
+                    <i class="fa-solid fa-play"></i> Start Now
                 </button>
             </div>
         </div>

@@ -111,55 +111,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Connect to Firebase Realtime Database via Server-Sent Events (SSE)
-    const firebaseUrl = `https://cricket-auction-9b22a-default-rtdb.asia-southeast1.firebasedatabase.app/live_auctions/${auctionCode}.json`;
-    const eventSource = new EventSource(firebaseUrl);
+    // 2. Poll Backend for Live Auction State
+    let liveStateInterval = null;
+    let previousStatus = null;
 
-    eventSource.addEventListener('put', function(e) {
-        try {
-            const payload = JSON.parse(e.data);
-            console.log("Firebase live data received:", payload);
-            
-            // The first event usually has path "/" and data is the whole object.
-            // Subsequent updates might have specific paths.
-            // For simplicity, we can fetch the whole state on any update if the payload path is nested.
-            fetchFullLiveState();
-        } catch (err) {
-            console.error("Error parsing firebase SSE data:", err);
-        }
-    });
-
-    eventSource.addEventListener('keep-alive', function(e) {
-        // Just heartbeat
-    });
-
-    eventSource.onerror = function(err) {
-        console.error("EventSource failed:", err);
-        // Might show overlay if connection fails completely, but let's keep it robust.
-    };
-
-    // Helper to fetch the full state whenever an update occurs to ensure UI is completely in sync
     async function fetchFullLiveState() {
         try {
-            const response = await fetch(firebaseUrl);
+            const response = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionCode}/live`, { cache: 'no-store' });
             const liveData = await response.json();
             
-            if (!liveData || liveData.status === 'waiting' || !liveData.currentPlayer) {
-                // If there's no data or it's just "waiting", show the message
-                showNotLive();
+            // Always update stats if they exist, regardless of live status
+            if (liveData && liveData.stats) {
+                if (liveData.stats.sold !== undefined) document.getElementById('soldCount').textContent = liveData.stats.sold;
+                if (liveData.stats.unsold !== undefined) document.getElementById('unsoldCount').textContent = liveData.stats.unsold;
+                if (liveData.stats.available !== undefined) document.getElementById('availableCount').textContent = liveData.stats.available;
+            }
+
+            if (!liveData || !liveData.status) {
+                showNotLive("AUCTION IS NOT LIVE", "Please wait for the organizer to start the auction.");
+                return;
+            }
+            
+            if (liveData.status === 'waiting') {
+                showNotLive("AUCTION IS LIVE", "Waiting for the organizer to bring a player to the block.");
                 return;
             }
 
-            // Auction is live!
+            // Auction is active!
             showLive();
             updateLiveUI(liveData);
             
+            previousStatus = liveData.status;
+
         } catch (error) {
             console.error("Error fetching full live state:", error);
         }
     }
 
-    function showNotLive() {
+    function showNotLive(titleText = "AUCTION IS NOT LIVE", subText = "Please wait for the organizer to start the auction.") {
+        const titleEl = notLiveMsg.querySelector('.not-live-title');
+        const subEl = notLiveMsg.querySelector('.not-live-sub');
+        if (titleEl) titleEl.textContent = titleText;
+        if (subEl) subEl.textContent = subText;
+
         notLiveMsg.style.display = 'flex';
         playerCard.style.display = 'none';
         bidCard.style.display = 'none';
@@ -173,6 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial fetch to paint the screen immediately
     fetchFullLiveState();
+    
+    // Start polling every 1 second
+    liveStateInterval = setInterval(fetchFullLiveState, 100);
 
     // Setup Tab Switching
     const navBtns = document.querySelectorAll('.nav-btn');
@@ -341,13 +338,24 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (data.currentBid.teamId && data.currentBid.teamName) {
                 document.getElementById('teamName').textContent = data.currentBid.teamName.toUpperCase();
-                // Optionally update logo if you pass teamLogo in Firebase
+                
+                const teamLogoContainer = document.getElementById('teamLogoContainer');
                 const teamLogo = document.getElementById('teamLogo');
-                teamLogo.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.currentBid.teamName)}&background=0f3a8a&color=fff&size=130`;
-                teamLogo.style.display = 'block';
+                const teamInitials = document.getElementById('teamInitials');
+                
+                teamLogoContainer.style.display = 'flex';
+                if (data.currentBid.teamLogo) {
+                    teamLogo.src = data.currentBid.teamLogo;
+                    teamLogo.style.display = 'block';
+                    teamInitials.style.display = 'none';
+                } else {
+                    teamLogo.style.display = 'none';
+                    teamInitials.textContent = data.currentBid.teamShortName || data.currentBid.teamName.substring(0, 2).toUpperCase();
+                    teamInitials.style.display = 'flex';
+                }
             } else {
                 document.getElementById('teamName').textContent = "WAITING FOR BIDS";
-                document.getElementById('teamLogo').style.display = 'none';
+                document.getElementById('teamLogoContainer').style.display = 'none';
             }
         }
 
@@ -360,15 +368,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle Sold/Unsold Overlays or Ribbons
         const bidRibbon = document.querySelector('.bid-ribbon');
+        const soldStamp = document.getElementById('soldStamp');
+        const playerPhoto = document.getElementById('playerPhoto');
+        
         if (data.status === 'sold') {
             bidRibbon.textContent = "SOLD!";
             bidRibbon.style.background = "linear-gradient(135deg, #16a34a, #15803d)";
+            
+            soldStamp.innerHTML = '<i class="fa-solid fa-gavel"></i> SOLD';
+            soldStamp.style.display = 'flex';
+            soldStamp.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(4, 120, 87, 0.95))';
+            
+            playerPhoto.classList.remove('player-grayscale');
+            
+            // Only fire confetti and animation if transitioning newly to 'sold'
+            if (previousStatus !== 'sold') {
+                soldStamp.classList.remove('animate-stamp');
+                soldStamp.classList.remove('unsold-animate');
+                void soldStamp.offsetWidth; // trigger reflow
+                soldStamp.classList.add('animate-stamp');
+                
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 150,
+                        spread: 120,
+                        origin: { y: 0.5 },
+                        colors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#ffffff']
+                    });
+                }
+            }
         } else if (data.status === 'unsold') {
             bidRibbon.textContent = "UNSOLD";
             bidRibbon.style.background = "linear-gradient(135deg, #dc2626, #991b1b)";
+            
+            soldStamp.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> UNSOLD';
+            soldStamp.style.display = 'flex';
+            soldStamp.style.background = 'linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(153, 27, 27, 0.95))';
+            
+            playerPhoto.classList.add('player-grayscale');
+            
+            if (previousStatus !== 'unsold') {
+                soldStamp.classList.remove('unsold-animate');
+                soldStamp.classList.remove('animate-stamp');
+                void soldStamp.offsetWidth;
+                soldStamp.classList.add('unsold-animate');
+            }
         } else {
             bidRibbon.textContent = "CURRENT HIGHEST BID";
             bidRibbon.style.background = "linear-gradient(135deg, #2563eb, #1e3a8a)";
+            soldStamp.style.display = 'none';
+            soldStamp.classList.remove('animate-stamp');
+            soldStamp.classList.remove('unsold-animate');
+            playerPhoto.classList.remove('player-grayscale');
         }
     }
 

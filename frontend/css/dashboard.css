@@ -241,7 +241,8 @@ h3 {
     color: var(--text-muted);
     padding: 0.5rem 0;
     position: relative;
-    transition: color 0.2s ease;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
 }
 
 .nav-link:hover {
@@ -252,15 +253,28 @@ h3 {
     color: var(--primary-blue);
 }
 
-.nav-link.active::after {
+.nav-link::after {
     content: '';
     position: absolute;
     bottom: -1.3rem;
-    left: 0;
-    width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
     height: 3px;
     background: var(--primary-blue);
     border-radius: 3px 3px 0 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    opacity: 0;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+    opacity: 0.3;
+}
+
+.nav-link.active::after {
+    width: 100%;
+    opacity: 1;
 }
 
 .search-bar {
@@ -939,16 +953,16 @@ h3 {
    ============================================================ */
 .page-view {
     display: none;
-    animation: viewFadeIn 0.25s ease;
 }
 
 .page-view.active {
     display: block;
+    animation: viewFadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 @keyframes viewFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(15px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* Nav link needs flex so icon + text align */
@@ -1549,4 +1563,69 @@ h3 {
     background: #0d50c8;
     transform: translateY(-2px);
     box-shadow: 0 4px 14px rgba(21,101,232,0.35);
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN (DASHBOARD & NAVBAR)
+============================================================ */
+@media (max-width: 1100px) {
+    .navbar {
+        display: grid !important;
+        grid-template-columns: max-content 1fr max-content max-content;
+        grid-template-areas: 
+            "brand . bell profile"
+            "links . search search";
+        padding: 1.5rem 2vw;
+        gap: 15px 20px;
+        align-items: center;
+        height: auto;
+    }
+    .nav-left, .nav-right {
+        display: contents;
+    }
+    .brand { grid-area: brand; justify-self: start; }
+    .nav-divider { display: none; }
+    
+    .notification { grid-area: bell; justify-self: end; margin-right: 15px; }
+    .profile-menu { grid-area: profile; justify-self: end; border-left: none; padding-left: 0; }
+    
+    .nav-links { grid-area: links; justify-self: start; display: flex; gap: 1.5rem; }
+    .search-bar { grid-area: search; justify-self: end; width: 100%; max-width: 400px; }
+    .search-bar input { width: 100%; }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 15px;
+        gap: 15px 10px;
+        grid-template-columns: max-content 1fr max-content max-content;
+        grid-template-areas: 
+            "brand . bell profile"
+            "links search search search";
+        border-radius: 0 0 16px 16px;
+    }
+    .nav-links { gap: 10px; font-size: 0.85rem; flex-wrap: nowrap; white-space: nowrap; }
+    .search-bar { max-width: 100%; }
+    
+    /* Shrink elements slightly to fit everything on one line for mobile */
+    .brand-title { font-size: 0.9rem; }
+    .brand-subtitle { font-size: 0.85rem; }
+    .brand-tagline { display: none; }
+    .brand-shield { font-size: 1.4rem; }
+    .batsman-icon { font-size: 0.7rem; }
+    .profile-name, .profile-role, .dropdown-icon { display: none; }
+    .notification { margin-right: 5px; }
+    .search-bar i { font-size: 0.85rem; }
+    .search-bar input { padding: 0.6rem 1rem 0.6rem 2rem; font-size: 0.8rem; }
+    
+    .dashboard-container { padding: 0 1rem 2rem 1rem; }
+    .dashboard-header { flex-direction: column; text-align: center; gap: 15px; align-items: stretch; }
+    
+    .insights-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+    .insights-grid { grid-template-columns: 1fr; }
+    .header-actions { flex-direction: column; }
+    .nav-links { gap: 5px; font-size: 0.75rem; }
 }

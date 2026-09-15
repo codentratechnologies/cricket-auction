@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CricAuction — Live View</title>
+    <title>Cricsquad — Live View</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,10 +20,10 @@
         <!-- Logo -->
         <div class="lv-logo">
             <div class="logo-icon">
-                <i class="fa-solid fa-cricket-bat-ball"></i>
+                <img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo">
             </div>
             <div class="logo-text">
-                <span class="logo-name">CricAuction</span>
+                <span class="logo-name">Cricsquad</span>
                 <span class="logo-tagline">Dream Teams. Real Glory.</span>
             </div>
         </div>
@@ -50,7 +50,8 @@
         <div id="tab-auction" class="tab-pane active">
 
         <!-- Left: Player -->
-        <div class="lv-player" id="livePlayerCard" style="display: none;">
+        <div class="lv-player" id="livePlayerCard" style="display: none; position: relative;">
+            <div id="soldStamp" class="sold-stamp" style="display: none;">SOLD OUT</div>
             <!-- Circular photo ring -->
             <div class="photo-ring">
                 <div class="ring-glow">
@@ -84,20 +85,14 @@
         <div class="lv-bid" id="liveBidCard" style="display: none;">
             <div class="bid-card">
                 <div class="bid-ribbon">CURRENT HIGHEST BID</div>
-                <img id="teamLogo"
-                     src=""
-                     alt="Team"
-                     class="team-logo"
-                     style="display: none;"
-                     onerror="this.style.display='none'">
+                <div id="teamLogoContainer" style="display: none; align-items: center; justify-content: center;">
+                    <img id="teamLogo" src="" alt="Team" class="team-logo" style="display: none;" onerror="this.style.display='none'; document.getElementById('teamInitials').style.display='flex';">
+                    <div id="teamInitials" class="team-initials" style="display: none;">--</div>
+                </div>
                 <h3 class="team-name" id="teamName">--</h3>
                 <div class="bid-pill">
                     <span class="coin">🪙</span>
                     <span class="bid-val" id="bidAmount">--</span>
-                </div>
-                <div class="capacity-row">
-                    <span class="cap-lbl">MAX BID CAPACITY</span>
-                    <span class="cap-val" id="maxBidCapacity">89,00,000</span>
                 </div>
             </div>
         </div>
@@ -205,6 +200,7 @@
     </footer>
 
 </div>
-<script src="js/live.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="js/live.js?v=2"></script>
 </body>
 </html>

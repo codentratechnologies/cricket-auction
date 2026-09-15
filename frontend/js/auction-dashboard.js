@@ -163,9 +163,60 @@ document.addEventListener('DOMContentLoaded', () => {
                         showToast('Cannot start: Add teams and players first!', true);
                     });
                 } else {
-                    startAuctionBtn.addEventListener('click', () => {
+                    // Start Auction Logic
+                    const startConfirmModal = document.getElementById('startAuctionConfirmModal');
+                    const closeStartConfirmModal = document.getElementById('closeStartConfirmModal');
+                    const cancelStartConfirmModal = document.getElementById('cancelStartConfirmModal');
+                    const confirmStartAuctionBtn = document.getElementById('confirmStartAuctionBtn');
+
+                    const startAuctionProceed = async () => {
+                        // Update status to live if it isn't already
+                        if (data.status !== 'live') {
+                            try {
+                                await fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ organizer_id: organizerId, status: 'live' })
+                                });
+                            } catch (e) {
+                                console.error('Error updating status to live:', e);
+                            }
+                        }
                         window.location.href = `live-auction.html?auction_id=${auctionId}`;
+                    };
+
+                    startAuctionBtn.addEventListener('click', () => {
+                        let isFuture = false;
+                        if (data.date) {
+                            const auctionDate = new Date(data.date);
+                            if (data.time) {
+                                const [h, m] = data.time.split(':');
+                                auctionDate.setHours(h, m, 0, 0);
+                            }
+                            if (auctionDate > new Date()) {
+                                isFuture = true;
+                            }
+                        }
+
+                        if (isFuture && data.status !== 'live' && startConfirmModal) {
+                            startConfirmModal.classList.remove('hidden');
+                        } else {
+                            startAuctionProceed();
+                        }
                     });
+
+                    if (startConfirmModal) {
+                        closeStartConfirmModal.addEventListener('click', () => startConfirmModal.classList.add('hidden'));
+                        cancelStartConfirmModal.addEventListener('click', () => startConfirmModal.classList.add('hidden'));
+                        confirmStartAuctionBtn.addEventListener('click', () => {
+                            confirmStartAuctionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting...';
+                            confirmStartAuctionBtn.disabled = true;
+                            startAuctionProceed();
+                        });
+                        startConfirmModal.addEventListener('click', e => { 
+                            if (e.target === startConfirmModal) startConfirmModal.classList.add('hidden'); 
+                        });
+                    }
                 }
             }
 

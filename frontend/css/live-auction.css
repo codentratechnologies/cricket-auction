@@ -364,7 +364,7 @@ body {
     color: #fff;
     font-weight: 700;
     font-size: 13px;
-    padding: 0 16px;
+    padding: 9px 16px;
     border-radius: var(--r-s);
     cursor: pointer;
     transition: background .15s;
@@ -411,6 +411,7 @@ body {
     flex-direction: column;
     gap: 7px;
     padding-right: 2px;
+    max-height: 205px; /* Fits exactly ~5 items before scrolling */
 }
 .la-activity-list::-webkit-scrollbar { width: 3px; }
 .la-activity-list::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
@@ -515,7 +516,8 @@ body {
     background: var(--surface);
     border: 1px solid var(--line);
     border-left: 5px solid var(--team-color, var(--ink-faint));
-    border-radius: var(--r-m);
+    border-radius: var(--r-l);
+    aspect-ratio: 1 / 1;
     padding: 14px 14px 12px;
     cursor: pointer;
     box-shadow: var(--shadow-card);

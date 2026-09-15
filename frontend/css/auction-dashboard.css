@@ -1747,3 +1747,53 @@ input[type="number"] {
 #link-tab button:hover {
     transform: scale(1.05) !important;
 }
+
+/* ============================================================
+   RESPONSIVE DESIGN (AUCTION DASHBOARD CARDS)
+============================================================ */
+@media (max-width: 1024px) {
+    .auction-header-card {
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        align-items: center;
+        text-align: center;
+    }
+    .ahc-logo-zone {
+        border-right: none;
+        border-bottom: 1px solid #E5E7EB;
+        padding-right: 0;
+        padding-bottom: 1.5rem;
+        width: 100%;
+    }
+    .ahc-actions-zone {
+        border-left: none;
+        border-top: 1px solid #E5E7EB;
+        padding-left: 0;
+        padding-top: 1.5rem;
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .ahc-title-row { justify-content: center; }
+    .ahc-info-row { flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
+    .ahc-info-chip { padding: 0; }
+    .ahc-info-sep { display: none; }
+    
+    .pane-header { flex-direction: column; gap: 15px; text-align: center; }
+    .pane-actions { justify-content: center; flex-wrap: wrap; }
+    
+    .about-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+    .ahc-title { font-size: 1.5rem; max-width: 100%; white-space: normal; }
+    .ahc-info-chip { flex-direction: column; text-align: center; padding: 0.5rem; }
+    
+    .tab-nav { flex-wrap: wrap; justify-content: center; }
+    .tab-btn { flex: 1 1 auto; justify-content: center; }
+    
+    .about-grid { grid-template-columns: 1fr; }
+    #link-tab .link-grid { grid-template-columns: 1fr; }
+}

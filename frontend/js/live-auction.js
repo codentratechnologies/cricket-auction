@@ -45,15 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Initial Load
     async function loadAuctionData() {
         try {
-            const [auctionRes, playersRes, teamsRes] = await Promise.all([
+            const [auctionRes, playersRes, teamsRes, historyRes] = await Promise.all([
                 fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}`),
                 fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/players`),
-                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams`)
+                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams`),
+                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/history`)
             ]);
 
             const auction = await auctionRes.json();
             const playersData = await playersRes.json();
             const teamsData = await teamsRes.json();
+            const historyData = await historyRes.json();
 
             if (auction.error) {
                 console.error("Auction not found");
@@ -81,6 +83,35 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Render Teams
             renderTeams();
+            
+            // Populate Recent Activity
+            if (Array.isArray(historyData)) {
+                // historyData is newest first. We reverse it so `addActivity` (which prepends) puts newest at the top.
+                historyData.reverse().forEach(record => {
+                    if (record.message) {
+                        addActivity(record.message);
+                    }
+                });
+            }
+
+            // Check if there is an active session to resume from Firebase
+            try {
+                const liveRes = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/live`, { cache: 'no-store' });
+                const liveData = await liveRes.json();
+                if (liveData && liveData.currentPlayer && liveData.status === 'active') {
+                    currentLiveState = liveData;
+                    updateOrganizerUI();
+                    
+                    // Visually highlight the team currently holding the bid
+                    if (currentLiveState.currentBid && currentLiveState.currentBid.teamId) {
+                        const tile = document.querySelector(`.la-team-tile[data-team-id="${currentLiveState.currentBid.teamId}"]`);
+                        if (tile) tile.classList.add('la-team-selected');
+                    }
+                    showToast("Restored active auction session", "sold");
+                }
+            } catch (err) {
+                console.log("No active live state found to resume or fetch failed.");
+            }
 
         } catch (error) {
             console.error("Error loading auction data:", error);
@@ -118,11 +149,15 @@ document.addEventListener('DOMContentLoaded', () => {
             tile.dataset.teamId = team.id || team.name;
             tile.dataset.teamName = team.name;
 
+            const badgeContent = team.logo_url 
+                ? `<img class="la-team-badge" src="${team.logo_url}" alt="${team.short_name || team.name}" style="background:${color}; object-fit: cover;">`
+                : `<span class="la-team-badge" style="background:${color}">${(team.short_name || team.name).substring(0,4)}</span>`;
+
             tile.innerHTML = `
                 <span class="la-lead-ribbon">Selected</span>
                 <div class="la-team-top">
-                    <span class="la-team-badge" style="background:${color}">${(team.short_name || team.name).substring(0,4)}</span>
-                    <span class="la-team-name-label">${team.short_name || team.name}</span>
+                    ${badgeContent}
+                    <span class="la-team-name-label" style="font-size: 13px;">${team.name}</span>
                 </div>
                 <div class="la-team-purse">
                     <div class="la-purse-row"><span class="la-p-l">Remaining</span><span class="la-p-v">₹${(team.balance || 0).toLocaleString('en-IN')}</span></div>
@@ -135,13 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Firebase Push Helper
+    // 2. Firebase Push Helper (Routed through Backend to bypass rules)
     async function pushToFirebase(patchData) {
         try {
-            await fetch(firebaseUrl, {
+            const payload = { ...patchData, organizer_id: localStorage.getItem('organizer_id') };
+            await fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/live`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(patchData)
+                body: JSON.stringify(payload)
             });
         } catch (error) {
             console.error("Firebase update failed:", error);
@@ -186,9 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentLiveState.currentPlayer = {
             id: player.id,
             name: player.name,
-            role: player.role || 'Player',
-            image: player.photo || '',
-            basePrice: player.base_price || (auctionSettings.min_bid || 0)
+            role: player.player_role || 'Player',
+            image: player.photo_url || '',
+            basePrice: parseInt(player.base_value) || (auctionSettings.min_bid || 0)
         };
         currentLiveState.currentBid = {
             amount: currentLiveState.currentPlayer.basePrice,
@@ -207,6 +243,19 @@ document.addEventListener('DOMContentLoaded', () => {
             status: currentLiveState.status,
             stats: currentLiveState.stats
         });
+        
+        // Initialize history node for this player
+        const initHistoryUrl = `http://127.0.0.1:5000/api/auctions/${auctionId}/history/${currentLiveState.currentPlayer.id}`;
+        fetch(initHistoryUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                organizer_id: localStorage.getItem('organizer_id'),
+                init_only: true,
+                player_name: currentLiveState.currentPlayer.name,
+                base_price: currentLiveState.currentPlayer.basePrice
+            })
+        }).catch(err => console.error("Failed to init history", err));
         
         showToast(`${player.name} is on the block!`, "sold");
     }
@@ -236,10 +285,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.la-team-tile').forEach(t => t.classList.remove('la-team-selected'));
         tile.classList.add('la-team-selected');
 
+        // If there is already an opening bid placed, subsequent taps increment the bid
+        if (currentLiveState.currentBid.teamId !== null) {
+            const increment = auctionSettings.bid_increase || 100;
+            currentLiveState.currentBid.amount += increment;
+        }
+
         currentLiveState.currentBid.teamId = team.id || team.name;
         currentLiveState.currentBid.teamName = team.name;
+        currentLiveState.currentBid.teamLogo = team.logo_url || null;
+        currentLiveState.currentBid.teamShortName = team.short_name || (team.name ? team.name.substring(0, 2).toUpperCase() : 'T');
         
+        updateOrganizerUI();
         pushToFirebase({ currentBid: currentLiveState.currentBid });
+        
+        // Log to bid history under player's ID via Backend
+        const historyUrl = `http://127.0.0.1:5000/api/auctions/${auctionId}/history/${currentLiveState.currentPlayer.id}`;
+        fetch(historyUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                organizer_id: localStorage.getItem('organizer_id'),
+                team_short_name: team.short_name || team.name,
+                amount: currentLiveState.currentBid.amount
+            })
+        }).catch(err => console.error("Failed to log bid history", err));
     }
 
     // Sell / Unsold Actions
@@ -278,8 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 availablePlayers = availablePlayers.filter(p => p.id !== pid);
                 updateStatsCounters();
                 
-                // Auto-clear block after 3s
-                setTimeout(() => clearBlock(), 3000);
+                // Auto-clear block after 1.5s (faster process)
+                setTimeout(() => clearBlock(), 1500);
             }
         } catch (e) {
             console.error("Error selling player", e);
@@ -308,7 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 availablePlayers = availablePlayers.filter(p => p.id !== pid);
                 updateStatsCounters();
                 
-                setTimeout(() => clearBlock(), 2000);
+                // Auto-clear block after 1s (faster process)
+                setTimeout(() => clearBlock(), 1000);
             }
         } catch (e) {
             console.error("Error passing player", e);
@@ -372,8 +443,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle manual entry
     document.getElementById('manualBtn').addEventListener('click', function () {
         const entry = document.getElementById('manualEntry');
-        entry.classList.toggle('la-show');
-        if (entry.classList.contains('la-show')) document.getElementById('manualInput').focus();
+        if (entry.style.display === 'flex') {
+            entry.style.display = 'none';
+        } else {
+            entry.style.display = 'flex';
+            document.getElementById('manualInput').focus();
+        }
     });
 
     // Start
