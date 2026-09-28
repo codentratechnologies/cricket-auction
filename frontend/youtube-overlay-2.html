@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CricSquad Auction League 2026 - Lower Third Broadcast Overlay</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts for Sports Broadcast Typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&amp;family=Oswald:wght@500;600;700;800&amp;family=Caveat:wght@700&amp;display=swap" rel="stylesheet">
+<!-- Canvas Confetti for Sold Animation -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              orange: '#ff5e00',
+              deepOrange: '#e64600',
+              navy: '#091524',
+              dark: '#050c14',
+              panel: '#0e1d2e',
+              plate: '#ffffff',
+            }
+          },
+          fontFamily: {
+            montserrat: ['Montserrat', 'sans-serif'],
+            oswald: ['Oswald', 'sans-serif'],
+            script: ['Caveat', 'cursive'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Broadcast Graphics Styles -->
+<style data-purpose="custom-broadcast-styles">
+    /* Global Glows & Shadows */
+    .hero-card-glow {
+      box-shadow: 0 0 35px rgba(255, 98, 0, 0.65), 0 15px 40px rgba(0, 0, 0, 0.75);
+    }
+    
+    .pod-orbit-glow {
+      box-shadow: 0 0 35px rgba(255, 94, 0, 0.6), inset 0 0 20px rgba(255, 94, 0, 0.4);
+    }
+
+    .shelf-glow {
+      box-shadow: 0 15px 35px rgba(234, 88, 12, 0.55), 0 0 25px rgba(255, 98, 0, 0.4);
+    }
+
+    /* Chamfer & Angled Cuts */
+    .clip-left-wing {
+      clip-path: polygon(24px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 28px);
+    }
+
+    .clip-right-wing {
+      clip-path: polygon(0% 0%, calc(100% - 24px) 0%, 100% 50%, calc(100% - 24px) 100%, 0% 100%);
+    }
+
+    .clip-endcap {
+      clip-path: polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%);
+    }
+
+    /* Ribbon Stripes */
+    .hazard-stripes {
+      background: repeating-linear-gradient(
+        -45deg,
+        #ea580c,
+        #ea580c 8px,
+        #c2410c 8px,
+        #c2410c 16px
+      );
+    }
+
+    .text-shadow-sports {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Live dot pulse */
+    @keyframes live-pulse {
+      0%, 100% { transform: scale(1);    opacity: 1;   }
+      50%       { transform: scale(1.35); opacity: 0.7; }
+    }
+    .live-dot-pulse { animation: live-pulse 1.6s infinite ease-in-out; }
+
+    .player-grayscale {
+      filter: grayscale(100%) brightness(0.8);
+    }
+
+    /* Full-screen wrapper */
+    #overlay-wrapper {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    /* Base styles — JS will set position + transform */
+    #overlay-root {
+      position: absolute;
+      width: 1380px;
+      transform-origin: center center;
+      overflow: visible;
+      opacity: 0; /* Hidden initially */
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+<!-- END: Custom Broadcast Graphics Styles -->
+</head>
+<body class="bg-transparent text-slate-100 min-h-screen flex flex-col items-center justify-center overflow-hidden font-montserrat select-none">
+<!-- BEGIN: Main Canvas -->
+<div id="overlay-wrapper">
+<div id="overlay-root">
+<main class="w-full flex flex-col items-center justify-center">
+<!-- BEGIN: Sports Broadcast Lower-Third Overlay Container -->
+<div class="relative w-full pt-14 pb-4 flex flex-col items-center justify-center" data-purpose="broadcast-lower-third-overlay">
+<!-- ======================================================== -->
+<!-- TIER 1: UPPER MAIN BAR STRUCTURE (Clean non-clipping flow) -->
+<!-- ======================================================== -->
+<div class="relative w-full h-[148px] flex items-stretch z-20">
+<!-- SECTION 1: CricSquad League Badge (Left Wing) -->
+<div class="relative w-[340px] bg-gradient-to-br from-white via-[#f8fafc] to-[#e2e8f0] rounded-tl-2xl flex items-center pl-7 pr-4 border-l-4 border-t-2 border-[#ff5500] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95)] flex-shrink-0 z-10" data-purpose="left-wing-league-badge">
+<!-- Subtle graphic background watermark -->
+<div class="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:8px_8px] pointer-events-none"></div>
+<div class="flex items-center gap-4 z-10">
+<!-- Orange & Navy 3D Shield Logo -->
+<div id="overlayTournamentLogoContainer" class="relative w-[54px] h-[54px] flex-shrink-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] flex items-center justify-center">
+<svg class="w-full h-full" viewBox="0 0 100 115">
+<defs>
+<linearGradient id="shieldLeft" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#ff7a00"></stop>
+<stop offset="100%" stop-color="#ea580c"></stop>
+</linearGradient>
+<linearGradient id="shieldRight" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#0f172a"></stop>
+<stop offset="100%" stop-color="#020617"></stop>
+</linearGradient>
+</defs>
+<path d="M50,5 L10,25 L10,65 C10,90 50,110 50,110 C50,110 50,5 50,5 Z" fill="url(#shieldLeft)"></path>
+<path d="M50,5 L90,25 L90,65 C90,90 50,110 50,110 C50,110 50,5 50,5 Z" fill="url(#shieldRight)"></path>
+<!-- Batsman Graphic -->
+<path d="M48,30 C52,30 55,27 55,23 C55,19 52,16 48,16 C44,16 41,19 41,23 C41,27 44,30 48,30 Z M35,46 L46,38 L54,42 L45,56 L38,72 L32,70 L38,55 L28,48 Z M45,43 L63,32 L67,38 L48,51 Z" fill="#ffffff"></path>
+<path d="M60,33 L78,22 L74,18 L56,30 Z" fill="#ffffff"></path>
+</svg>
+</div>
+<!-- CricSquad Typography -->
+<div class="flex flex-col">
+<div class="flex flex-col leading-[1.05] justify-center mb-1" id="overlayTournamentNameWrap">
+<span id="overlayTournamentName1" class="text-[24px] font-black tracking-tight text-[#0f172a]">CRIC</span>
+<span id="overlayTournamentName2" class="text-[24px] font-black tracking-tight text-[#ea580c]">SQUAD</span>
+</div>
+<span class="text-[9.5px] font-extrabold uppercase tracking-[0.16em] text-[#334155]">AUCTION LEAGUE 2026</span>
+<div class="flex items-center gap-1.5 mt-1 text-[8.5px] font-bold uppercase tracking-[0.25em] text-[#0f172a]/70">
+<span class="">PLAY</span>•<span class="">BID</span>•<span class="">BELIEVE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Hero 3D Player Breakout Card -->
+<div class="relative w-[210px] -my-[32px] -ml-[45px] z-30 flex-shrink-0" data-purpose="hero-3d-player-card">
+<div class="relative w-full h-[210px] p-[4px] bg-gradient-to-b from-[#ff8533] via-[#ea580c] to-[#9a3412] rounded-2xl hero-card-glow transform -rotate-1 transition-transform duration-300">
+<div class="relative w-full h-full bg-gradient-to-t from-[#040810] via-[#0b1728] to-[#1e3450] rounded-[13px] overflow-hidden border border-amber-300/40">
+<!-- Trophy glow aura inside card -->
+<div class="absolute bottom-4 left-2 w-28 h-28 bg-[#ea580c]/30 blur-xl rounded-full"></div>
+<!-- Player Cutout with Championship Trophy -->
+<img id="overlayPlayerPhoto" alt="Player Photo" class="absolute object-contain w-[260px] h-[260px] max-w-none -top-[75px] -left-[25px] pointer-events-none drop-shadow-[0_12px_18px_rgba(0,0,0,0.9)]" style="width: 260px; height: 260px; top: -75px; left: -25px; object-fit: contain;" src="https://ui-avatars.com/api/?name=TG&background=b8d4f0&color=1e3a8a&size=300">
+<!-- Golden Script Badge Sticker -->
+<div id="overlayStatusStamp" class="absolute bottom-2 right-2 bg-gradient-to-r from-[#ea580c] to-[#ff7a00] px-3 py-0.5 rounded shadow-lg border border-amber-200/50 transform -rotate-3 transition-colors duration-500">
+<span id="overlayStatusText" class="font-script text-[15px] font-bold text-amber-50 tracking-wide block leading-none">
+                  Play Bid Believe
+                </span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 3: Player Details Section (Pure Solid Crisp White Plate) -->
+<div class="relative flex-1 bg-white flex flex-col justify-between py-3 px-6 z-10 border-t-2 border-slate-200 shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)]" data-purpose="player-specifications-panel">
+<!-- Top Row: Large Clear Nameplate -->
+<div class="flex items-center justify-center gap-3 border-b border-slate-100 pb-2">
+
+<!-- Player Full Name -->
+<h1 id="overlayPlayerName" class="text-[26px] font-black uppercase tracking-tight leading-none flex items-center whitespace-nowrap">
+<span class="text-[#0f172a]">TUSHAR N.</span>
+<span class="text-[#ea580c] ml-1.5">GAJERA</span>
+</h1>
+</div>
+<!-- Bottom Row: 2x2 Clean High-Contrast Specs Matrix -->
+<div class="grid grid-cols-2 gap-x-6 gap-y-2 py-1">
+<!-- Spec 1: Role -->
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center text-[#ea580c] flex-shrink-0">
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
+<path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+</svg>
+</div>
+<span id="overlayPlayerRole" class="text-[12px] font-bold uppercase text-[#0f172a] tracking-wider">ALL ROUNDER</span>
+</div>
+<!-- Spec 2: Age -->
+<div class="flex items-center gap-2 border-l border-slate-200 pl-4">
+<div class="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center text-[#ea580c] flex-shrink-0">
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
+<path clip-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<span id="overlayPlayerAge" class="text-[12px] font-bold uppercase text-[#0f172a] tracking-wider">AGE 26</span>
+</div>
+<!-- Spec 3: Batting Style -->
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 flex items-center justify-center text-[#ea580c] flex-shrink-0">
+<svg class="w-4 h-4 fill-current rotate-45" viewBox="0 0 24 24">
+<path d="M4.5 21.5L2 19l12.5-12.5L16 8 4.5 21.5zm13.7-14.8l-1.4-1.4 1.4-1.4c.8-.8 2-.8 2.8 0l1.4 1.4c.8.8.8 2 0 2.8l-1.4 1.4-2.8-2.8z"></path>
+</svg>
+</div>
+<span id="overlayBattingStyle" class="text-[11.5px] font-bold uppercase text-[#1e293b] tracking-wider">RIGHT HAND BAT</span>
+</div>
+<!-- Spec 4: Bowling Style -->
+<div class="flex items-center gap-2 border-l border-slate-200 pl-4">
+<div class="w-5 h-5 flex items-center justify-center text-[#ea580c] flex-shrink-0">
+<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+<circle cx="12" cy="12" fill="none" r="9" stroke="currentColor" stroke-width="2"></circle>
+<path d="M7 6c3 3 3 9 0 12M17 6c-3 3-3 9 0 12" stroke="currentColor" stroke-dasharray="2 1" stroke-width="1.5"></path>
+</svg>
+</div>
+<span id="overlayBowlingStyle" class="text-[11.5px] font-bold uppercase text-[#1e293b] tracking-wider">RIGHT ARM OFF SPIN</span>
+</div>
+</div>
+</div>
+<!-- SECTION 4: 3D Central Circular Bidding Pod -->
+<div class="relative w-[215px] -my-[32px] -mx-4 flex items-center justify-center z-40 flex-shrink-0" data-purpose="central-bidding-pod">
+<!-- Animated Orbital Dashed Ring -->
+<div id="overlayOrbitRing" class="absolute w-[212px] h-[212px] rounded-full border-2 border-[#ea580c] border-dashed animate-[spin_45s_linear_infinite] opacity-70 pointer-events-none transition-colors duration-500"></div>
+<!-- Outer Glowing Disc -->
+<div id="overlayPodOuter" class="relative w-[198px] h-[198px] rounded-full p-[6px] bg-gradient-to-b from-[#ff8533] via-[#ea580c] to-[#9a3412] pod-orbit-glow flex items-center justify-center transition-colors duration-500">
+<!-- Silver Beveled Ring -->
+<div class="w-full h-full rounded-full p-[4px] bg-gradient-to-b from-white via-[#cbd5e1] to-[#64748b] shadow-inner flex items-center justify-center">
+<!-- Obsidian Deep Blue Core -->
+<div class="w-full h-full rounded-full bg-gradient-to-b from-[#0f172a] via-[#090d16] to-[#020617] flex flex-col items-center justify-center text-center p-2 relative shadow-[inset_0_4px_12px_rgba(0,0,0,0.9)]">
+<!-- Gavel Icon Badge -->
+<div id="overlayGavelBadge" class="absolute -top-3 w-8 h-8 rounded-full bg-gradient-to-tr from-[#ea580c] to-[#ff7a00] border-2 border-white flex items-center justify-center shadow-lg transition-colors duration-500">
+<svg class="w-4 h-4 fill-white" viewBox="0 0 24 24">
+<path d="M14.5 2.5L12 5l3 3 2.5-2.5c.6-.6.6-1.5 0-2.1l-.9-.9c-.6-.6-1.5-.6-2.1 0zM10.9 6.1L4.8 12.2c-.4.4-.4 1 0 1.4l1.6 1.6c.4.4 1 .4 1.4 0l6.1-6.1-3-3zM3 19.5v1.5h1.5l8.5-8.5-1.5-1.5L3 19.5z"></path>
+</svg>
+</div>
+<!-- Current Bid Label -->
+<span id="overlayBidLabelText" class="text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#ff8d36] mt-2 mb-0.5 transition-colors duration-500">CURRENT BID</span>
+<!-- Giant Bid Value -->
+<div class="flex items-center justify-center text-white font-black text-[27px] tracking-tight leading-none drop-shadow-md">
+<span class="text-[21px] mr-1 text-slate-200">₹</span>
+<span id="overlayBidValue">2,00,000</span>
+</div>
+<!-- Status Capsule -->
+<div id="overlayBidCountingBg" class="mt-2 w-[85%] hazard-stripes py-0.5 px-2 rounded-full border border-amber-300/40 shadow-sm flex items-center justify-center transition-all duration-500">
+<span id="overlayBidCountingText" class="text-[8.5px] font-black text-white uppercase tracking-wider italic drop-shadow">
+                    AND COUNTING...
+                  </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 5: Right Wing - Current Bid Team (Mahek Challengers) -->
+<div class="relative flex-1 bg-gradient-to-r from-[#0a0f1d] via-[#0d1627] to-[#080d19] clip-right-wing pl-10 pr-24 flex items-center justify-between border-t-2 border-b-2 border-[#ea580c] shadow-[0_10px_25px_rgba(0,0,0,0.8)] z-10 transition-colors duration-500" id="overlayRightWing" data-purpose="right-wing-franchise-details">
+<div class="flex flex-col z-10 w-full">
+<!-- Header: Current Bid Team -->
+<div class="flex items-center gap-2 mb-1.5">
+<span id="overlayRightWingLine1" class="h-[1.5px] w-6 bg-[#ea580c] transition-colors duration-500"></span>
+<span id="overlayRightWingLabel" class="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff8d36] transition-colors duration-500">CURRENT BID TEAM</span>
+<span id="overlayRightWingLine2" class="h-[1.5px] w-6 bg-[#ea580c] transition-colors duration-500"></span>
+</div>
+<!-- Team Logo Crest & Team Name -->
+<div class="flex items-center gap-3.5">
+<div id="overlayTeamLogoContainer" class="relative w-12 h-14 flex-shrink-0 drop-shadow-[0_4px_6px_rgba(0,0,0,0.7)] flex items-center justify-center">
+    <!-- Fallback empty state before JS loads -->
+</div>
+<!-- Team Typography -->
+<div class="flex flex-col">
+<span id="overlayTeamName1" class="text-[25px] font-black uppercase text-white tracking-wide leading-none font-oswald text-shadow-sports">
+                  MAHEK
+                </span>
+<span id="overlayTeamName2" class="text-[21px] font-black uppercase tracking-wider leading-tight font-oswald text-slate-100 text-shadow-sports">
+                  CHALLENGERS
+                </span>
+</div>
+</div>
+</div>
+<!-- Far Right Chevron Endcap Banner -->
+<div id="overlayEndcap" class="absolute right-0 top-0 bottom-0 w-[90px] bg-[#f8fafc] clip-endcap flex flex-col items-center justify-center text-center pr-3 border-l-2 border-[#ea580c] transition-colors duration-500" data-purpose="aerodynamic-endcap">
+<!-- Crown Icon -->
+<svg id="overlayEndcapIcon" class="w-4 h-4 text-amber-500 fill-current mb-1" viewBox="0 0 24 24">
+<path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"></path>
+</svg>
+<div class="text-[8px] font-black text-[#0f172a] uppercase leading-[1.1] tracking-tight font-montserrat">
+              BIGGER<br>
+<span id="overlayEndcapText" class="text-[#ea580c] transition-colors duration-500">PLAYERS</span><br>
+              BRIGHTER<br>
+              TOMORROW
+            </div>
+</div>
+</div>
+</div>
+<!-- END: TIER 1 -->
+<!-- ======================================================== -->
+<!-- TIER 2: VIBRANT GLOWING FOUNDATION SHELF BAR             -->
+<!-- Positioned cleanly directly beneath with zero overlap bugs -->
+<!-- ======================================================== -->
+<div id="overlayShelfBar" class="relative w-[calc(100%-24px)] self-start h-[52px] bg-gradient-to-r from-[#ea580c] via-[#ff6a00] to-[#ea580c] rounded-b-xl shelf-glow flex items-center justify-between px-6 z-10 border-t-2 border-amber-300/50 -mt-0.5 transition-colors duration-500" data-purpose="under-rail-chassis">
+<!-- Left: Live Auction Capsule Badge -->
+<div id="overlayLivePillBg" class="flex items-center gap-2 bg-[#09101a] border border-amber-400/60 py-1.5 px-4 rounded-full shadow-md flex-shrink-0 transition-colors duration-500">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+<span id="overlayLiveDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600 shadow-[0_0_8px_#ff0000] live-dot-pulse transition-colors duration-500"></span>
+</span>
+<span id="overlayLivePillText" class="text-white text-[11px] font-black tracking-wider uppercase transition-colors duration-500">LIVE AUCTION</span>
+</div>
+<!-- Center: Clear, Crisp, Legible Motto -->
+<div class="flex-1 text-center pl-4">
+<span id="overlayMottoText" class="text-white text-[10px] font-black tracking-[0.32em] uppercase text-shadow-sports transition-colors duration-500">
+            TALENT &nbsp;•&nbsp; MEETS &nbsp;•&nbsp; OPPORTUNITY
+          </span>
+</div>
+<!-- Right: Spacer to maintain perfect center alignment of motto -->
+<div class="w-[160px] hidden md:block"></div>
+</div>
+<!-- END: TIER 2 -->
+</div>
+<!-- END: Sports Broadcast Lower-Third Overlay Container -->
+
+</main>
+<!-- END: Main Canvas -->
+</div>
+</div>
+
+<script>
+  // ── Scaling ──────────────────────────────────────────────────────────────
+  function scaleOverlay() {
+    const root    = document.getElementById('overlay-root');
+    const wrapper = document.getElementById('overlay-wrapper');
+    const DESIGN_WIDTH   = 1380;
+    const DESIGN_HEIGHT  = 200;
+    const vw = wrapper.clientWidth;
+    const vh = wrapper.clientHeight;
+    const scale    = (vw * 0.95) / DESIGN_WIDTH;
+    const visualW  = DESIGN_WIDTH * scale;
+    const visualH  = DESIGN_HEIGHT * scale;
+    const left = (vw - visualW) / 2;
+    const top  = (vh - visualH) / 2;
+    root.style.left            = left + 'px';
+    root.style.top             = top  + 'px';
+    root.style.transform       = `scale(${scale})`;
+    root.style.transformOrigin = 'top left';
+  }
+  window.addEventListener('resize', scaleOverlay);
+
+  // ── Firebase Live Data ────────────────────────────────────────────────────
+  const urlParams   = new URLSearchParams(window.location.search);
+  const auctionCode = urlParams.get('code') || urlParams.get('auction_id');
+  const API_BASE    = 'http://127.0.0.1:5000/api';
+
+  // Helper: format number as Indian currency string
+  function formatINR(amount) {
+    return Number(amount || 0).toLocaleString('en-IN');
+  }
+
+  // Helper: split a full team name into two lines (word 1 / rest)
+  function splitTeamName(name) {
+    const words = (name || 'TEAM').toUpperCase().split(' ');
+    return { line1: words[0], line2: words.slice(1).join(' ') || '' };
+  }
+
+  let previousStatus = null;
+
+  // Update every DOM element with fresh data
+  function updateOverlay(data) {
+    const rootEl = document.getElementById('overlay-root');
+    
+    // 1. Check if waiting for next player
+    if (!data || !data.status || data.status === 'waiting') {
+      rootEl.style.opacity = '0'; // Hide overlay smoothly
+      previousStatus = 'waiting';
+      return;
+    }
+    
+    // Make sure overlay is visible if active/sold/unsold
+    rootEl.style.opacity = '1';
+
+    // ── Player Info ──
+    if (data.currentPlayer) {
+      const p = data.currentPlayer;
+
+      // Name — two-colour split
+      const nameEl = document.getElementById('overlayPlayerName');
+      const nameParts = (p.name || 'PLAYER NAME').toUpperCase().split(' ');
+      const lastName  = nameParts.pop();
+      const firstName = nameParts.join(' ');
+      nameEl.innerHTML = `<span class="text-[#0f172a]">${firstName}</span><span class="text-[#ea580c] ml-1.5">${lastName}</span>`;
+
+      // Photo
+      const photoEl = document.getElementById('overlayPlayerPhoto');
+      if (p.image) {
+          photoEl.src = p.image;
+          photoEl.style.width = '260px';
+          photoEl.style.height = '260px';
+          photoEl.style.top = '-75px';
+          photoEl.style.left = '-29px';
+          photoEl.style.objectFit = 'contain';
+      } else {
+          photoEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name||'P')}&background=b8d4f0&color=1e3a8a&size=300`;
+          photoEl.style.width = '100%';
+          photoEl.style.height = '100%';
+          photoEl.style.top = '0px';
+          photoEl.style.left = '0px';
+          photoEl.style.objectFit = 'cover';
+      }
+
+      // Role & Age
+      const roleEl = document.getElementById('overlayPlayerRole');
+      if (roleEl) roleEl.textContent = (p.role || 'PLAYER').toUpperCase();
+
+      const ageEl = document.getElementById('overlayPlayerAge');
+      if (ageEl) ageEl.textContent = 'AGE ' + (p.age || '--');
+
+      // Batting & Bowling style
+      const batEl  = document.getElementById('overlayBattingStyle');
+      if (batEl)  batEl.textContent  = (p.batting_style  || p.batting  || 'RIGHT HAND BAT').toUpperCase();
+
+      const bowlEl = document.getElementById('overlayBowlingStyle');
+      if (bowlEl) bowlEl.textContent = (p.bowling_style  || p.bowling  || 'RIGHT ARM SPIN').toUpperCase();
+    }
+
+    // ── Bid Info ──
+    if (data.currentBid) {
+      const b = data.currentBid;
+
+      // Bid amount
+      const bidValEl = document.getElementById('overlayBidValue');
+      if (bidValEl) bidValEl.textContent = formatINR(b.amount || 0);
+
+      // Bidding team
+      if (b.teamName) {
+        const { line1, line2 } = splitTeamName(b.teamName);
+        const t1 = document.getElementById('overlayTeamName1');
+        const t2 = document.getElementById('overlayTeamName2');
+        if (t1) t1.textContent = line1;
+        if (t2) t2.textContent = line2;
+
+        // Team logo or generated fallback initials
+        const logoContainer = document.getElementById('overlayTeamLogoContainer');
+        if (logoContainer) {
+          const initials = b.teamShortName || line1 || 'T';
+          const logoUrl = b.teamLogo || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=3b82f6&color=ffffff&size=150`;
+          logoContainer.innerHTML = `<img src="${logoUrl}" alt="Team Logo" class="w-14 h-14 object-cover rounded-full shadow-md border-2 border-white">`;
+        }
+      } else {
+        const t1 = document.getElementById('overlayTeamName1');
+        const t2 = document.getElementById('overlayTeamName2');
+        if (t1) t1.textContent = 'WAITING';
+        if (t2) t2.textContent = 'FOR BIDS';
+        
+        const logoContainer = document.getElementById('overlayTeamLogoContainer');
+        if (logoContainer) logoContainer.innerHTML = '';
+      }
+    }
+    
+    // ── STATUS ANIMATIONS (ACTIVE / SOLD / UNSOLD) ──
+    const statusStamp = document.getElementById('overlayStatusStamp');
+    const statusText = document.getElementById('overlayStatusText');
+    const playerPhoto = document.getElementById('overlayPlayerPhoto');
+    const livePillBg = document.getElementById('overlayLivePillBg');
+    const livePillText = document.getElementById('overlayLivePillText');
+    const liveDot = document.getElementById('overlayLiveDot');
+    
+    const bidLabelText = document.getElementById('overlayBidLabelText');
+    const bidCountingBg = document.getElementById('overlayBidCountingBg');
+    const bidCountingText = document.getElementById('overlayBidCountingText');
+    
+    const podOuter = document.getElementById('overlayPodOuter');
+    const orbitRing = document.getElementById('overlayOrbitRing');
+    const gavelBadge = document.getElementById('overlayGavelBadge');
+    
+    const rightWing = document.getElementById('overlayRightWing');
+    const rwLine1 = document.getElementById('overlayRightWingLine1');
+    const rwLine2 = document.getElementById('overlayRightWingLine2');
+    const rwLabel = document.getElementById('overlayRightWingLabel');
+    const endcap = document.getElementById('overlayEndcap');
+    const endcapText = document.getElementById('overlayEndcapText');
+    const shelfBar = document.getElementById('overlayShelfBar');
+
+    if (data.status === 'sold') {
+      // Apply Sold Visuals (Green Theme)
+      playerPhoto.classList.remove('player-grayscale');
+      statusText.textContent = 'SOLD';
+      statusStamp.className = "absolute bottom-2 right-2 bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-0.5 rounded shadow-lg border border-emerald-200/50 transform -rotate-3 transition-colors duration-500";
+      
+      livePillBg.className = "flex items-center gap-2 bg-[#064e3b] border border-emerald-400/60 py-1.5 px-4 rounded-full shadow-md flex-shrink-0 transition-colors duration-500";
+      livePillText.textContent = "PLAYER SOLD";
+      liveDot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_8px_#10b981] live-dot-pulse transition-colors duration-500";
+      liveDot.previousElementSibling.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+      
+      bidLabelText.textContent = "SOLD TO";
+      bidLabelText.className = "text-[10px] font-extrabold uppercase tracking-[0.25em] text-emerald-400 mt-2 mb-0.5 transition-colors duration-500";
+      
+      bidCountingBg.className = "mt-2 w-[85%] bg-emerald-600 py-0.5 px-2 rounded-full border border-emerald-300/40 shadow-sm flex items-center justify-center transition-all duration-500";
+      bidCountingText.textContent = "FINAL PRICE";
+      
+      podOuter.className = "relative w-[198px] h-[198px] rounded-full p-[6px] bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800 pod-orbit-glow flex items-center justify-center transition-colors duration-500";
+      orbitRing.className = "absolute w-[212px] h-[212px] rounded-full border-2 border-emerald-500 border-dashed animate-[spin_45s_linear_infinite] opacity-70 pointer-events-none transition-colors duration-500";
+      gavelBadge.className = "absolute -top-3 w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-emerald-400 border-2 border-white flex items-center justify-center shadow-lg transition-colors duration-500";
+      
+      rightWing.className = "relative flex-1 bg-gradient-to-r from-[#064e3b] via-[#022c22] to-[#064e3b] clip-right-wing pl-10 pr-24 flex items-center justify-between border-t-2 border-b-2 border-emerald-500 shadow-[0_10px_25px_rgba(0,0,0,0.8)] z-10 transition-colors duration-500";
+      rwLine1.className = "h-[1.5px] w-6 bg-emerald-500 transition-colors duration-500";
+      rwLine2.className = "h-[1.5px] w-6 bg-emerald-500 transition-colors duration-500";
+      rwLabel.className = "text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400 transition-colors duration-500";
+      
+      endcap.className = "absolute right-0 top-0 bottom-0 w-[90px] bg-[#f8fafc] clip-endcap flex flex-col items-center justify-center text-center pr-3 border-l-2 border-emerald-500 transition-colors duration-500";
+      endcapText.className = "text-emerald-600 transition-colors duration-500";
+      
+      shelfBar.className = "relative w-[calc(100%-24px)] self-start h-[52px] bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 rounded-b-xl shelf-glow flex items-center justify-between px-6 z-10 border-t-2 border-emerald-300/50 -mt-0.5 transition-colors duration-500";
+      
+      // Fire Confetti only ONCE when status transitions to sold
+      if (previousStatus !== 'sold') {
+        const duration = 3000;
+        const end = Date.now() + duration;
+
+        (function frame() {
+          confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, colors: ['#10b981', '#3b82f6', '#f59e0b', '#ffffff'] });
+          confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, colors: ['#10b981', '#3b82f6', '#f59e0b', '#ffffff'] });
+          if (Date.now() < end) requestAnimationFrame(frame);
+        }());
+      }
+      
+    } else if (data.status === 'unsold') {
+      // Apply Unsold Visuals (Red/Gray Theme)
+      playerPhoto.classList.add('player-grayscale');
+      statusText.textContent = 'UNSOLD';
+      statusStamp.className = "absolute bottom-2 right-2 bg-gradient-to-r from-rose-700 to-red-600 px-3 py-0.5 rounded shadow-lg border border-red-200/50 transform -rotate-3 transition-colors duration-500";
+      
+      livePillBg.className = "flex items-center gap-2 bg-[#4c0519] border border-red-400/60 py-1.5 px-4 rounded-full shadow-md flex-shrink-0 transition-colors duration-500";
+      livePillText.textContent = "PLAYER UNSOLD";
+      
+      bidLabelText.textContent = "UNSOLD";
+      bidLabelText.className = "text-[10px] font-extrabold uppercase tracking-[0.25em] text-red-400 mt-2 mb-0.5 transition-colors duration-500";
+      
+      bidCountingBg.className = "mt-2 w-[85%] bg-red-700 py-0.5 px-2 rounded-full border border-red-300/40 shadow-sm flex items-center justify-center transition-all duration-500";
+      bidCountingText.textContent = "RETURNED TO POOL";
+      
+      podOuter.className = "relative w-[198px] h-[198px] rounded-full p-[6px] bg-gradient-to-b from-red-500 via-red-700 to-red-900 pod-orbit-glow flex items-center justify-center transition-colors duration-500";
+      orbitRing.className = "absolute w-[212px] h-[212px] rounded-full border-2 border-red-600 border-dashed animate-[spin_45s_linear_infinite] opacity-70 pointer-events-none transition-colors duration-500";
+      gavelBadge.className = "absolute -top-3 w-8 h-8 rounded-full bg-gradient-to-tr from-red-600 to-red-500 border-2 border-white flex items-center justify-center shadow-lg transition-colors duration-500";
+      
+      rightWing.className = "relative flex-1 bg-gradient-to-r from-[#4c0519] via-[#22020a] to-[#4c0519] clip-right-wing pl-10 pr-24 flex items-center justify-between border-t-2 border-b-2 border-red-600 shadow-[0_10px_25px_rgba(0,0,0,0.8)] z-10 transition-colors duration-500";
+      rwLine1.className = "h-[1.5px] w-6 bg-red-600 transition-colors duration-500";
+      rwLine2.className = "h-[1.5px] w-6 bg-red-600 transition-colors duration-500";
+      rwLabel.className = "text-[10px] font-black uppercase tracking-[0.25em] text-red-400 transition-colors duration-500";
+      
+      endcap.className = "absolute right-0 top-0 bottom-0 w-[90px] bg-[#f8fafc] clip-endcap flex flex-col items-center justify-center text-center pr-3 border-l-2 border-red-600 transition-colors duration-500";
+      endcapText.className = "text-red-600 transition-colors duration-500";
+      
+      shelfBar.className = "relative w-[calc(100%-24px)] self-start h-[52px] bg-gradient-to-r from-red-700 via-rose-600 to-red-700 rounded-b-xl shelf-glow flex items-center justify-between px-6 z-10 border-t-2 border-red-300/50 -mt-0.5 transition-colors duration-500";
+      
+    } else {
+      // Active State (Default Orange/Brand Theme)
+      playerPhoto.classList.remove('player-grayscale');
+      statusText.textContent = 'Play Bid Believe';
+      statusStamp.className = "absolute bottom-2 right-2 bg-gradient-to-r from-[#ea580c] to-[#ff7a00] px-3 py-0.5 rounded shadow-lg border border-amber-200/50 transform -rotate-3 transition-colors duration-500";
+      
+      livePillBg.className = "flex items-center gap-2 bg-[#09101a] border border-amber-400/60 py-1.5 px-4 rounded-full shadow-md flex-shrink-0 transition-colors duration-500";
+      livePillText.textContent = "LIVE AUCTION";
+      liveDot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600 shadow-[0_0_8px_#ff0000] live-dot-pulse transition-colors duration-500";
+      liveDot.previousElementSibling.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75";
+      
+      bidLabelText.textContent = "CURRENT BID";
+      bidLabelText.className = "text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#ff8d36] mt-2 mb-0.5 transition-colors duration-500";
+      
+      bidCountingBg.className = "mt-2 w-[85%] hazard-stripes py-0.5 px-2 rounded-full border border-amber-300/40 shadow-sm flex items-center justify-center transition-all duration-500";
+      bidCountingText.textContent = "AND COUNTING...";
+      
+      podOuter.className = "relative w-[198px] h-[198px] rounded-full p-[6px] bg-gradient-to-b from-[#ff8533] via-[#ea580c] to-[#9a3412] pod-orbit-glow flex items-center justify-center transition-colors duration-500";
+      orbitRing.className = "absolute w-[212px] h-[212px] rounded-full border-2 border-[#ea580c] border-dashed animate-[spin_45s_linear_infinite] opacity-70 pointer-events-none transition-colors duration-500";
+      gavelBadge.className = "absolute -top-3 w-8 h-8 rounded-full bg-gradient-to-tr from-[#ea580c] to-[#ff7a00] border-2 border-white flex items-center justify-center shadow-lg transition-colors duration-500";
+      
+      rightWing.className = "relative flex-1 bg-gradient-to-r from-[#0a0f1d] via-[#0d1627] to-[#080d19] clip-right-wing pl-10 pr-24 flex items-center justify-between border-t-2 border-b-2 border-[#ea580c] shadow-[0_10px_25px_rgba(0,0,0,0.8)] z-10 transition-colors duration-500";
+      rwLine1.className = "h-[1.5px] w-6 bg-[#ea580c] transition-colors duration-500";
+      rwLine2.className = "h-[1.5px] w-6 bg-[#ea580c] transition-colors duration-500";
+      rwLabel.className = "text-[10px] font-black uppercase tracking-[0.25em] text-[#ff8d36] transition-colors duration-500";
+      
+      endcap.className = "absolute right-0 top-0 bottom-0 w-[90px] bg-[#f8fafc] clip-endcap flex flex-col items-center justify-center text-center pr-3 border-l-2 border-[#ea580c] transition-colors duration-500";
+      endcapText.className = "text-[#ea580c] transition-colors duration-500";
+      
+      shelfBar.className = "relative w-[calc(100%-24px)] self-start h-[52px] bg-gradient-to-r from-[#ea580c] via-[#ff6a00] to-[#ea580c] rounded-b-xl shelf-glow flex items-center justify-between px-6 z-10 border-t-2 border-amber-300/50 -mt-0.5 transition-colors duration-500";
+    }
+
+    previousStatus = data.status;
+  }
+
+  // Poll the live endpoint
+  let pollingInterval = null;
+
+  async function fetchLiveData() {
+    if (!auctionCode) return;
+    try {
+      const res  = await fetch(`${API_BASE}/auctions/${auctionCode}/live`, { cache: 'no-store' });
+      const data = await res.json();
+      updateOverlay(data);
+    } catch (err) {
+      console.warn('Overlay: live fetch error', err);
+    }
+  }
+
+  // Fetch basic tournament details (name and logo) once on load
+  async function fetchTournamentData() {
+    if (!auctionCode) return;
+    try {
+      const res = await fetch(`${API_BASE}/auctions/${auctionCode}`);
+      const auction = await res.json();
+      if (!auction.error) {
+        // Name — two-colour split
+        const words = (auction.name || 'CRIC SQUAD').toUpperCase().split(' ');
+        let name1, name2;
+        if (words.length > 1) {
+            name2 = words.pop();
+            name1 = words.join(' ');
+        } else {
+            name1 = words[0];
+            name2 = '';
+        }
+        
+        document.getElementById('overlayTournamentName1').textContent = name1;
+        document.getElementById('overlayTournamentName2').textContent = name2;
+        
+        const logoContainer = document.getElementById('overlayTournamentLogoContainer');
+        if (logoContainer && auction.logo_url) {
+          logoContainer.innerHTML = `<img src="${auction.logo_url}" alt="Tournament Logo" class="w-full h-full object-contain filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.2)]">`;
+        }
+      }
+    } catch(err) {
+      console.warn("Could not fetch tournament data", err);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    scaleOverlay();
+
+    if (auctionCode) {
+      fetchTournamentData(); // One-time fetch for name/logo
+      fetchLiveData(); // immediate first paint
+      pollingInterval = setInterval(fetchLiveData, 100); // poll every 100 ms
+      console.log('Overlay connected to auction:', auctionCode);
+    } else {
+      console.warn('No auction code in URL. Use ?code=YOUR_CODE');
+    }
+  });
+</script>
+</body>
+</html>

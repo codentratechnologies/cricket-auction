@@ -134,15 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateStr = data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'TBD';
             const timeStr = data.time ? formatAMPM(data.time) : '';
             auctionDateTimeEl.textContent = `${dateStr}, ${timeStr}`;
+            auctionDateTimeEl.setAttribute('title', `${dateStr}, ${timeStr}`);
 
             auctionPlayersPerTeamEl.textContent = `${data.players_per_team || 0} Players`;
             auctionCodeEl.textContent = data.auction_code;
+            auctionCodeEl.setAttribute('title', data.auction_code);
             auctionPlanEl.textContent = data.plan || 'Free Plan';
             auctionViewsEl.textContent = data.views || '0';
             
             // Build live link
             const liveLinkUrl = `${window.location.origin}/live.html?code=${auctionId}`;
             auctionLiveLinkEl.textContent = liveLinkUrl;
+            auctionLiveLinkEl.setAttribute('title', liveLinkUrl);
 
             // Attach copy listeners
             copyCodeBtn.addEventListener('click', () => copyToClipboard(data.auction_code, 'Auction code copied!'));
@@ -229,13 +232,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const liveLink = `${origin}/live.html?code=${auctionId}`;
             const registerLink = `${origin}/player-register.html?auction=${auctionId}`;
             const overlayLink = `${origin}/overlay.html?code=${auctionId}`;
+            const overlayLink2 = `${origin}/youtube-overlay-2.html?code=${auctionId}`;
             
             const linkLiveViewEl = document.getElementById('linkLiveView');
             const linkPlayerRegEl = document.getElementById('linkPlayerReg');
             const linkOverlayEl = document.getElementById('linkOverlay');
+            const linkOverlay2El = document.getElementById('linkOverlay2');
+            
             if (linkLiveViewEl) linkLiveViewEl.value = liveLink;
             if (linkPlayerRegEl) linkPlayerRegEl.value = registerLink;
             if (linkOverlayEl) linkOverlayEl.value = overlayLink;
+            if (linkOverlay2El) linkOverlay2El.value = overlayLink2;
             
             // Populate About Tab
             let cachedAuctionData = data;
@@ -420,12 +427,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return numA - numB;
                 });
                 renderPlayersTable(allPlayers);
+                renderMvpTable(allPlayers);
                 const el = document.getElementById('aboutPlayersCount');
                 if (el) el.textContent = allPlayers.length;
             })
             .catch(() => {
                 allPlayers = [];
                 renderPlayersTable([]);
+                renderMvpTable([]);
             });
     }
 
@@ -522,6 +531,116 @@ document.addEventListener('DOMContentLoaded', () => {
     window.changePlayerPage = function(page) {
         playersCurrentPage = page;
         renderPlayersTable(allPlayers);
+    };
+
+    let mvpCurrentPage = 1;
+    const mvpPerPage = 5;
+
+    function renderMvpTable(players) {
+        const tbody = document.getElementById('mvpTableBody');
+        if (!tbody) return;
+
+        // Filter players who are Sold and have a sold_price
+        const soldPlayers = players.filter(p => p.status === 'Sold' && p.sold_price);
+        
+        // Sort descending by sold_price
+        soldPlayers.sort((a, b) => {
+            const priceA = parseInt(String(a.sold_price).replace(/[^0-9]/g, '')) || 0;
+            const priceB = parseInt(String(b.sold_price).replace(/[^0-9]/g, '')) || 0;
+            return priceB - priceA;
+        });
+
+        if (soldPlayers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;color:#9CA3AF;">
+                <i class="fa-solid fa-star-half-stroke" style="font-size:2rem;margin-bottom:0.75rem;display:block;"></i>
+                No players have been sold yet.
+            </td></tr>`;
+            document.getElementById('mPageTotal').textContent = '0';
+            document.getElementById('mPageStart').textContent = '0';
+            document.getElementById('mPageEnd').textContent = '0';
+            renderMvpPaginationControls(0);
+            return;
+        }
+
+        const totalItems = soldPlayers.length;
+        const totalPages = Math.ceil(totalItems / mvpPerPage);
+        if (mvpCurrentPage > totalPages) mvpCurrentPage = totalPages || 1;
+
+        const startIdx = (mvpCurrentPage - 1) * mvpPerPage;
+        const endIdx = Math.min(startIdx + mvpPerPage, totalItems);
+        const displayPlayers = soldPlayers.slice(startIdx, endIdx);
+
+        document.getElementById('mPageTotal').textContent = totalItems;
+        document.getElementById('mPageStart').textContent = startIdx + 1;
+        document.getElementById('mPageEnd').textContent = endIdx;
+
+        tbody.innerHTML = displayPlayers.map((p, i) => {
+            const absoluteRank = startIdx + i;
+            const img = p.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=F3F4F6&color=374151`;
+            
+            let catClass = '';
+            if (p.category === 'Batsman') catClass = 'cat-batsman';
+            else if (p.category === 'Bowler') catClass = 'cat-bowler';
+            else if (p.category === 'All-Rounder') catClass = 'cat-allrounder';
+
+            const priceStr = '₹' + Number(p.sold_price).toLocaleString('en-IN');
+            
+            // Find team from allTeams array using sold_to_team ID, or fallback to sold_to_team_name if present
+            const teamObj = (typeof allTeams !== 'undefined') ? allTeams.find(t => t.id === p.sold_to_team) : null;
+            const teamName = teamObj ? teamObj.name : (p.sold_to_team_name || p.sold_to_team || 'Unknown');
+            const teamLogo = (teamObj && teamObj.logo_url) ? teamObj.logo_url : (p.sold_to_team_logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(teamName)}&background=0E48A0&color=fff`);
+            
+            const teamHtml = teamName !== 'Unknown' ? `
+                <div style="display:flex; align-items:center; gap:8px; font-weight:600;">
+                    <img src="${teamLogo}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(teamName)}&background=0E48A0&color=fff'">
+                    ${teamName}
+                </div>
+            ` : '—';
+
+            return `
+                <tr>
+                    <td style="font-weight:800; color:${absoluteRank === 0 ? '#F59E0B' : (absoluteRank === 1 ? '#9CA3AF' : (absoluteRank === 2 ? '#D97706' : 'var(--text-secondary)'))}; font-size:${absoluteRank < 3 ? '1.1rem' : '1rem'};">#${absoluteRank + 1}</td>
+                    <td>
+                        <div class="player-cell" style="display:flex; align-items:center; gap:10px; font-weight:600;">
+                            <img src="${img}" alt="${p.name}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                            ${p.name}
+                        </div>
+                    </td>
+                    <td><span class="badge-category ${catClass}">${p.category}</span></td>
+                    <td>${teamHtml}</td>
+                    <td class="text-green-bold" style="font-size:1.05rem;">${priceStr}</td>
+                </tr>
+            `;
+        }).join('');
+
+        renderMvpPaginationControls(totalPages);
+    }
+
+    function renderMvpPaginationControls(totalPages) {
+        const controlsContainer = document.querySelector('#mvpPagination .page-controls');
+        if (!controlsContainer) return;
+        
+        if (totalPages <= 1) {
+            controlsContainer.innerHTML = `
+                <button class="page-btn active">1</button>
+            `;
+            return;
+        }
+
+        let html = `<button class="page-btn" ${mvpCurrentPage === 1 ? 'disabled' : ''} onclick="changeMvpPage(${mvpCurrentPage - 1})"><i class="fa-solid fa-chevron-left"></i></button>`;
+        
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="page-btn ${mvpCurrentPage === i ? 'active' : ''}" onclick="changeMvpPage(${i})">${i}</button>`;
+        }
+
+        html += `<button class="page-btn" ${mvpCurrentPage === totalPages ? 'disabled' : ''} onclick="changeMvpPage(${mvpCurrentPage + 1})"><i class="fa-solid fa-chevron-right"></i></button>`;
+        
+        controlsContainer.innerHTML = html;
+    }
+
+    window.changeMvpPage = function(page) {
+        mvpCurrentPage = page;
+        renderMvpTable(allPlayers);
     };
 
     // Initial data is loaded inside the auction fetch promise above to prevent race conditions.

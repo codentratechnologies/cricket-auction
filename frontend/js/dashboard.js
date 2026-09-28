@@ -215,14 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardHtml = `
                     <div class="auction-card live-card">
                         <div class="card-bg-stadium" style="background-image:url('${bgUrl}');"></div>
-                        <div class="auction-card-header" style="z-index:10;position:absolute;top:1.25rem;left:1.25rem;right:1.25rem;">
+                        <div class="auction-card-header">
                             <div style="display:flex;gap:0.5rem;align-items:center;">
                                 <span class="badge-live"><span class="dot"></span> LIVE</span>
                                 ${ownerBadge}
                             </div>
                             <span class="watching-count"><i class="fa-regular fa-eye"></i> ${auction.watching || 0} watching</span>
                         </div>
-                        <div class="card-main-content" style="z-index:1;margin-left:170px;display:flex;flex-direction:column;gap:0.8rem;margin-top:2.5rem;flex:1;">
+                        <div class="card-main-content">
                             <h3 style="margin:0;font-size:1.25rem;color:#111827;">${auction.name || 'Untitled'}</h3>
                             <div class="auction-meta" style="font-weight:600;color:#4B5563;"><i class="fa-solid fa-user-tie text-blue"></i> ${creatorName}</div>
                             <div class="auction-meta" style="font-size:0.75rem;color:#6B7280;display:flex;gap:0.3rem;">
@@ -244,13 +244,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardHtml = `
                     <div class="auction-card upcoming-card">
                         <div class="card-bg-stadium" style="background-image:url('${bgUrl}');"></div>
-                        <div class="auction-card-header" style="z-index:10;position:absolute;top:1.25rem;left:1.25rem;right:1.25rem;">
+                        <div class="auction-card-header">
                             <div style="display:flex;gap:0.5rem;align-items:center;">
                                 <span class="badge-upcoming"><i class="fa-solid fa-hourglass-half"></i> ${startsIn}</span>
                                 ${ownerBadge}
                             </div>
                         </div>
-                        <div class="card-main-content" style="z-index:1;margin-left:170px;display:flex;flex-direction:column;gap:0.8rem;margin-top:2.5rem;flex:1;">
+                        <div class="card-main-content">
                             <h3 style="margin:0;font-size:1.25rem;color:#111827;">${auction.name || 'Untitled'}</h3>
                             <div class="auction-meta" style="font-weight:600;color:#4B5563;"><i class="fa-solid fa-user-tie text-blue"></i> ${creatorName}</div>
                             <div class="auction-meta" style="font-size:0.75rem;color:#6B7280;display:flex;gap:0.3rem;">

@@ -1,0 +1,437 @@
+/* Reset & Global */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Rajdhani', sans-serif;
+    /* Transparent for OBS/Broadcast */
+    background: transparent;
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+    color: #1e293b;
+}
+
+/* OVERLAY CONTAINER */
+.overlay-scaler {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Vertically center */
+    overflow: hidden;
+}
+
+.overlay-container {
+    width: 1920px; /* Increased internal design width for breathing room */
+    height: 150px; /* Slightly taller */
+    position: relative;
+    display: flex;
+    align-items: center;
+    transform-origin: center center;
+    /* Dynamically scale to ALWAYS occupy exactly 95% of the screen width */
+    transform: scale(calc(95vw / 1920));
+}
+
+/* BANNER BACKGROUNDS WITH CLIP-PATH */
+.banner-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.banner-blue-border {
+    width: 100%;
+    height: 100%;
+    /* Sharp angled tips on far left & right — matches the image exactly */
+    clip-path: polygon(60px 0%, calc(100% - 60px) 0%, 100% 100%, 0% 100%);
+    background: linear-gradient(90deg, #020617 0%, #1e3a8a 5%, #2563eb 15%, #3b82f6 50%, #2563eb 85%, #1e3a8a 95%, #020617 100%);
+    padding: 5px 30px;
+}
+
+.banner-white-core {
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(55px 0%, calc(100% - 55px) 0%, 100% 100%, 0% 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+/* WINGS (Far Left & Far Right) */
+.wing {
+    flex: 0 0 220px; /* Compact wings like in the image */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.left-wing {
+    padding: 10px 15px 10px 45px;
+    background: linear-gradient(90deg, #dbeafe 0%, #eff6ff 50%, #ffffff 100%);
+}
+
+.right-wing {
+    padding: 10px 45px 10px 15px;
+    background: linear-gradient(270deg, #dbeafe 0%, #eff6ff 50%, #ffffff 100%);
+    text-align: right;
+    align-items: flex-end;
+}
+
+/* MIDDLE SECTIONS */
+.middle-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 30px;
+}
+
+.middle-left {
+    padding-right: 20px;
+}
+
+.middle-right {
+    padding-left: 20px;
+}
+
+.center-spacer {
+    flex: 0 0 380px; /* Strict, massive gap in the center so NOTHING goes under the circle */
+}
+
+/* --- LEFT WING CONTENT --- */
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+
+.brand-logo i {
+    font-size: 2rem;
+    color: #1D4ED8;
+}
+
+.brand-text h1 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+.brand-text p {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.brand-motto {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+}
+
+.live-badge {
+    background: #0f172a;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+}
+
+.live-badge .dot {
+    width: 7px;
+    height: 7px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #22c55e;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+
+/* --- MIDDLE LEFT: PLAYER INFO --- */
+.player-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.flag-icon {
+    width: 32px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.player-header h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem; /* Reduced to ensure it fits perfectly */
+    font-weight: 700;
+    color: #1d4ed8;
+    line-height: 1;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.player-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.stat-item {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-item i {
+    color: #2563eb;
+    font-size: 1.1rem;
+}
+
+.stat-divider {
+    color: #cbd5e1;
+    font-weight: 300;
+}
+
+.section-motto {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 3px;
+    margin-top: 6px;
+    white-space: nowrap;
+}
+
+
+/* --- CENTER FOCUS: PLAYER PHOTO --- */
+.center-player-circle {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 230px;
+    height: 230px;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circle-border-1 {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1d4ed8 0%, #60a5fa 100%);
+    border-radius: 50%;
+    padding: 6px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.circle-border-2 {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 50%;
+    padding: 6px;
+}
+
+.player-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #e2e8f0;
+}
+
+.player-number {
+    position: absolute;
+    bottom: 5px; /* Moved up so it overlaps the circle properly */
+    background: linear-gradient(180deg, #2563eb 0%, #1e3a8a 100%);
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    padding: 2px 25px;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border: 2px solid #fff;
+    /* Slanted sides for the badge */
+    clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 100%, 0 100%);
+}
+
+.script-watermark {
+    position: absolute;
+    left: -70px; /* Moved further left to avoid text */
+    top: 60px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.8rem;
+    line-height: 1;
+    color: #3b82f6;
+    opacity: 0.8;
+    transform: rotate(-10deg);
+    text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff;
+    z-index: 5;
+}
+
+
+/* --- MIDDLE RIGHT: CURRENT BID --- */
+.middle-right {
+    align-items: flex-start;
+}
+
+.bid-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    background: #eff6ff;
+    padding: 4px 20px 4px 4px;
+    border-radius: 30px;
+}
+
+.hammer-icon {
+    width: 36px;
+    height: 36px;
+    background: #2563eb;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.bid-header span {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.bid-amount {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2.8rem; /* Reduced to ensure perfect fit */
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1;
+    margin-bottom: 8px;
+    white-space: nowrap;
+}
+
+.bid-counting {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #3b82f6;
+}
+
+.counting-pill {
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+}
+
+
+/* --- RIGHT WING: TEAM INFO --- */
+.team-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.team-header .line {
+    height: 2px;
+    width: 30px;
+    background: #cbd5e1;
+}
+
+.team-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.team-logo {
+    width: 60px; /* Reduced from 80px */
+    height: 60px; /* Reduced from 80px */
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    background: #fff;
+    padding: 2px;
+}
+
+.team-name {
+    text-align: left;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.team-name span {
+    font-size: 1.1rem; /* Reduced from 1.3rem */
+    font-weight: 600;
+    color: #475569;
+}
+
+.team-name strong {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.5rem; /* Reduced from 1.8rem */
+    color: #0f172a;
+}
+
+.right-motto {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-align: right;
+    line-height: 1.2;
+    margin-left: 15px;
+    border-left: 2px solid #e2e8f0;
+    padding-left: 15px;
+}

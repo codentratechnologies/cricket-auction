@@ -45,9 +45,9 @@ body {
 .upgrade-box {
     background: #fff;
     border-radius: 12px;
-    padding: 2.5rem 3.5rem;
+    padding: 1.5rem 2.5rem; /* Reduced padding */
     width: 100%;
-    max-width: 900px;
+    max-width: 850px; /* Reduced max-width slightly */
     box-shadow: 0 25px 60px rgba(0,0,0,0.15);
     position: relative;
     animation: fadeIn 0.4s ease;
@@ -60,11 +60,11 @@ body {
 
 .upgrade-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem; /* Reduced margin */
 }
 
 .upgrade-header h2 {
-    font-size: 2rem;
+    font-size: 1.75rem; /* Reduced from 2rem */
     font-weight: 800;
     color: #0f172a;
     margin-bottom: 0.5rem;
@@ -76,7 +76,7 @@ body {
 
 .upgrade-header p {
     color: #475569;
-    font-size: 1.05rem;
+    font-size: 0.95rem; /* Reduced from 1.05rem */
     line-height: 1.6;
     font-weight: 500;
 }
@@ -84,13 +84,13 @@ body {
 .upgrade-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1.25rem; /* Reduced gap */
 }
 
 .plan-card {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 2rem 1.5rem;
+    padding: 1.25rem 1rem; /* Reduced padding */
     text-align: center;
     position: relative;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -123,11 +123,11 @@ body {
 }
 
 .plan-icon {
-    font-size: 1.5rem;
-    width: 60px;
-    height: 60px;
+    font-size: 1.25rem; /* Reduced from 1.5rem */
+    width: 45px; /* Reduced from 60px */
+    height: 45px; /* Reduced from 60px */
     border-radius: 50%;
-    margin: 0 auto 1rem auto;
+    margin: 0 auto 0.75rem auto; /* Reduced margin */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -136,7 +136,7 @@ body {
 }
 
 .plan-card h3 {
-    font-size: 1.35rem;
+    font-size: 1.15rem; /* Reduced from 1.35rem */
     font-weight: 800;
     color: #0f172a;
     margin: 0 0 0.5rem 0;
@@ -147,22 +147,22 @@ body {
     color: var(--theme);
     background: var(--theme-bg);
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem; /* Reduced margin */
     display: inline-block;
     padding: 4px 12px;
     border-radius: 20px;
 }
 
 .plan-price {
-    font-size: 1.6rem;
+    font-size: 1.35rem; /* Reduced from 1.6rem */
     font-weight: 800;
     color: #0f172a;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; /* Reduced margin */
 }
 
 .btn-upgrade {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.6rem; /* Reduced padding */
     background: #0052FF;
     color: #fff;
     border: none;
@@ -179,7 +179,7 @@ body {
 
 .btn-current-plan {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.6rem; /* Reduced padding */
     background: #e2e8f0;
     color: #475569;
     border: none;

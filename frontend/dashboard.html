@@ -11,16 +11,13 @@
 </head>
 <body>
 
-    <!-- ========================= NAVBAR (never changes) ========================= -->
+    <!-- ========================= NAVBAR ========================= -->
     <nav class="navbar">
         <div class="nav-left">
             <div class="brand">
                 <div class="brand-shield"><img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo"></div>
                 <div class="brand-text">
                     <div class="brand-title">CRICSQUAD</div>
-                    
-                    
-                    
                 </div>
             </div>
 
@@ -61,8 +58,56 @@
                     <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
                 </div>
             </div>
+
+            <!-- Hamburger for mobile -->
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- ========================= MOBILE DRAWER ========================= -->
+    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="mobile-drawer-header">
+            <div class="brand">
+                <div class="brand-shield"><img src="logo.png" style="height: 40px; width: auto;" alt="Cricsquad Logo"></div>
+                <div class="brand-title">CRICSQUAD</div>
+            </div>
+            <button class="drawer-close-btn" id="drawerCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="mobile-drawer-profile">
+            <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="mobile-profile-pic" id="mobileProfileAvatar">
+            <div>
+                <div class="mobile-profile-name" id="mobileProfileName">Organizer</div>
+                <div class="mobile-profile-role">Super Admin</div>
+            </div>
+        </div>
+
+        <div class="mobile-search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search...">
+        </div>
+
+        <nav class="mobile-nav-links">
+            <a href="#" class="mobile-nav-link active" data-view="dashboard-view" id="mobileNavDashboard">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a href="#" class="mobile-nav-link" data-view="auctions-view" id="mobileNavAuctions">
+                <i class="fa-solid fa-gavel"></i> Auctions
+            </a>
+            <a href="create-auction.html" class="mobile-nav-link">
+                <i class="fa-solid fa-plus"></i> Create Auction
+            </a>
+            <a href="profile.html" class="mobile-nav-link">
+                <i class="fa-regular fa-user"></i> My Profile
+            </a>
+            <a href="#" class="mobile-nav-link mobile-nav-logout" id="mobileLogoutBtn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </nav>
+    </div>
 
     <!-- ========================= VIEW: DASHBOARD ========================= -->
     <div id="dashboard-view" class="page-view active">
@@ -76,10 +121,10 @@
                 </div>
                 <div class="header-actions">
                     <button class="btn btn-primary" onclick="window.location.href='create-auction.html'">
-                        <i class="fa-solid fa-plus"></i> CREATE AUCTION
+                        <i class="fa-solid fa-plus"></i> <span class="btn-text">CREATE AUCTION</span>
                     </button>
                     <button class="btn btn-outline" id="viewAuctionsBtn">
-                        <i class="fa-regular fa-eye"></i> VIEW AUCTIONS
+                        <i class="fa-regular fa-eye"></i> <span class="btn-text">VIEW AUCTIONS</span>
                     </button>
                 </div>
                 <div class="confetti c1"></div>
@@ -261,6 +306,53 @@
                 document.activeElement.blur();
             }
         });
+
+        // ── Mobile Drawer ──────────────────────────────────────────
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const mobileDrawer  = document.getElementById('mobileDrawer');
+        const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+
+        function openDrawer() {
+            mobileDrawer.classList.add('open');
+            drawerOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            mobileDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+
+        // Mobile drawer nav links — switch view and close drawer
+        document.querySelectorAll('.mobile-nav-link[data-view]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const view = this.dataset.view;
+                // Re-use the same SPA switching logic
+                document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+                document.getElementById(view)?.classList.add('active');
+                // Update active state in drawer
+                document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                // Also sync desktop nav
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelector(`.nav-link[data-view="${view}"]`)?.classList.add('active');
+                closeDrawer();
+            });
+        });
+
+        // Sync logout from drawer
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        if (mobileLogoutBtn) {
+            mobileLogoutBtn.addEventListener('click', () => {
+                document.getElementById('logoutBtn')?.click();
+            });
+        }
     </script>
 </body>
 </html>

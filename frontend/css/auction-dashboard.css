@@ -207,6 +207,15 @@
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
+    max-width: 100%;
+    overflow: hidden;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
 }
 
 .ahc-chip-label {
@@ -223,12 +232,19 @@
     font-weight: 700;
     color: #111827;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: inline-block;
+    vertical-align: bottom;
 }
 
 .ahc-chip-val-row {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .ahc-copy-icon {
@@ -1776,24 +1792,135 @@ input[type="number"] {
         justify-content: center;
         flex-wrap: wrap;
     }
-    .ahc-title-row { justify-content: center; }
-    .ahc-info-row { flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
-    .ahc-info-chip { padding: 0; }
+    .ahc-title-row { justify-content: center; text-align: center; }
+    
+    /* Display primary info row as a premium 2-column card grid */
+    .ahc-info-row { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 1rem; 
+        width: 100%; 
+        justify-items: stretch;
+    }
+    .ahc-info-chip { 
+        flex-direction: column; 
+        text-align: center; 
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 1.25rem 0.75rem; 
+        align-items: center; 
+        width: 100%;
+        min-width: 0; /* Important for ellipsis */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s;
+    }
+    .ahc-info-chip:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Secondary info row (Link & Upgrade) */
+    .ahc-info-row--secondary {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        width: 100%;
+        padding-top: 1rem;
+    }
+    .ahc-upgrade-chip { 
+        flex-direction: column; 
+        text-align: center; 
+        background: #EEF2FF;
+        border: 1px solid #C7D2FE;
+        border-radius: 16px;
+        padding: 1.25rem 0.75rem; 
+        justify-content: center; 
+        align-items: center;
+        width: 100%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s;
+    }
     .ahc-info-sep { display: none; }
     
-    .pane-header { flex-direction: column; gap: 15px; text-align: center; }
-    .pane-actions { justify-content: center; flex-wrap: wrap; }
+    .pane-header { flex-direction: column; gap: 15px; text-align: left; align-items: flex-start; }
+    .pane-actions { justify-content: flex-start; flex-wrap: wrap; }
     
     .about-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 768px) {
+    .auction-dashboard-container { padding: 0 1rem 3rem 1rem; }
     .ahc-title { font-size: 1.5rem; max-width: 100%; white-space: normal; }
-    .ahc-info-chip { flex-direction: column; text-align: center; padding: 0.5rem; }
-    
-    .tab-nav { flex-wrap: wrap; justify-content: center; }
-    .tab-btn { flex: 1 1 auto; justify-content: center; }
+    .tabs-container {
+        padding: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .tabs-container::-webkit-scrollbar {
+        display: none;
+    }
+    .tabs { 
+        flex-wrap: nowrap; 
+        justify-content: flex-start; 
+        gap: 2rem; 
+        padding: 0 1.5rem; 
+        width: max-content; 
+    }
+    .tab-btn { 
+        flex: 0 0 auto; 
+        white-space: nowrap; 
+        min-width: auto; 
+    }
+    .tab-pane { padding: 1.25rem 1rem; }
     
     .about-grid { grid-template-columns: 1fr; }
     #link-tab .link-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+    .auction-dashboard-container { padding: 0 0.75rem 2rem 0.75rem; }
+    .auction-header-card { padding: 1.25rem; }
+    .ahc-logo-wrap { width: 100px; height: 100px; }
+    .ahc-title { font-size: 1.3rem; }
+    
+    .tabs-container { padding: 0; }
+    .tabs { gap: 1.5rem; padding: 0 1rem; }
+    .tab-btn { font-size: 0.9rem; padding: 1rem 0; flex: 0 0 auto; }
+    
+    .ahc-link-val { max-width: 180px; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
+    
+    .pane-title h2 { font-size: 1.25rem; }
+    .search-box { width: 100%; }
+    
+    /* Make data tables fully scrollable with slightly less padding */
+    .data-table th, .data-table td { padding: 0.75rem 0.5rem; }
+    .btn-action { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+    .btn-action span { display: none; } /* Hide text on small screens, keep icons */
+    .team-name-cell img { width: 28px; height: 28px; }
+    .team-name-cell { gap: 0.5rem; font-size: 0.9rem; }
+}
+
+/* Tooltip on touch/hover for truncated values */
+.ahc-chip-value {
+    position: relative;
+    cursor: pointer;
+}
+.ahc-chip-value[title]:active::after,
+.ahc-chip-value[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111827;
+    color: #fff;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
