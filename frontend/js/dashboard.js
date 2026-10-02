@@ -128,46 +128,62 @@ document.addEventListener('DOMContentLoaded', () => {
     // ================================================================
     //  DASHBOARD VIEW — FETCH DATA
     // ================================================================
-    fetch(`${API_BASE}/api/dashboard/${organizerId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                console.error('Dashboard error:', data.error);
-                if (data.error === 'Organizer not found') window.location.href = 'index.html';
-                return;
-            }
+    function fetchDashboardData(retries = 5) {
+        fetch(`${API_BASE}/api/dashboard/${organizerId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Dashboard error:', data.error);
+                    if (data.error === 'Organizer not found') {
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    throw new Error(data.error);
+                }
 
-            // Profile
-            if (data.user) {
-                const name = data.user.name || 'Organizer';
-                document.querySelectorAll('.profile-name, #profileNameDisplay').forEach(el => el.textContent = name);
-                const h1 = document.querySelector('#dashboard-view .header-text h1');
-                if (h1) {
-                h1.innerHTML = `<span class="gradient-text">Welcome back, ${name}!</span> 👋`;
-                h1.style.animation = 'none';
-                h1.offsetHeight; // trigger reflow
-                h1.style.animation = 'titleEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards';
-            }
-                const avatar = document.getElementById('profileAvatar');
-                if (avatar) avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`;
-            }
+                // Profile
+                if (data.user) {
+                    const name = data.user.name || 'Organizer';
+                    document.querySelectorAll('.profile-name, #profileNameDisplay').forEach(el => el.textContent = name);
+                    const h1 = document.querySelector('#dashboard-view .header-text h1');
+                    if (h1) {
+                        h1.innerHTML = `<span class="gradient-text">Welcome back, ${name}!</span> 👋`;
+                        h1.style.animation = 'none';
+                        h1.offsetHeight; // trigger reflow
+                        h1.style.animation = 'titleEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards';
+                    }
+                    const avatar = document.getElementById('profileAvatar');
+                    if (avatar) avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`;
+                }
 
-            // Insights
-            if (data.insights) {
-                document.getElementById('totalAuctionsVal').textContent = data.insights.total_auctions || 0;
-                document.getElementById('totalPlayersVal').textContent  = data.insights.total_players || 0;
-                document.getElementById('totalTeamsVal').textContent    = data.insights.total_teams || 0;
-                const spent = data.insights.total_spent || 0;
-                document.getElementById('totalSpentVal').textContent = typeof spent === 'number' ? '₹' + spent.toLocaleString() : spent;
-            }
+                // Insights
+                if (data.insights) {
+                    document.getElementById('totalAuctionsVal').textContent = data.insights.total_auctions || 0;
+                    document.getElementById('totalPlayersVal').textContent  = data.insights.total_players || 0;
+                    document.getElementById('totalTeamsVal').textContent    = data.insights.total_teams || 0;
+                    const spent = data.insights.total_spent || 0;
+                    document.getElementById('totalSpentVal').textContent = typeof spent === 'number' ? '₹' + spent.toLocaleString() : spent;
+                }
 
-            // Dashboard Auctions carousel
-            renderDashboardAuctions(data.auctions || [], organizerId);
+                // Dashboard Auctions carousel
+                renderDashboardAuctions(data.auctions || [], organizerId);
 
-            // Activity
-            renderActivities(data.activities || []);
-        })
-        .catch(err => console.error('Dashboard fetch error:', err));
+                // Activity
+                renderActivities(data.activities || []);
+                
+                // Global Live Auction Insights
+                renderGlobalInsights(data.auctions || []);
+            })
+            .catch(err => {
+                console.error('Dashboard fetch error:', err);
+                if (retries > 0) {
+                    console.log(`Backend may not be ready yet. Retrying in 1.5s... (${retries} retries left)`);
+                    setTimeout(() => fetchDashboardData(retries - 1), 1500);
+                }
+            });
+    }
+
+    fetchDashboardData();
 
     // ================================================================
     //  DASHBOARD VIEW — AUCTIONS CAROUSEL
@@ -273,6 +289,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ================================================================
     //  DASHBOARD VIEW — ACTIVITY
     // ================================================================
+    function timeAgo(dateString) {
+        if (!dateString) return 'Just now';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Just now';
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return minutes + ' mins ago';
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return hours + ' hours ago';
+        const days = Math.floor(hours / 24);
+        if (days < 30) return days + (days === 1 ? ' day ago' : ' days ago');
+        return date.toLocaleDateString();
+    }
+
     function renderActivities(rawActivities) {
         const list = document.getElementById('activityList');
         list.innerHTML = '';
@@ -294,9 +325,77 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="activity-item">
                     ${iconHtml}
                     <div class="activity-content"><p>${activity.text}</p></div>
-                    <div class="activity-time">${activity.time || 'Just now'}</div>
+                    <div class="activity-time">${timeAgo(activity.timestamp)}</div>
                 </div>`;
         });
+    }
+
+    function renderGlobalInsights(auctions) {
+        const list = document.getElementById('globalInsightsList');
+        if (!list) return;
+
+        let totalSpent = 0;
+        let playersSold = 0;
+        let highestBid = 0;
+        let allSoldPlayers = [];
+
+        // Loop through all live auctions
+        auctions.forEach(auction => {
+            if (auction.status === 'live' && auction.is_owner) {
+                const playersObj = auction.players || {};
+                const teamsObj = auction.teamList || {};
+                
+                Object.values(playersObj).forEach(p => {
+                    if (p.status === 'Sold') {
+                        const price = parseInt(String(p.sold_price).replace(/[^0-9]/g, '')) || 0;
+                        totalSpent += price;
+                        playersSold++;
+                        if (price > highestBid) highestBid = price;
+                        
+                        const teamId = p.sold_to_team;
+                        const teamName = teamsObj[teamId] ? teamsObj[teamId].name : (p.sold_to_team_name || p.sold_to_team || 'Unknown');
+
+                        allSoldPlayers.push({
+                            ...p,
+                            priceNum: price,
+                            teamName: teamName,
+                            auctionName: auction.name || 'Untitled'
+                        });
+                    }
+                });
+            }
+        });
+
+        document.getElementById('globalInsightTotalSpent').textContent = '₹' + totalSpent.toLocaleString('en-IN');
+        document.getElementById('globalInsightPlayersSold').textContent = playersSold;
+        document.getElementById('globalInsightHighestBid').textContent = '₹' + highestBid.toLocaleString('en-IN');
+
+        if (allSoldPlayers.length === 0) {
+            list.innerHTML = '<div style="text-align:center;padding:20px;color:#64748B;">No bidding insights available for live auctions yet.</div>';
+            return;
+        }
+
+        allSoldPlayers.sort((a, b) => {
+            const timeA = new Date(a.updated_at || a.created_at || 0).getTime();
+            const timeB = new Date(b.updated_at || b.created_at || 0).getTime();
+            return timeB - timeA;
+        });
+
+        // Show top 5 recent sold players across all live auctions in the identical format to Recent Activity
+        list.innerHTML = allSoldPlayers.slice(0, 5).map(p => {
+            const priceStr = '₹' + p.priceNum.toLocaleString('en-IN');
+            const timestamp = p.updated_at || p.created_at;
+            
+            return `
+                <div class="activity-item">
+                    <div class="activity-icon-container green-bg"><i class="fa-regular fa-user green-text"></i></div>
+                    <div class="activity-content">
+                        <p>Player <strong>${p.name}</strong> sold to <strong>${p.teamName}</strong> for <strong style="color:#10B981;">${priceStr}</strong> in <em>${p.auctionName}</em>.</p>
+                    </div>
+                    <div class="activity-time">${timeAgo(timestamp)}</div>
+                </div>
+            `;
+        }).join('');
     }
 
     // ================================================================

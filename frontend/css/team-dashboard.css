@@ -447,3 +447,97 @@
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* ============================================================
+   RESPONSIVE DESIGN (TEAM DASHBOARD)
+   ============================================================ */
+@media (max-width: 1024px) {
+    .kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .team-dashboard-container {
+        padding: 1rem;
+    }
+    .team-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    .thc-actions {
+        flex-wrap: nowrap;
+        width: 100%;
+        gap: 0.6rem;
+    }
+    .btn-export {
+        flex: 1;
+        justify-content: center;
+        padding: 0.75rem 0;
+        font-size: 1.25rem;
+    }
+    .btn-export span {
+        display: none;
+    }
+    
+    .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .kpi-card:last-child {
+        grid-column: 1 / -1;
+    }
+    .kpi-section, .team-content-section {
+        padding: 1.25rem;
+    }
+    
+    .team-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .team-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .table-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .th-right {
+        width: 100%;
+    }
+    .search-box {
+        flex: 1;
+        width: 100%;
+    }
+    
+    /* Ensure table cells don't awkwardly wrap text on smaller screens */
+    .data-table th, .data-table td { 
+        white-space: nowrap; 
+        padding: 0.75rem 1rem;
+    }
+    
+    .pagination-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .thc-left {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+    }
+    /* Removed the 100% flex on btn-export so they stay in a horizontal line even on tiny screens */
+    /* Removed 1fr grid override here so the KPI cards remain 2 columns (split) on mobile as defined in the 768px query */
+    .kpi-card:last-child {
+        grid-column: 1 / -1;
+    }
+}

@@ -256,14 +256,54 @@ def get_dashboard_data(organizer_id):
                 "total_spent": total_spent_val
             }
             
-            raw_activities = db.reference(f'/activities/{organizer_id}').get() or {}
-            activities_list = []
-            if isinstance(raw_activities, dict):
-                for act_id, act_data in raw_activities.items():
-                    if isinstance(act_data, dict):
-                        act_data['id'] = act_id
-                        activities_list.append(act_data)
-            activities_list.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+            dynamic_activities = []
+            if isinstance(all_auctions, dict):
+                for aid, adata in all_auctions.items():
+                    if isinstance(adata, dict):
+                        is_owner = (adata.get('organizer_id') == organizer_id)
+                        if is_owner:
+                            created_at = adata.get('created_at')
+                            if created_at:
+                                dynamic_activities.append({
+                                    "id": f"auc-{aid}",
+                                    "type": "auction_created",
+                                    "text": f"Auction '{adata.get('name', 'Untitled')}' has been created successfully.",
+                                    "timestamp": created_at
+                                })
+                            teams = adata.get('teamList', {})
+                            if isinstance(teams, dict):
+                                for tid, tdata in teams.items():
+                                    t_created = tdata.get('created_at')
+                                    if t_created:
+                                        dynamic_activities.append({
+                                            "id": f"team-{aid}-{tid}",
+                                            "type": "team_registered",
+                                            "text": f"New team '{tdata.get('name', 'Team')}' registered for '{adata.get('name', 'Auction')}'.",
+                                            "timestamp": t_created
+                                        })
+                            players = adata.get('players', {})
+                            if isinstance(players, dict):
+                                for pid, pdata in players.items():
+                                    if pdata.get('status') == 'Sold':
+                                        p_sold = pdata.get('updated_at') or pdata.get('created_at')
+                                        team_id = pdata.get('sold_to_team')
+                                        team_name = "a team"
+                                        if isinstance(teams, dict) and team_id in teams:
+                                            team_name = teams[team_id].get('name', 'a team')
+                                        if p_sold:
+                                            # handle float formatting without error for sold_price
+                                            sp = pdata.get('sold_price', 0)
+                                            try: sp_val = float(sp)
+                                            except: sp_val = 0
+                                            dynamic_activities.append({
+                                                "id": f"player-{aid}-{pid}",
+                                                "type": "player_sold",
+                                                "text": f"Player '{pdata.get('name', 'Unknown')}' sold to '{team_name}' for ₹{sp_val:,.0f}.",
+                                                "timestamp": p_sold
+                                            })
+            
+            dynamic_activities.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+            activities_list = dynamic_activities[:20]
             
             return jsonify({
                 "user": user_data,
@@ -1193,11 +1233,18 @@ def get_team_players(auction_id, team_id):
     if not firebase_initialized:
         return jsonify([]), 200
     try:
-        # Currently, there are no players module, so we return an empty list
-        # Eventually, players will be stored under /auctions/{auction_id}/players and we can filter by team_id
-        # or under /auctions/{auction_id}/teamList/{team_id}/players.
-        # For now, we return empty list.
-        return jsonify([]), 200
+        players_ref = db.reference(f'/auctions/{auction_id}/players')
+        all_players = normalize_dict(players_ref.get())
+        
+        team_players = []
+        for pid, pdata in all_players.items():
+            if pdata.get('status') == 'Sold' and pdata.get('sold_to_team') == team_id:
+                pdata['id'] = pid
+                team_players.append(pdata)
+                
+        # Sort by sold amount descending, or created_at
+        team_players.sort(key=lambda x: int(x.get('sold_price', 0) or x.get('sold_amount', 0)), reverse=True)
+        return jsonify(team_players), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

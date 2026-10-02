@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Nav setup
     document.getElementById('backToTeamList').href = `auction-dashboard.html?id=${auctionId}`;
     document.getElementById('navAuctions').href = `auction-dashboard.html?id=${auctionId}`;
-    document.getElementById('navTeams').href = `auction-dashboard.html?id=${auctionId}`;
+    const navTeams = document.getElementById('navTeams');
+    if (navTeams) navTeams.href = `auction-dashboard.html?id=${auctionId}`;
 
     // UI Elements
     const teamLogoEl = document.getElementById('teamLogo');
@@ -44,18 +45,38 @@ document.addEventListener('DOMContentLoaded', () => {
     let teamData = null;
     let soldPlayers = [];
 
+    // Helper for fetch with retry
+    async function fetchWithRetry(url, retries = 5) {
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.error && data.error.includes && (data.error.includes("WinError 10054") || data.error.includes("reset") || data.error.includes("stale"))) {
+                throw new Error(data.error);
+            }
+            // If it's a genuine 404 (team deleted), we return it
+            return data;
+        } catch (err) {
+            if (retries > 0) {
+                console.log(`Retrying ${url}... (${retries} left)`);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                return fetchWithRetry(url, retries - 1);
+            }
+            throw err;
+        }
+    }
+
     // Fetch Data
     async function loadData() {
         try {
-            const [auctionRes, teamRes, playersRes] = await Promise.all([
-                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}`),
-                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams/${teamId}`),
-                fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams/${teamId}/players`)
+            const [auctionDataRes, teamDataRes, soldPlayersRes] = await Promise.all([
+                fetchWithRetry(`http://127.0.0.1:5000/api/auctions/${auctionId}`),
+                fetchWithRetry(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams/${teamId}`),
+                fetchWithRetry(`http://127.0.0.1:5000/api/auctions/${auctionId}/teams/${teamId}/players`)
             ]);
 
-            auctionData = await auctionRes.json();
-            teamData = await teamRes.json();
-            soldPlayers = await playersRes.json();
+            auctionData = auctionDataRes;
+            teamData = teamDataRes;
+            soldPlayers = soldPlayersRes;
 
             if (teamData.error) {
                 showToast("Team not found");
@@ -66,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderUI();
         } catch (e) {
             console.error("Error loading team data:", e);
+            showToast("Failed to load team data. Retrying...");
         }
     }
 
@@ -142,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </td>
                     <td>${p.phone || '--'}</td>
-                    <td class="amount-cell">₹${formatNumber(p.sold_amount || 0)}</td>
+                    <td class="amount-cell">₹${formatNumber(p.sold_price || p.sold_amount || 0)}</td>
                 </tr>
             `;
         }).join('');

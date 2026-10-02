@@ -58,36 +58,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const CARDS_VISIBLE = 2; // how many cards visible at once
 
     // ---- Fetch Dashboard Data ----
-    fetch(`${API_BASE}/api/dashboard/${organizerId}`)
-        .then(res => res.json())
-        .then(data => {
-            // Update profile
-            if (data.user) {
-                const name = data.user.name || 'Organizer';
-                if (profileNameEl) profileNameEl.textContent = name;
-                if (profileAvatar) {
-                    profileAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`;
+    function fetchAuctionsData(retries = 5) {
+        fetch(`${API_BASE}/api/dashboard/${organizerId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                
+                // Update profile
+                if (data.user) {
+                    const name = data.user.name || 'Organizer';
+                    if (profileNameEl) profileNameEl.textContent = name;
+                    if (profileAvatar) {
+                        profileAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`;
+                    }
                 }
-            }
 
-            // Build auction list
-            const raw = data.auctions;
-            allAuctions = raw
-                ? (Array.isArray(raw) ? raw : Object.values(raw))
-                : [];
+                // Build auction list
+                const raw = data.auctions;
+                allAuctions = raw
+                    ? (Array.isArray(raw) ? raw : Object.values(raw))
+                    : [];
 
-            applyFilter();
-        })
-        .catch(err => {
-            console.error('Failed to load auctions:', err);
-            cardsLoading.innerHTML = `
-                <div style="text-align:center; padding: 3rem; color: #6B7280;">
-                    <i class="fa-solid fa-wifi" style="font-size:2rem; margin-bottom:1rem; display:block; color:#D1D5DB;"></i>
-                    <p style="font-weight:600;">Could not connect to server</p>
-                    <p style="font-size:0.85rem; margin-top:0.5rem;">Please make sure the backend is running.</p>
-                </div>
-            `;
-        });
+                applyFilter();
+            })
+            .catch(err => {
+                console.error('Failed to load auctions:', err);
+                if (retries > 0) {
+                    console.log(`Backend may not be ready yet. Retrying in 1.5s... (${retries} retries left)`);
+                    setTimeout(() => fetchAuctionsData(retries - 1), 1500);
+                } else {
+                    cardsLoading.innerHTML = `
+                        <div style="text-align:center; padding: 3rem; color: #6B7280;">
+                            <i class="fa-solid fa-wifi" style="font-size:2rem; margin-bottom:1rem; display:block; color:#D1D5DB;"></i>
+                            <p style="font-weight:600;">Could not connect to server</p>
+                            <p style="font-size:0.85rem; margin-top:0.5rem;">Please make sure the backend is running.</p>
+                        </div>
+                    `;
+                }
+            });
+    }
+
+    fetchAuctionsData();
 
     // ---- Filter ----
     statusFilter.addEventListener('change', applyFilter);

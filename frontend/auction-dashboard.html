@@ -162,7 +162,8 @@
                 <!-- Divider -->
                 <div class="ahc-divider"></div>
 
-                <!-- Info row 1: Code | Date | Players -->
+                <div class="ahc-info-grid">
+                    <!-- Info row 1: Code | Date | Players -->
                 <div class="ahc-info-row">
                     <div class="ahc-info-chip">
                         <div class="ahc-chip-icon"><i class="fa-regular fa-id-badge"></i></div>
@@ -194,8 +195,10 @@
                             <span class="ahc-chip-value" id="auctionPlayersPerTeam">Loading...</span>
                         </div>
                     </div>
-                    <div class="ahc-info-sep"></div>
+                </div>
 
+                <!-- Info row 2: Upgrade -->
+                <div class="ahc-info-row ahc-info-row--secondary">
                     <div class="ahc-info-chip">
                         <div class="ahc-chip-icon ahc-chip-icon--blue"><i class="fa-solid fa-link"></i></div>
                         <div class="ahc-chip-text">
@@ -208,10 +211,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Info row 2: Upgrade -->
-                <div class="ahc-info-row ahc-info-row--secondary">
+                    <div class="ahc-info-sep"></div>
 
                     <div class="ahc-upgrade-chip">
                         <div class="ahc-upgrade-icon"><i class="fa-solid fa-bolt"></i></div>
@@ -221,6 +222,7 @@
                         </div>
                     </div>
                 </div>
+                </div> <!-- End ahc-info-grid -->
 
             </div>
 
@@ -241,6 +243,7 @@
             <div class="tabs">
                 <button class="tab-btn active" data-tab="teams"><i class="fa-solid fa-users-viewfinder"></i> Teams</button>
                 <button class="tab-btn" data-tab="players"><i class="fa-solid fa-user-plus"></i> Players</button>
+                <button class="tab-btn" data-tab="insights"><i class="fa-solid fa-chart-line"></i> Insights</button>
                 <button class="tab-btn" data-tab="mvp"><i class="fa-solid fa-star"></i> MVP</button>
                 <button class="tab-btn" data-tab="sponsors"><i class="fa-solid fa-certificate"></i> Sponsors</button>
                 <button class="tab-btn" data-tab="link"><i class="fa-solid fa-link"></i> Link</button>
@@ -407,6 +410,49 @@
                     </div>
                 </div>
             </div>
+
+            <div class="tab-pane" id="insights-tab">
+                <div class="pane-header">
+                    <div class="pane-title">
+                        <h2>Live Auction Insights</h2>
+                        <p>Track real-time bidding information and sold players.</p>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div style="background:#fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size:13px; color:#6B7280; font-weight:600; text-transform:uppercase;">Total Spent</div>
+                        <div id="insightTotalSpent" style="font-size:24px; font-weight:800; color:#3B82F6; margin-top:8px;">₹0</div>
+                    </div>
+                    <div style="background:#fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size:13px; color:#6B7280; font-weight:600; text-transform:uppercase;">Players Sold</div>
+                        <div id="insightPlayersSold" style="font-size:24px; font-weight:800; color:#10B981; margin-top:8px;">0</div>
+                    </div>
+                    <div style="background:#fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size:13px; color:#6B7280; font-weight:600; text-transform:uppercase;">Highest Bid</div>
+                        <div id="insightHighestBid" style="font-size:24px; font-weight:800; color:#F59E0B; margin-top:8px;">₹0</div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="insightsTable">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>PLAYER</th>
+                                <th>SOLD TO</th>
+                                <th>SOLD PRICE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="insightsTableBody">
+                            <tr><td colspan="4" style="text-align:center;padding:3rem;color:#9CA3AF;">
+                                <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i><br><br>Loading insights...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
             <div class="tab-pane" id="link-tab">
                 <div class="pane-header">
                     <div class="pane-title">
@@ -418,7 +464,7 @@
                 <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
 
                     <!-- Live Web View -->
-                    <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 20px;">
+                    <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                         <div style="width: 52px; height: 52px; background: #EFF6FF; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <i class="fa-solid fa-globe" style="font-size: 22px; color: #2563EB;"></i>
                         </div>
@@ -426,7 +472,7 @@
                             <div style="font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 4px;">Live Web View</div>
                             <div style="font-size: 13px; color: #6B7280; line-height: 1.4;">Share this link with audiences to watch<br>the live auction leaderboard.</div>
                         </div>
-                        <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+                        <div style="flex: 1; min-width: 250px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                             <input type="text" id="linkLiveView" readonly style="flex: 1; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #374151; background: #F9FAFB; outline: none; cursor: text; font-family: monospace;">
                             <button onclick="copyLink('linkLiveView', this)" style="display: flex; align-items: center; gap: 8px; background: white; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 700; color: #374151; cursor: pointer; white-space: nowrap; transition: all 0.2s;">
                                 <i class="fa-regular fa-copy"></i> COPY LINK
@@ -435,7 +481,7 @@
                     </div>
 
                     <!-- Player Registration Link -->
-                    <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 20px;">
+                    <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                         <div style="width: 52px; height: 52px; background: #F0FDF4; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <i class="fa-solid fa-file-pen" style="font-size: 22px; color: #16A34A;"></i>
                         </div>
@@ -443,7 +489,7 @@
                             <div style="font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 4px;">Player Registration Link</div>
                             <div style="font-size: 13px; color: #6B7280; line-height: 1.4;">Share this link with players to allow<br>them to register themselves.</div>
                         </div>
-                        <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+                        <div style="flex: 1; min-width: 250px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                             <input type="text" id="linkPlayerReg" readonly style="flex: 1; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #374151; background: #F9FAFB; outline: none; cursor: text; font-family: monospace;">
                             <button onclick="copyLink('linkPlayerReg', this)" style="display: flex; align-items: center; gap: 8px; background: white; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 700; color: #374151; cursor: pointer; white-space: nowrap; transition: all 0.2s;">
                                 <i class="fa-regular fa-copy"></i> COPY LINK

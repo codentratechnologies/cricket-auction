@@ -1431,8 +1431,9 @@
     background: #fff;
     border-radius: 20px;
     padding: 2rem;
-    width: 100%;
+    width: 92%;
     max-width: 480px;
+    box-sizing: border-box;
     box-shadow: 0 25px 60px rgba(0,0,0,0.18);
     animation: slideUp 0.25s ease;
 }
@@ -1795,12 +1796,15 @@ input[type="number"] {
     .ahc-title-row { justify-content: center; text-align: center; }
     
     /* Display primary info row as a premium 2-column card grid */
-    .ahc-info-row { 
+    .ahc-info-grid {
         display: grid; 
         grid-template-columns: 1fr 1fr; 
         gap: 1rem; 
         width: 100%; 
         justify-items: stretch;
+    }
+    .ahc-info-row { 
+        display: contents;
     }
     .ahc-info-chip { 
         flex-direction: column; 
@@ -1821,13 +1825,10 @@ input[type="number"] {
     
     /* Secondary info row (Link & Upgrade) */
     .ahc-info-row--secondary {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        width: 100%;
-        padding-top: 1rem;
+        display: contents;
     }
     .ahc-upgrade-chip { 
+        grid-column: 1 / -1;
         flex-direction: column; 
         text-align: center; 
         background: #EEF2FF;
@@ -1874,6 +1875,9 @@ input[type="number"] {
     }
     .tab-pane { padding: 1.25rem 1rem; }
     
+    /* Ensure table cells don't awkwardly wrap text on smaller screens */
+    .data-table th, .data-table td { white-space: nowrap; }
+
     .about-grid { grid-template-columns: 1fr; }
     #link-tab .link-grid { grid-template-columns: 1fr; }
 }
@@ -1895,32 +1899,47 @@ input[type="number"] {
     
     /* Make data tables fully scrollable with slightly less padding */
     .data-table th, .data-table td { padding: 0.75rem 0.5rem; }
+    
+    /* Modals */
+    .modal-box {
+        width: 95%;
+        padding: 1.25rem;
+        border-radius: 16px;
+    }
+    .modal-logo-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+    .modal-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .modal-footer button {
+        width: 100%;
+    }
     .btn-action { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
     .btn-action span { display: none; } /* Hide text on small screens, keep icons */
     .team-name-cell img { width: 28px; height: 28px; }
     .team-name-cell { gap: 0.5rem; font-size: 0.9rem; }
 }
 
-/* Tooltip on touch/hover for truncated values */
-.ahc-chip-value {
-    position: relative;
-    cursor: pointer;
-}
-.ahc-chip-value[title]:active::after,
-.ahc-chip-value[title]:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: 130%;
-    left: 50%;
-    transform: translateX(-50%);
+/* Custom Global Tooltip */
+.global-tooltip {
+    position: fixed;
     background: #111827;
     color: #fff;
-    padding: 0.4rem 0.7rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
     font-weight: 500;
     white-space: nowrap;
-    z-index: 1000;
+    z-index: 9999;
     pointer-events: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: opacity 0.2s ease-in-out;
+}
+.global-tooltip.hidden {
+    display: none;
 }

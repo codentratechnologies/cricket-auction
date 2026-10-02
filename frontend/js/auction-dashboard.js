@@ -1,4 +1,46 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Tooltip logic
+    const tooltip = document.createElement('div');
+    tooltip.className = 'global-tooltip hidden';
+    document.body.appendChild(tooltip);
+
+    function showTooltip(e, text) {
+        tooltip.textContent = text;
+        tooltip.classList.remove('hidden');
+        
+        // Position it
+        const rect = e.target.getBoundingClientRect();
+        let top = rect.top - tooltip.offsetHeight - 8;
+        if (top < 10) top = rect.bottom + 8; // flip to bottom if too high
+        
+        let left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2);
+        // Constrain to screen
+        if (left < 10) left = 10;
+        if (left + tooltip.offsetWidth > window.innerWidth - 10) {
+            left = window.innerWidth - tooltip.offsetWidth - 10;
+        }
+
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+        tooltip.style.opacity = '1';
+
+        // Auto hide
+        setTimeout(() => {
+            tooltip.style.opacity = '0';
+            setTimeout(() => tooltip.classList.add('hidden'), 200);
+        }, 2500);
+    }
+
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('[title]');
+        if (target && (target.classList.contains('ahc-chip-value') || target.classList.contains('ahc-link-val') || target.classList.contains('ahc-title'))) {
+            // Only show custom tooltip on mobile width where truncation happens
+            if (window.innerWidth <= 1024) {
+                // Prevent default so we don't trigger anything else if it's just a span
+                showTooltip(e, target.getAttribute('title'));
+            }
+        }
+    });
     // Utility for time formatting
     function formatAMPM(timeStr) {
         if (!timeStr) return '';
@@ -53,15 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const toastMsg = document.getElementById('toastMsg');
 
     // Fetch Auction Data
-    fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                console.error("Error fetching auction:", data.error);
-                return;
-            }
+    function fetchAuctionData(retries = 5) {
+        fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Error fetching auction:", data.error);
+                    throw new Error(data.error);
+                }
 
-            isOwner = (data.organizer_id === organizerId);
+                isOwner = (data.organizer_id === organizerId);
             const creatorName = data.organizer_name || 'Organizer';
             
             // Extract raw budget number from "$1,000,000" string
@@ -351,8 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => {
             console.error("Error connecting to server:", err);
-            auctionNameEl.textContent = "Error loading data";
+            if (retries > 0) {
+                console.log(`Backend may not be ready yet. Retrying in 1.5s... (${retries} retries left)`);
+                setTimeout(() => fetchAuctionData(retries - 1), 1500);
+            } else {
+                auctionNameEl.textContent = "Error loading data";
+            }
         });
+    }
+
+    fetchAuctionData();
 
 
     // =============================================
@@ -406,13 +457,66 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(teams => {
                 allTeams = Array.isArray(teams) ? teams : [];
                 renderTeamsTable(allTeams);
+                renderInsightsTable();
                 const el = document.getElementById('aboutTeamsCount');
                 if (el) el.textContent = allTeams.length;
             })
             .catch(() => {
                 allTeams = [];
                 renderTeamsTable([]);
+                renderInsightsTable();
             });
+    }
+
+    function renderInsightsTable() {
+        const tbody = document.getElementById('insightsTableBody');
+        if (!tbody) return;
+
+        let totalSpent = 0;
+        let playersSold = 0;
+        let highestBid = 0;
+        const soldPlayers = allPlayers.filter(p => p.status === 'Sold');
+
+        soldPlayers.forEach(p => {
+            const price = parseInt(String(p.sold_price).replace(/[^0-9]/g, '')) || 0;
+            totalSpent += price;
+            playersSold++;
+            if (price > highestBid) highestBid = price;
+        });
+
+        document.getElementById('insightTotalSpent').textContent = '₹' + totalSpent.toLocaleString('en-IN');
+        document.getElementById('insightPlayersSold').textContent = playersSold;
+        document.getElementById('insightHighestBid').textContent = '₹' + highestBid.toLocaleString('en-IN');
+
+        if (soldPlayers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:3rem;color:#9CA3AF;">
+                <i class="fa-solid fa-chart-line" style="font-size:2rem;margin-bottom:0.75rem;display:block;"></i>
+                No bidding insights available yet.
+            </td></tr>`;
+            return;
+        }
+
+        soldPlayers.sort((a, b) => {
+            const timeA = new Date(a.updated_at || a.created_at || 0).getTime();
+            const timeB = new Date(b.updated_at || b.created_at || 0).getTime();
+            return timeB - timeA;
+        });
+
+        tbody.innerHTML = soldPlayers.map(p => {
+            const priceStr = '₹' + Number(p.sold_price).toLocaleString('en-IN');
+            const teamObj = allTeams.find(t => t.id === p.sold_to_team);
+            const teamName = teamObj ? teamObj.name : (p.sold_to_team_name || p.sold_to_team || 'Unknown');
+            const timeStr = p.updated_at || p.created_at ? new Date(p.updated_at || p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '—';
+            
+            return `
+                <tr>
+                    <td style="color:#6B7280; font-size:0.9rem;"><i class="fa-regular fa-clock"></i> ${timeStr}</td>
+                    <td style="font-weight:600; color:#111827;">${p.name}</td>
+                    <td style="font-weight:500; color:#374151;">${teamName}</td>
+                    <td class="text-green-bold">${priceStr}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     function loadPlayers() {
@@ -428,6 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 renderPlayersTable(allPlayers);
                 renderMvpTable(allPlayers);
+                renderInsightsTable();
                 const el = document.getElementById('aboutPlayersCount');
                 if (el) el.textContent = allPlayers.length;
             })
@@ -435,6 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 allPlayers = [];
                 renderPlayersTable([]);
                 renderMvpTable([]);
+                renderInsightsTable();
             });
     }
 
