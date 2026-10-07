@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - Cricsquad</title>
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/dashboard.css?v=13">
+    <link rel="stylesheet" href="css/profile.css?v=15">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -18,61 +18,51 @@
                 <div class="brand-shield"><img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo"></div>
                 <div class="brand-text">
                     <div class="brand-title">CRICSQUAD</div>
-                    
-                    
-                    
                 </div>
             </div>
-        </div>
-        
-        <div class="nav-center">
-            <a href="dashboard.html" class="nav-link">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fa-solid fa-gavel"></i> Auctions
-            </a>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
+            </div>
         </div>
 
         <div class="nav-right">
-            <div class="notification">
-                <i class="fa-regular fa-bell"></i>
-                <span class="badge">3</span>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
             </div>
-            <div class="profile-menu" id="profileMenuToggle">
+
+            <a href="profile.html" class="profile-menu-link active" title="Go to Profile" style="display: flex; align-items: center;">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
-                <div class="profile-info">
-                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
-                    <span class="profile-role">Super Admin</span>
-                </div>
-                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
-                
-                <!-- Dropdown Menu -->
-                <div class="dropdown-content" id="profileDropdown">
-                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
-                </div>
-            </div>
+            </a>
+
+            <!-- Hamburger for mobile -->
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </nav>
 
     <!-- Main Content Area -->
     <main class="dashboard-container">
         
-        <header class="dashboard-header" style="padding-bottom: 20px;">
-            <div class="header-text">
-                <h1>My Profile</h1>
-                <p>Manage your account details and settings.</p>
-            </div>
-        </header>
+        <div style="text-align: center; margin-bottom: 2rem; margin-top: 1rem;">
+            <h1 style="font-size: 2.2rem; font-weight: 700; color: var(--text-dark, #0F172A); font-family: 'Outfit', sans-serif;">My Profile</h1>
+            <p style="color: var(--text-muted, #64748B); font-size: 1rem;">Manage your account details and settings.</p>
+        </div>
 
         <section class="profile-section">
             <div class="profile-card">
                 <div class="profile-header">
                     <div class="profile-avatar-large">
                         <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff&size=128" alt="Profile" id="largeAvatar">
-                        <button class="btn btn-icon edit-avatar-btn"><i class="fa-solid fa-camera"></i></button>
                     </div>
                     <div class="profile-title">
                         <h2 id="userNameDisplay">Loading...</h2>
@@ -99,8 +89,10 @@
                             </div>
                         </div>
 
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline" disabled>Edit Profile (Coming Soon)</button>
+                        <div class="form-actions" style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                            <button type="button" class="btn" style="background: #ef4444; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" id="logoutBtn">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                            </button>
                         </div>
                     </form>
                 </div>

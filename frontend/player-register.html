@@ -129,7 +129,7 @@
 
         .success-icon {
             width: 80px;
-            height: 120px;
+            height: 80px;
             background: linear-gradient(135deg, #10B981, #059669);
             border-radius: 50%;
             display: flex;
@@ -143,8 +143,8 @@
         .success-screen h3 { font-size: 24px; font-weight: 800; color: #0F172A; margin-bottom: 12px; }
         .success-screen p { font-size: 15px; color: #64748B; line-height: 1.6; }
 
-        #errorBanner { display: none; text-align: center; padding: 60px 20px; }
-        #errorBanner i { font-size: 48px; color: #EF4444; margin-bottom: 16px; }
+        #errorBanner { display: none; text-align: center; padding: 40px 20px; }
+        #errorBanner i.fa-circle-xmark { font-size: 24px; color: #EF4444; background: #FEF2F2; width: 48px; height: 48px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
         #errorBanner h3 { font-size: 20px; font-weight: 700; color: #0F172A; margin-bottom: 8px; }
         #errorBanner p { font-size: 14px; color: #64748B; }
 
@@ -169,10 +169,12 @@
             <!-- Tournament Branding -->
             <div class="brand-shield" id="headerLogo" style="overflow:hidden; background:#EFF6FF; color:#2563EB;"><i class="fa-solid fa-trophy"></i></div>
             <div class="brand-text">
-                <div class="title" id="headerAuctionName" style="font-family:'Playfair Display', serif; color:#1E293B; font-weight:800; font-size:24px; letter-spacing: -0.01em;">Loading...</div>
-                <div class="subtitle" id="headerAuctionMeta" style="color:#64748B; font-weight:500; font-size:13px; text-transform:none; letter-spacing:0;">Fetching details...</div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="title" id="headerAuctionName" style="font-family:'Playfair Display', serif; color:#1E293B; font-weight:800; font-size:24px; letter-spacing: -0.01em;">Loading...</div>
+                    <span class="status-badge" id="headerStatus" style="position:static; margin-top:-2px;">Open</span>
+                </div>
+                <div class="subtitle" id="headerAuctionMeta" style="color:#64748B; font-weight:500; font-size:13px; text-transform:none; letter-spacing:0; margin-top: 4px;">Fetching details...</div>
             </div>
-            <span class="status-badge" id="headerStatus" style="position:static; margin-left:12px;">Open</span>
         </div>
 
         <div id="loadingBanner">
@@ -184,6 +186,11 @@
             <i class="fa-solid fa-circle-xmark"></i>
             <h3>Auction Not Found</h3>
             <p id="errorMsg">This registration link is invalid or the auction no longer exists.</p>
+            <div style="margin-top: 24px;">
+                <button onclick="window.location.href='index.html'" style="padding: 10px 24px; background: #3B82F6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0 auto; font-family: 'Inter', sans-serif;">
+                    <i class="fa-solid fa-house"></i> Return Home
+                </button>
+            </div>
         </div>
 
         <div id="formSection" style="display:none;">

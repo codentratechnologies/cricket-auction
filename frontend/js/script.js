@@ -97,6 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
             emailInput.value = registeredEmail;
         }
     }
+    
+    // Check for auth requirement messages
+    if (urlParams.get('msg') === 'auth_required') {
+        showToast("Please log in to access this page.", "error");
+    }
 
     // --- Login Form Validation & Submission ---
     const loginForm = document.getElementById('loginForm');
@@ -152,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('organizer_id', data.organizer_id);
                         showToast("Login successful! Redirecting...");
                         setTimeout(() => {
-                            window.location.href = 'dashboard.html';
+                            const redirectTo = urlParams.get('redirect') || 'dashboard.html';
+                            window.location.href = redirectTo;
                         }, 800);
                     }
                 })
@@ -164,7 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('organizer_id', localId);
                     showToast("Login successful! Redirecting to Dashboard...");
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        const redirectTo = urlParams.get('redirect') || 'dashboard.html';
+                        window.location.href = redirectTo;
                     }, 800);
                 });
             }

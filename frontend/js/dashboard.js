@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ================================================================
     const organizerId = localStorage.getItem('organizer_id');
     if (!organizerId) {
-        window.location.href = 'index.html';
+        const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `login.html?redirect=${currentUrl}&msg=auth_required`;
         return;
     }
 

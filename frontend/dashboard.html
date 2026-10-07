@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cricsquad</title>
-    <link rel="stylesheet" href="css/dashboard.css?v=3">
+    <link rel="stylesheet" href="css/dashboard.css?v=20">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -39,25 +39,9 @@
                 <input type="text" placeholder="Search auctions, players, teams...">
             </div>
 
-            <div class="notification">
-                <i class="fa-regular fa-bell"></i>
-                <span class="badge">3</span>
-            </div>
-
-            <div class="profile-menu" id="profileMenuToggle">
+            <a href="profile.html" class="profile-menu-link" title="Go to Profile" style="display: flex; align-items: center;">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
-                <div class="profile-info">
-                    <span class="profile-name" id="profileNameDisplay">Organizer</span>
-                    <span class="profile-role">Super Admin</span>
-                </div>
-                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
-
-                <div class="dropdown-content" id="profileDropdown">
-                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
-                </div>
-            </div>
+            </a>
 
             <!-- Hamburger for mobile -->
             <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
@@ -77,12 +61,10 @@
             <button class="drawer-close-btn" id="drawerCloseBtn"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div class="mobile-drawer-profile">
-            <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="mobile-profile-pic" id="mobileProfileAvatar">
-            <div>
-                <div class="mobile-profile-name" id="mobileProfileName">Organizer</div>
-                <div class="mobile-profile-role">Super Admin</div>
-            </div>
+        <div class="mobile-drawer-profile" style="justify-content: center;">
+            <a href="profile.html" title="Go to Profile">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="mobile-profile-pic" id="mobileProfileAvatar">
+            </a>
         </div>
 
         <div class="mobile-search-bar">
