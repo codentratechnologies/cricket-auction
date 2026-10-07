@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Cricsquad</title>
+    <link rel="stylesheet" href="css/mockup.css?v=20">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- ========================= NAVBAR ========================= -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand">
+                <div class="brand-shield"><img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo"></div>
+                <div class="brand-text">
+                    <div class="brand-title">CRICSQUAD</div>
+                </div>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-links">
+                <a href="#" class="nav-link active" id="navDashboard" data-view="dashboard-view">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link" id="navAuctions" data-view="auctions-view">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+
+            <a href="profile.html" class="profile-menu-link" title="Go to Profile" style="display: flex; align-items: center;">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
+            </a>
+
+            <!-- Hamburger for mobile -->
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ========================= MOBILE DRAWER ========================= -->
+    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="mobile-drawer-header">
+            <div class="brand">
+                <div class="brand-shield"><img src="logo.png" style="height: 40px; width: auto;" alt="Cricsquad Logo"></div>
+                <div class="brand-title">CRICSQUAD</div>
+            </div>
+            <button class="drawer-close-btn" id="drawerCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="mobile-drawer-profile" style="justify-content: center;">
+            <a href="profile.html" title="Go to Profile">
+                <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="mobile-profile-pic" id="mobileProfileAvatar">
+            </a>
+        </div>
+
+        <div class="mobile-search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search...">
+        </div>
+
+        <nav class="mobile-nav-links">
+            <a href="#" class="mobile-nav-link active" data-view="dashboard-view" id="mobileNavDashboard">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a href="#" class="mobile-nav-link" data-view="auctions-view" id="mobileNavAuctions">
+                <i class="fa-solid fa-gavel"></i> Auctions
+            </a>
+            <a href="create-auction.html" class="mobile-nav-link">
+                <i class="fa-solid fa-plus"></i> Create Auction
+            </a>
+            <a href="profile.html" class="mobile-nav-link">
+                <i class="fa-regular fa-user"></i> My Profile
+            </a>
+            <a href="#" class="mobile-nav-link mobile-nav-logout" id="mobileLogoutBtn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </nav>
+    </div>
+
+    <!-- ========================= VIEW: DASHBOARD ========================= -->
+    <div id="dashboard-view" class="page-view active">
+        <main class="dashboard-container">
+
+            <!-- Welcome Header -->
+            <header class="dashboard-header">
+                <div class="header-text">
+                    <h1><span class="gradient-text">Welcome back, Organizer!</span> 👋</h1>
+                    <p>Here is what's happening with your tournaments today.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='create-auction.html'">
+                        <i class="fa-solid fa-plus"></i> <span class="btn-text">CREATE AUCTION</span>
+                    </button>
+                    <button class="btn btn-outline" id="viewAuctionsBtn">
+                        <i class="fa-regular fa-eye"></i> <span class="btn-text">VIEW AUCTIONS</span>
+                    </button>
+                </div>
+                <div class="confetti c1"></div>
+                <div class="confetti c2"></div>
+                <div class="confetti c3"></div>
+                <div class="confetti c4"></div>
+            </header>
+
+            <!-- Insights Section -->
+            <section class="insights-section">
+                <h2 class="section-title"><i class="fa-solid fa-chart-simple"></i> INSIGHTS</h2>
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="card-header">
+                            <div class="icon-box blue-bg"><i class="fa-solid fa-trophy blue-text"></i></div>
+                            <div class="card-title">Total Auctions</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="totalAuctionsVal">0</div>
+                            <div class="card-stats">
+                                <span class="stat-trend positive">↑ 20%</span>
+                                <span class="stat-label">All Time</span>
+                            </div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartAuctions"></canvas></div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="card-header">
+                            <div class="icon-box green-bg"><i class="fa-solid fa-users green-text"></i></div>
+                            <div class="card-title">Total Players</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="totalPlayersVal">0</div>
+                            <div class="card-stats">
+                                <span class="stat-trend positive">↑ 18%</span>
+                                <span class="stat-label">All Time</span>
+                            </div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartPlayers"></canvas></div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="card-header">
+                            <div class="icon-box purple-bg"><i class="fa-solid fa-shield-halved purple-text"></i></div>
+                            <div class="card-title">Total Teams</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="totalTeamsVal">0</div>
+                            <div class="card-stats">
+                                <span class="stat-trend positive">↑ 14%</span>
+                                <span class="stat-label">All Time</span>
+                            </div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartTeams"></canvas></div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="card-header">
+                            <div class="icon-box orange-bg"><i class="fa-solid fa-dollar-sign orange-text"></i></div>
+                            <div class="card-title">Total Spent</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="totalSpentVal">₹0</div>
+                            <div class="card-stats">
+                                <span class="stat-trend positive">↑ 25%</span>
+                                <span class="stat-label">All Time</span>
+                            </div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartSpent"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Auctions Carousel -->
+            <section class="auctions-section">
+                <h2 class="section-title"><i class="fa-solid fa-fire"></i> LIVE &amp; UPCOMING AUCTIONS</h2>
+                <div class="auctions-carousel">
+                    <button class="nav-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div class="cards-wrapper" id="auctionsWrapper">
+                        <!-- Dynamic auction cards -->
+                    </div>
+                    <button class="nav-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="carousel-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="activity-section">
+                <div class="section-header-flex">
+                    <h2 class="section-title"><i class="fa-regular fa-clock"></i> RECENT ACTIVITY</h2>
+                    <a href="#" class="view-all-link">View All Activity <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="activity-list" id="activityList"></div>
+            </section>
+
+            <!-- Global Live Auction Insights -->
+            <section class="insights-section" style="margin-top: 32px;">
+                <div class="section-header-flex">
+                    <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> GLOBAL BIDDING INSIGHTS</h2>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; margin-top: 16px;">
+                    <div style="background:#fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size:13px; color:#6B7280; font-weight:600; text-transform:uppercase;">Total Spent (Live)</div>
+                        <div id="globalInsightTotalSpent" style="font-size:24px; font-weight:800; color:#3B82F6; margin-top:8px;">₹0</div>
+                    </div>
+                    <div style="background:#fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size:13px; color:#6B7280; font-weight:600; text-transform:uppercase;">Players Sold (Live)</div>
+                        <div id="globalInsightPlayersSold" style="font-size:24px; font-weight:800; color:#10B981; margin-top:8px;">0</div>
+                    </div>
+                    <div style="background:#fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size:13px; color:#6B7280; font-weight:600; text-transform:uppercase;">Highest Bid (Live)</div>
+                        <div id="globalInsightHighestBid" style="font-size:24px; font-weight:800; color:#F59E0B; margin-top:8px;">₹0</div>
+                    </div>
+                </div>
+
+                <div class="activity-list" id="globalInsightsList">
+                    <div style="text-align:center;padding:3rem;color:#9CA3AF;">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i><br><br>Loading insights...
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ========================= VIEW: AUCTIONS ========================= -->
+    <div id="auctions-view" class="page-view">
+
+        <!-- Auctions Content -->
+        <div class="auctions-page-body">
+
+            <!-- Hero Command Center Banner -->
+            <section class="auctions-hero">
+                <div class="auctions-hero-bg"></div>
+                <div class="auctions-hero-content">
+                    <h1 class="auctions-hero-title">YOUR <span class="auctions-hero-highlight">COMMAND CENTER</span></h1>
+                    <p class="auctions-hero-subtitle">Manage your tournaments, track live bids,<br>and build champion teams.</p>
+                    <button class="auctions-cta-btn" onclick="window.location.href='create-auction.html'">
+                        <i class="fa-solid fa-plus"></i> CREATE NEW AUCTION
+                    </button>
+                </div>
+            </section>
+
+            <!-- Header row -->
+            <div class="auctions-page-header">
+                <h2 class="auctions-page-title">
+                    Your Tournaments <span class="auctions-count-badge" id="auctionCountBadge">(0)</span>
+                </h2>
+                <div class="auctions-filter-wrap">
+                    <select class="auctions-filter-select" id="auctionStatusFilter">
+                        <option value="all">All Status</option>
+                        <option value="live">Live</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down auctions-filter-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Cards Carousel -->
+            <div class="auctions-carousel-wrap" id="auctionsCarouselWrap">
+                <button class="auctions-nav-btn" id="auctionsPrevBtn" aria-label="Previous">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <div class="auctions-cards-viewport">
+                    <div class="auctions-cards-track" id="auctionsCardsTrack">
+                        <div class="auctions-cards-loading" id="auctionsCardsLoading">
+                            <div class="auctions-spinner"></div>
+                            <p>Loading your auctions...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="auctions-nav-btn" id="auctionsNextBtn" aria-label="Next">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Dots -->
+            <div class="auctions-dots-row" id="auctionsDotsRow"></div>
+
+            <!-- Empty state -->
+            <div class="auctions-empty hidden" id="auctionsEmpty">
+                <div class="auctions-empty-icon"><i class="fa-solid fa-gavel"></i></div>
+                <h3>No Auctions Yet</h3>
+                <p>Create your first cricket auction and start building champion teams!</p>
+                <button class="auctions-empty-btn" onclick="window.location.href='create-auction.html'">
+                    <i class="fa-solid fa-plus"></i> Create Your First Auction
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/dashboard.js?v=3"></script>
+    <script>
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+
+        // ── Mobile Drawer ──────────────────────────────────────────
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const mobileDrawer  = document.getElementById('mobileDrawer');
+        const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+
+        function openDrawer() {
+            mobileDrawer.classList.add('open');
+            drawerOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            mobileDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+
+        // Mobile drawer nav links — switch view and close drawer
+        document.querySelectorAll('.mobile-nav-link[data-view]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const view = this.dataset.view;
+                // Re-use the same SPA switching logic
+                document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+                document.getElementById(view)?.classList.add('active');
+                // Update active state in drawer
+                document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                // Also sync desktop nav
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelector(`.nav-link[data-view="${view}"]`)?.classList.add('active');
+                closeDrawer();
+            });
+        });
+
+        // Sync logout from drawer
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        if (mobileLogoutBtn) {
+            mobileLogoutBtn.addEventListener('click', () => {
+                document.getElementById('logoutBtn')?.click();
+            });
+        }
+    </script>
+</body>
+</html>

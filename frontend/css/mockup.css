@@ -2266,4 +2266,37 @@ h3 {
 
 .insight-card:hover .icon-box {
     transform: scale(1.2) rotate(8deg);
+}/* PREMIUM GLASSMORPHISM OVERRIDES */
+.insight-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 24px !important;
+    padding: 1.75rem !important;
+    box-shadow: 0 10px 40px -10px rgba(14, 72, 160, 0.15), 0 0 0 1px rgba(255,255,255,0.7) inset !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.insight-card:hover {
+    transform: translateY(-10px) scale(1.03) !important;
+    box-shadow: 0 25px 50px -12px rgba(14, 72, 160, 0.25), 0 0 0 2px rgba(59, 130, 246, 0.3) inset !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    z-index: 10 !important;
+}
+
+.auction-card {
+    background: rgba(255, 255, 255, 0.85) !important; 
+    border-radius: 24px !important; 
+    box-shadow: 0 15px 45px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.7) inset !important; 
+    border: 1px solid rgba(226, 232, 240, 0.5) !important; 
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.auction-card:hover {
+    transform: translateY(-10px) scale(1.02) !important;
+    box-shadow: 0 25px 50px -15px rgba(14, 72, 160, 0.25), 0 0 0 2px rgba(59, 130, 246, 0.2) inset !important;
+    background: rgba(255, 255, 255, 0.98) !important;
 }
