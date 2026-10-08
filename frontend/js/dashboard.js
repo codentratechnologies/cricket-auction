@@ -3,6 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE = 'http://127.0.0.1:5000';
 
     // ================================================================
+    //  NAVBAR SCROLL EFFECT
+    // ================================================================
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }
+
+    // ================================================================
     //  AUTH CHECK
     // ================================================================
     const organizerId = localStorage.getItem('organizer_id');
@@ -75,9 +89,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+    const mobileLogoutBtn   = document.getElementById('mobileLogoutBtn');
+    const customLogoutModal = document.getElementById('customLogoutModal');
+    const modalCancelLogout = document.getElementById('modalCancelLogout');
+    const modalConfirmLogout = document.getElementById('modalConfirmLogout');
+
+    const handleLogout = (e) => {
+        e.preventDefault();
+        if (customLogoutModal) {
+            customLogoutModal.classList.add('show');
+        }
+    };
+
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+    if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
+
+    if (modalCancelLogout) {
+        modalCancelLogout.addEventListener('click', () => {
+            customLogoutModal.classList.remove('show');
+        });
+    }
+
+    if (modalConfirmLogout) {
+        modalConfirmLogout.addEventListener('click', () => {
             localStorage.removeItem('organizer_id');
             window.location.href = 'index.html';
         });
@@ -196,10 +230,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         wrapper.innerHTML = '';
 
-        const auctions = Array.isArray(rawAuctions) ? rawAuctions : Object.values(rawAuctions);
+        // Filter out completed auctions since this section is only for live and upcoming
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        const auctions = (Array.isArray(rawAuctions) ? rawAuctions : Object.values(rawAuctions))
+            .filter(a => {
+                if (a.status === 'completed') return false;
+                if (a.status !== 'live' && a.date) {
+                    const d = new Date(a.date);
+                    if (d < now) return false;
+                }
+                return true;
+            });
 
         if (auctions.length === 0) {
-            wrapper.innerHTML = '<div style="text-align:center;padding:40px;color:#64748B;width:100%;font-weight:500;">No auctions yet. Click "Create Auction" to start!</div>';
+            wrapper.innerHTML = `
+                <div style="text-align:center;padding:50px 20px;width:100%;background:rgba(255,255,255,0.5);border-radius:16px;border:1.5px dashed #CBD5E1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-gavel" style="font-size:2.5rem;color:#94A3B8;margin-bottom:1rem;opacity:0.7;"></i>
+                    <div style="font-size:1.1rem;font-weight:700;color:#334155;margin-bottom:0.5rem;">No Live or Upcoming Auctions</div>
+                    <div style="font-size:0.9rem;color:#64748B;">There are no active or upcoming tournaments at the moment.</div>
+                    <button class="btn btn-primary" style="margin-top:1.5rem;padding:0.6rem 1.2rem;font-size:0.9rem;" onclick="window.location.href='create-auction.html'"><i class="fa-solid fa-plus" style="margin-right:6px;"></i> Create Auction</button>
+                </div>
+            `;
             if (prevBtn) prevBtn.style.display = 'none';
             if (nextBtn) nextBtn.style.display = 'none';
             if (dotsEl)  dotsEl.style.display  = 'none';
@@ -252,7 +305,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>`;
             } else {
-                const startsIn = auction.starts_in ? `STARTS IN ${String(auction.starts_in).toUpperCase()}` : 'UPCOMING';
+                let isCompleted = auction.status === 'completed';
+                if (!isCompleted && auction.date) {
+                    const d = new Date(auction.date);
+                    const now = new Date();
+                    now.setHours(0,0,0,0);
+                    if (d < now) isCompleted = true;
+                }
+
+                let badgeStatusHtml = '';
+                if (isCompleted) {
+                    badgeStatusHtml = `<span class="badge-upcoming" style="background:#F3F4F6;color:#4B5563;border:1px solid #D1D5DB;"><i class="fa-solid fa-check-circle"></i> COMPLETED</span>`;
+                } else {
+                    const startsIn = auction.starts_in ? `STARTS IN ${String(auction.starts_in).toUpperCase()}` : 'UPCOMING';
+                    badgeStatusHtml = `<span class="badge-upcoming"><i class="fa-solid fa-hourglass-half"></i> ${startsIn}</span>`;
+                }
+
                 const btn = isOwner
                     ? `<button class="btn btn-block btn-outline-primary" style="padding:0.6rem;font-size:0.85rem;display:flex;justify-content:center;align-items:center;gap:8px;" onclick="window.location.href='auction-dashboard.html?id=${aId}'">Manage Auction <i class="fa-solid fa-arrow-right"></i></button>`
                     : `<button class="btn btn-block btn-outline-primary" style="padding:0.6rem;font-size:0.85rem;display:flex;justify-content:center;align-items:center;gap:8px;" onclick="window.location.href='auction-dashboard.html?id=${aId}'">View Details <i class="fa-solid fa-arrow-right"></i></button>`;
@@ -262,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="card-bg-stadium" style="background-image:url('${bgUrl}');"></div>
                         <div class="auction-card-header">
                             <div style="display:flex;gap:0.5rem;align-items:center;">
-                                <span class="badge-upcoming"><i class="fa-solid fa-hourglass-half"></i> ${startsIn}</span>
+                                ${badgeStatusHtml}
                                 ${ownerBadge}
                             </div>
                         </div>
@@ -314,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        activities.forEach(activity => {
+        activities.slice(0, 5).forEach(activity => {
             let iconHtml = '';
             if      (activity.type === 'player_sold')      iconHtml = '<div class="activity-icon-container green-bg"><i class="fa-regular fa-user green-text"></i></div>';
             else if (activity.type === 'team_registered')  iconHtml = '<div class="activity-icon-container blue-bg"><i class="fa-solid fa-shield-halved blue-text"></i></div>';
@@ -428,7 +496,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function aucApplyFilter() {
         const val = statusFilter ? statusFilter.value : 'all';
-        aucFiltered = val === 'all' ? [...aucAllAuctions] : aucAllAuctions.filter(a => a.status === val);
+        
+        // Strictly show only the current organizer's auctions
+        const myAuctions = aucAllAuctions.filter(a => (a.organizer_id === organizerId) || a.is_owner === true);
+        
+        aucFiltered = val === 'all' ? myAuctions : myAuctions.filter(a => a.status === val);
         aucCurrentIdx = 0;
         aucRenderCards();
     }
@@ -465,6 +537,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function aucBuildCard(auction, idx) {
+        let isCompleted = auction.status === 'completed';
+        if (!isCompleted && auction.date && auction.status !== 'live') {
+            const d = new Date(auction.date);
+            const now = new Date();
+            now.setHours(0,0,0,0);
+            if (d < now) isCompleted = true;
+        }
+
         const isLive  = auction.status === 'live';
         const isOwner = (auction.organizer_id === organizerId) || auction.is_owner;
         const aId     = auction.id || '';
@@ -476,9 +556,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const venue   = auction.venue || '—';
         const logo    = auction.logo_url || '';
 
-        const statusBadge = isLive
-            ? `<span class="auc-badge-live"><span class="auc-live-dot"></span> LIVE</span>`
-            : `<span class="auc-badge-upcoming"><i class="fa-solid fa-hourglass-half"></i> UPCOMING</span>`;
+        let statusBadge = '';
+        if (isLive) {
+            statusBadge = `<span class="auc-badge-live"><span class="auc-live-dot"></span> LIVE</span>`;
+        } else if (isCompleted) {
+            statusBadge = `<span class="auc-badge-upcoming" style="background:#F3F4F6;color:#4B5563;border:1px solid #D1D5DB;"><i class="fa-solid fa-check-circle"></i> COMPLETED</span>`;
+        } else {
+            statusBadge = `<span class="auc-badge-upcoming"><i class="fa-solid fa-hourglass-half"></i> UPCOMING</span>`;
+        }
 
         const ownerBadge = isOwner
             ? `<span class="auc-badge-owner"><i class="fa-solid fa-crown"></i> OWNER</span>` : '';
@@ -510,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="auc-detail-cell">
                     <span class="auc-detail-label">Status</span>
-                    <span class="auc-detail-value amber">Upcoming</span>
+                    <span class="auc-detail-value ${isCompleted ? '' : 'amber'}" style="text-transform: capitalize; ${isCompleted ? 'color: #6B7280;' : ''}">${isCompleted ? 'Completed' : (auction.status || 'Upcoming')}</span>
                 </div>`;
         }
 

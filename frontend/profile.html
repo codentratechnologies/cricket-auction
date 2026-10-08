@@ -11,51 +11,96 @@
 </head>
 <body>
 
-    <!-- Top Navigation -->
+    <!-- ========================= NAVBAR ========================= -->
     <nav class="navbar">
         <div class="nav-left">
             <div class="brand">
                 <div class="brand-shield"><img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo"></div>
                 <div class="brand-text">
                     <div class="brand-title">CRICSQUAD</div>
-                    
-                    
-                    
                 </div>
             </div>
-        </div>
-        
-        <div class="nav-center">
-            <a href="dashboard.html" class="nav-link">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fa-solid fa-gavel"></i> Auctions
-            </a>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-gavel"></i> Auctions
+                </a>
+            </div>
         </div>
 
         <div class="nav-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search auctions, players, teams...">
+            </div>
+
             <div class="notification">
                 <i class="fa-regular fa-bell"></i>
                 <span class="badge">3</span>
             </div>
-            <div class="profile-menu" id="profileMenuToggle">
+
+            <div class="profile-menu" onclick="window.location.href='profile.html'">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
                 <div class="profile-info">
                     <span class="profile-name" id="profileNameDisplay">Organizer</span>
                     <span class="profile-role">Super Admin</span>
                 </div>
-                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
-                
-                <!-- Dropdown Menu -->
-                <div class="dropdown-content" id="profileDropdown">
-                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
-                </div>
             </div>
+
+            <!-- Hamburger for mobile -->
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- ========================= MOBILE DRAWER ========================= -->
+    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="mobile-drawer-header">
+            <div class="brand">
+                <div class="brand-shield"><img src="logo.png" style="height: 40px; width: auto;" alt="Cricsquad Logo"></div>
+                <div class="brand-title">CRICSQUAD</div>
+            </div>
+            <button class="drawer-close-btn" id="drawerCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="mobile-drawer-profile">
+            <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="mobile-profile-pic" id="mobileProfileAvatar">
+            <div>
+                <div class="mobile-profile-name" id="mobileProfileName">Organizer</div>
+                <div class="mobile-profile-role">Super Admin</div>
+            </div>
+        </div>
+
+        <div class="mobile-search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search...">
+        </div>
+
+        <nav class="mobile-nav-links">
+            <a href="dashboard.html" class="mobile-nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a href="dashboard.html" class="mobile-nav-link">
+                <i class="fa-solid fa-gavel"></i> Auctions
+            </a>
+            <a href="create-auction.html" class="mobile-nav-link">
+                <i class="fa-solid fa-plus"></i> Create Auction
+            </a>
+            <a href="profile.html" class="mobile-nav-link active">
+                <i class="fa-regular fa-user"></i> My Profile
+            </a>
+            <a href="#" class="mobile-nav-link mobile-nav-logout" id="mobileLogoutBtn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </nav>
+    </div>
 
     <!-- Main Content Area -->
     <main class="dashboard-container">
@@ -76,7 +121,22 @@
                     </div>
                     <div class="profile-title">
                         <h2 id="userNameDisplay">Loading...</h2>
-                        <span class="role-badge">Super Admin</span>
+                        <span class="role-badge" id="profileRoleBadge">Organizer</span>
+                    </div>
+                </div>
+
+                <div class="profile-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                    <div class="stat-box" style="text-align: center; padding: 1rem; background: #F9FAFB; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-blue);" id="statAuctions">0</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: 0.25rem;">Total Auctions</div>
+                    </div>
+                    <div class="stat-box" style="text-align: center; padding: 1rem; background: #F9FAFB; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-blue);" id="statTeams">0</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: 0.25rem;">Teams Managed</div>
+                    </div>
+                    <div class="stat-box" style="text-align: center; padding: 1rem; background: #F9FAFB; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-blue);" id="statPlayers">0</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: 0.25rem;">Total Players</div>
                     </div>
                 </div>
 
@@ -99,8 +159,11 @@
                             </div>
                         </div>
 
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline" disabled>Edit Profile (Coming Soon)</button>
+                        <div class="form-actions" style="display: flex; gap: 1rem;">
+                            <button type="button" class="btn btn-outline" id="editProfileBtn">Edit Profile</button>
+                            <button type="button" class="btn btn-primary" id="saveProfileBtn" style="display: none;">Save Profile</button>
+                            <button type="button" class="btn btn-outline" id="cancelProfileBtn" style="display: none;">Cancel</button>
+                            <button type="button" class="btn btn-outline text-red" id="logoutBtn" style="border-color: #EF4444; color: #EF4444;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
                         </div>
                     </form>
                 </div>
@@ -111,13 +174,61 @@
 
     <script src="js/profile.js"></script>
 
-    <!-- Global fix: Prevent mouse scroll from changing number inputs -->
+    <!-- Global scripts -->
     <script>
+        // Navbar scroll effect
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // Mobile drawer
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const mobileDrawer  = document.getElementById('mobileDrawer');
+        const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+
+        function openDrawer() {
+            mobileDrawer.classList.add('open');
+            drawerOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            mobileDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+
+        // Prevent mouse scroll from changing number inputs
         document.addEventListener('wheel', function(event) {
             if (document.activeElement.type === 'number') {
                 document.activeElement.blur();
             }
         });
     </script>
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="customLogoutModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </div>
+            <h3 class="modal-title">Confirm Logout</h3>
+            <p class="modal-text">Are you sure you want to log out? You will need to sign in again to access your dashboard.</p>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="modalCancelLogout">Cancel</button>
+                <button class="btn btn-primary" style="background: #EF4444; border-color: #EF4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" id="modalConfirmLogout">Log out</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cricsquad</title>
-    <link rel="stylesheet" href="css/dashboard.css?v=3">
+    <link rel="stylesheet" href="css/dashboard.css?v=4">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -44,18 +44,11 @@
                 <span class="badge">3</span>
             </div>
 
-            <div class="profile-menu" id="profileMenuToggle">
+            <div class="profile-menu" onclick="window.location.href='profile.html'">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
                 <div class="profile-info">
                     <span class="profile-name" id="profileNameDisplay">Organizer</span>
                     <span class="profile-role">Super Admin</span>
-                </div>
-                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
-
-                <div class="dropdown-content" id="profileDropdown">
-                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
                 </div>
             </div>
 
@@ -122,9 +115,6 @@
                 <div class="header-actions">
                     <button class="btn btn-primary" onclick="window.location.href='create-auction.html'">
                         <i class="fa-solid fa-plus"></i> <span class="btn-text">CREATE AUCTION</span>
-                    </button>
-                    <button class="btn btn-outline" id="viewAuctionsBtn">
-                        <i class="fa-regular fa-eye"></i> <span class="btn-text">VIEW AUCTIONS</span>
                     </button>
                 </div>
                 <div class="confetti c1"></div>
@@ -381,5 +371,19 @@
             });
         }
     </script>
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="customLogoutModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </div>
+            <h3 class="modal-title">Confirm Logout</h3>
+            <p class="modal-text">Are you sure you want to log out? You will need to sign in again to access your dashboard.</p>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="modalCancelLogout">Cancel</button>
+                <button class="btn btn-primary" style="background: #EF4444; border-color: #EF4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" id="modalConfirmLogout">Log out</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

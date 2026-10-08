@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auction Dashboard - Cricsquad</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/dashboard.css?v=4">
     <link rel="stylesheet" href="css/auction-dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,21 +13,18 @@
 </head>
 <body>
 
-    <!-- Top Navigation (Shared) -->
+    <!-- ========================= NAVBAR ========================= -->
     <nav class="navbar">
         <div class="nav-left">
             <div class="brand">
                 <div class="brand-shield"><img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo"></div>
                 <div class="brand-text">
                     <div class="brand-title">CRICSQUAD</div>
-                    
-                    
-                    
                 </div>
             </div>
-            
+
             <div class="nav-divider"></div>
-            
+
             <div class="nav-links">
                 <a href="dashboard.html" class="nav-link">
                     <i class="fa-solid fa-border-all"></i> Dashboard
@@ -43,25 +40,17 @@
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" placeholder="Search auctions, players, teams...">
             </div>
-            
+
             <div class="notification">
                 <i class="fa-regular fa-bell"></i>
                 <span class="badge">3</span>
             </div>
-            
-            <div class="profile-menu" id="profileMenuToggle">
+
+            <div class="profile-menu" onclick="window.location.href='profile.html'">
                 <img src="https://ui-avatars.com/api/?name=Organizer&background=0D8ABC&color=fff" alt="Profile" class="profile-pic" id="profileAvatar">
                 <div class="profile-info">
                     <span class="profile-name" id="profileNameDisplay">Organizer</span>
                     <span class="profile-role">Super Admin</span>
-                </div>
-                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
-                
-                <!-- Dropdown Menu -->
-                <div class="dropdown-content" id="profileDropdown">
-                    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" id="logoutBtn" class="text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
                 </div>
             </div>
 
@@ -952,13 +941,58 @@
         if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', closeDrawer);
         if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
 
-        // Sync logout from drawer
+        // Navbar Scroll Effect
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // Handle logout from mobile drawer (since desktop nav links to profile page)
         const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        const customLogoutModal = document.getElementById('customLogoutModal');
+        const modalCancelLogout = document.getElementById('modalCancelLogout');
+        const modalConfirmLogout = document.getElementById('modalConfirmLogout');
+
         if (mobileLogoutBtn) {
-            mobileLogoutBtn.addEventListener('click', () => {
-                document.getElementById('logoutBtn')?.click();
+            mobileLogoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (customLogoutModal) customLogoutModal.classList.add('show');
+            });
+        }
+
+        if (modalCancelLogout) {
+            modalCancelLogout.addEventListener('click', () => {
+                customLogoutModal.classList.remove('show');
+            });
+        }
+
+        if (modalConfirmLogout) {
+            modalConfirmLogout.addEventListener('click', () => {
+                localStorage.removeItem('organizer_id');
+                window.location.href = 'index.html';
             });
         }
     </script>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="customLogoutModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </div>
+            <h3 class="modal-title">Confirm Logout</h3>
+            <p class="modal-text">Are you sure you want to log out? You will need to sign in again to access your dashboard.</p>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="modalCancelLogout">Cancel</button>
+                <button class="btn btn-primary" style="background: #EF4444; border-color: #EF4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" id="modalConfirmLogout">Log out</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

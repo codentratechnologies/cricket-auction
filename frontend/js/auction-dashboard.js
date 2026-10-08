@@ -59,6 +59,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Fetch and display Organizer Profile in Navbar
+    fetch(`http://127.0.0.1:5000/api/dashboard/${organizerId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.user) {
+                const name = data.user.name || 'Organizer';
+                document.querySelectorAll('.profile-name, #profileNameDisplay, #mobileProfileName').forEach(el => el.textContent = name);
+                document.querySelectorAll('#profileAvatar, #mobileProfileAvatar').forEach(avatar => {
+                    avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`;
+                });
+            }
+        }).catch(err => console.error("Error fetching organizer details:", err));
+
     // Get Auction ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const auctionId = urlParams.get('id');

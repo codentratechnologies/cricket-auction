@@ -17,10 +17,10 @@
     <div class="landing-container" style="background-image: url('assets/images/static bg.png');">
         <!-- Navbar -->
         <nav class="navbar">
-            <div class="logo">
-                <i class="fa-solid fa-shield-halved logo-icon"></i>
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="CricSquad Logo" class="logo-img">
                 <span class="logo-text">CricSquad</span>
-            </div>
+            </a>
             
             <button class="hamburger-btn" id="mobileMenuBtn">
                 <i class="fa-solid fa-bars"></i>
@@ -35,84 +35,107 @@
                     <a href="#faq">FAQ</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="login.html" class="btn btn-outline">Login</a>
-                    <a href="register.html" class="btn btn-primary">Start for Free &rarr;</a>
+                    <a href="login.html" class="btn btn-outline nav-btn">
+                        <i class="fa-solid fa-arrow-right-to-bracket icon-only"></i>
+                        <span class="btn-text">Login</span>
+                    </a>
+                    <a href="register.html" class="btn btn-primary nav-btn">
+                        <i class="fa-solid fa-rocket icon-only"></i>
+                        <span class="btn-text">Start for Free &rarr;</span>
+                    </a>
                 </div>
             </div>
         </nav>
 
         <!-- Hero Section -->
-        <div class="hero">
+        <section class="hero">
+            <!-- Left: Text -->
             <div class="hero-left">
-                <div class="badge"><i class="fa-solid fa-bolt text-blue"></i> The Future of Cricsquads</div>
-                <h1>Run Auctions.<br><span class="text-gradient">Smarter</span> & <span class="text-purple">Faster.</span></h1>
+                <div class="badge"><i class="fa-solid fa-bolt"></i> The Future of Cricket Auctions</div>
+                <h1>Run Auctions.<br><span class="text-gradient">Smarter</span> &amp;<br><span class="text-purple">Faster.</span></h1>
                 <p>Go digital with real-time bidding, automated calculations and live streaming — all in one powerful platform.</p>
                 <div class="hero-cta">
-                    <a href="register.html" class="btn btn-primary btn-lg">Start Your Auction for Free &rarr;</a>
-                    <a href="#" class="btn btn-outline-light btn-lg watch-demo"><i class="fa-solid fa-play text-blue"></i> Watch Demo</a>
+                    <a href="register.html" class="btn btn-primary btn-lg">Start for Free &rarr;</a>
+                    <a href="#" class="btn btn-outline-light btn-lg watch-demo">
+                        <span class="play-btn-icon"><i class="fa-solid fa-play"></i></span> Watch Demo
+                    </a>
+                </div>
+                <div class="hero-social-proof">
+                    <div class="proof-avatars">
+                        <img src="https://i.pravatar.cc/40?img=1" alt="user">
+                        <img src="https://i.pravatar.cc/40?img=2" alt="user">
+                        <img src="https://i.pravatar.cc/40?img=3" alt="user">
+                        <img src="https://i.pravatar.cc/40?img=4" alt="user">
+                    </div>
+                    <div class="proof-text">
+                        <div class="proof-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <span>Trusted by <strong>500+</strong> organizers</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Center: Player Image -->
             <div class="hero-center">
+                <div class="hero-glow-blob"></div>
                 <img src="assets/images/player.png" alt="Cricket Player" class="player-img">
             </div>
+
+            <!-- Right: Auction Widget -->
             <div class="hero-right">
-                <!-- Auction Widget -->
                 <div class="auction-widget">
                     <div class="widget-header">
-                        <div class="live-indicator"><span class="live-dot"></span> Live <span style="color: #333">Auction</span></div>
+                        <div class="live-indicator"><span class="live-dot"></span> Live <span style="color:#333">Auction</span></div>
                         <div class="time-left">Time Left <span class="time">00:02:45</span></div>
                     </div>
                     <div class="teams">
-                        <div class="team">
-                            <div class="team-logo bg-blue-dark">
-                                <span style="color: white; font-weight: bold; font-size: 20px;">AR</span>
-                            </div>
+                        <!-- Team 1 -->
+                        <div class="team-row">
+                            <div class="team-logo bg-blue-dark"><span style="color:white;font-weight:bold;font-size:16px;">AR</span></div>
                             <div class="team-info">
                                 <span class="team-name text-blue-dark">Azure Royals</span>
                                 <span class="team-bid">₹ 1,25,000</span>
                                 <span class="bid-label">Current Bid</span>
                             </div>
+                            <span class="team-badge leading">Leading</span>
                         </div>
-                        <div class="vs">VS</div>
-                        <div class="team text-right" style="flex-direction: row-reverse;">
-                            <div class="team-logo bg-red-dark">
-                                <i class="fa-solid fa-shield text-white" style="font-size: 20px;"></i>
-                            </div>
-                            <div class="team-info" style="align-items: flex-end; margin-right: 15px;">
+                        <!-- VS Divider -->
+                        <div class="vs-row">
+                            <div class="vs-line"></div>
+                            <div class="vs">VS</div>
+                            <div class="vs-line"></div>
+                        </div>
+                        <!-- Team 2 -->
+                        <div class="team-row">
+                            <div class="team-logo bg-red-dark"><i class="fa-solid fa-shield text-white" style="font-size:16px;"></i></div>
+                            <div class="team-info">
                                 <span class="team-name text-red-dark">Crimson Titans</span>
                                 <span class="team-bid text-red-dark">₹ 1,20,000</span>
                                 <span class="bid-label">Current Bid</span>
                             </div>
+                            <span class="team-badge trailing">Behind</span>
                         </div>
                     </div>
                     <div class="player-card">
-                        <div class="player-avatar">
-                            <img src="https://i.pravatar.cc/150?img=11" alt="Player" class="avatar-img">
-                        </div>
+                        <div class="player-avatar"><img src="https://i.pravatar.cc/150?img=11" alt="Player" class="avatar-img"></div>
                         <div class="player-info">
                             <div class="player-name">Zero &ndash; The Phenom</div>
                             <div class="player-role">All Rounder</div>
                         </div>
-                        <div class="player-base-price">
-                            Base Price<br><strong>₹ 50,000</strong>
-                        </div>
+                        <div class="player-base-price">Base Price<br><strong>₹ 50,000</strong></div>
                     </div>
                     <div class="widget-footer">
-                        <div class="next-bid">
-                            Next Bid<br><strong class="text-green">₹ 1,30,000</strong>
-                        </div>
-                        <button class="btn btn-primary place-bid-btn"><i class="fa-solid fa-gavel" style="margin-right: 8px;"></i> Place Bid</button>
+                        <div class="next-bid">Next Bid<br><strong class="text-green">₹ 1,30,000</strong></div>
+                        <button class="btn btn-primary place-bid-btn"><i class="fa-solid fa-gavel" style="margin-right:8px;"></i>Place Bid</button>
                         <div class="auto-bid">
-                            <span style="font-size: 12px; color: #555; font-weight: 500;">Auto Bid</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider round"></span>
-                            </label>
+                            <span style="font-size:12px;color:#555;font-weight:500;">Auto Bid</span>
+                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+
         
         <!-- Features Strip -->
         <div class="features-strip">
@@ -790,46 +813,6 @@
 
             <!-- Content Grid -->
             <div class="faq-content-grid">
-                <!-- Sidebar Categories -->
-                <div class="faq-sidebar">
-                    <button class="faq-cat-btn active">
-                        <span><i class="fa-solid fa-border-all"></i> All Questions</span>
-                        <span class="count">34</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-solid fa-rocket"></i> Getting Started</span>
-                        <span class="count">6</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-solid fa-gavel"></i> Auctions</span>
-                        <span class="count">7</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-solid fa-users-gear"></i> Teams & Players</span>
-                        <span class="count">6</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-regular fa-credit-card"></i> Payments & Billing</span>
-                        <span class="count">5</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-solid fa-tower-broadcast"></i> Live Auctions</span>
-                        <span class="count">4</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-solid fa-shield-halved"></i> Account & Security</span>
-                        <span class="count">4</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-solid fa-chart-line"></i> Reports & Analytics</span>
-                        <span class="count">4</span>
-                    </button>
-                    <button class="faq-cat-btn">
-                        <span><i class="fa-solid fa-headset"></i> Technical Support</span>
-                        <span class="count">3</span>
-                    </button>
-                </div>
-
                 <!-- Accordion List -->
                 <div class="faq-accordion-list">
                     <!-- Item 1 (Expanded) -->
@@ -1087,6 +1070,16 @@
                         }
                     });
                 }
+
+                // Navbar Scroll Effect
+                const navbar = document.querySelector('.navbar');
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                });
             });
         </script>
     </footer>
@@ -1099,5 +1092,9 @@
             }
         });
     </script>
+
+    <!-- Premium Scroll & Entry Animations -->
+    <script src="js/landing-animations.js"></script>
+
 </body>
 </html>
