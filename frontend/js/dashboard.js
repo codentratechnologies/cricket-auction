@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ================================================================
     //  AUTH CHECK
     // ================================================================
+    let globalAuctionsList = []; // Added for search filtering
+
     const organizerId = localStorage.getItem('organizer_id');
     if (!organizerId) {
         window.location.href = 'index.html';
@@ -200,7 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Dashboard Auctions carousel
-                renderDashboardAuctions(data.auctions || [], organizerId);
+                globalAuctionsList = data.auctions || [];
+                renderDashboardAuctions(globalAuctionsList, organizerId);
 
                 // Activity
                 renderActivities(data.activities || []);
@@ -230,12 +233,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         wrapper.innerHTML = '';
 
-        // Filter out completed auctions since this section is only for live and upcoming
+        // Filter out completed auctions since this section is only for live and upcoming (UNLESS actively searching)
         const now = new Date();
         now.setHours(0, 0, 0, 0);
+        
+        const searchInput = document.getElementById('globalSearchInput');
+        const isSearching = searchInput && searchInput.value.trim() !== '';
 
         const auctions = (Array.isArray(rawAuctions) ? rawAuctions : Object.values(rawAuctions))
             .filter(a => {
+                if (isSearching) return true; // Show all matching auctions if actively searching
+                
                 if (a.status === 'completed') return false;
                 if (a.status !== 'live' && a.date) {
                     const d = new Date(a.date);
@@ -496,11 +504,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function aucApplyFilter() {
         const val = statusFilter ? statusFilter.value : 'all';
+        const searchInput = document.getElementById('globalSearchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
         
         // Strictly show only the current organizer's auctions
         const myAuctions = aucAllAuctions.filter(a => (a.organizer_id === organizerId) || a.is_owner === true);
         
-        aucFiltered = val === 'all' ? myAuctions : myAuctions.filter(a => a.status === val);
+        aucFiltered = myAuctions.filter(a => {
+            const matchesStatus = val === 'all' ? true : a.status === val;
+            const matchesSearch = matchesSearchTerm(a, searchTerm);
+            return matchesStatus && matchesSearch;
+        });
         aucCurrentIdx = 0;
         aucRenderCards();
     }
@@ -690,6 +704,158 @@ document.addEventListener('DOMContentLoaded', () => {
         const hrs = parseInt(h);
         const ampm = hrs >= 12 ? 'PM' : 'AM';
         return `${hrs % 12 || 12}:${m} ${ampm}`;
+    }
+
+    // ================================================================
+    //  GLOBAL SEARCH HANDLER (ELASTIC/FLEXIBLE SEARCH)
+    // ================================================================
+    function matchesSearchTerm(auction, term) {
+        if (!term) return true;
+        if (!auction) return false;
+        
+        // Check auction name
+        const aName = (auction.name || '').toLowerCase();
+        if (aName.includes(term)) return true;
+        
+        // Check teams
+        if (auction.teamList) {
+            const teams = Object.values(auction.teamList);
+            for (let t of teams) {
+                if (!t) continue;
+                const tName = typeof t === 'string' ? t : (t.name || '');
+                if (tName.toLowerCase().includes(term)) return true;
+            }
+        }
+        
+        // Check players
+        if (auction.players) {
+            const players = Object.values(auction.players);
+            for (let p of players) {
+                if (!p) continue;
+                const pName = typeof p === 'string' ? p : (p.name || '');
+                if (pName.toLowerCase().includes(term)) return true;
+            }
+        }
+        
+        return false;
+    }
+
+    const globalSearchInput = document.getElementById('globalSearchInput');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    
+    // Close suggestions on outside click
+    document.addEventListener('click', (e) => {
+        if (searchSuggestions && !searchSuggestions.contains(e.target) && e.target !== globalSearchInput) {
+            searchSuggestions.classList.add('hidden');
+        }
+    });
+
+    if (globalSearchInput) {
+        globalSearchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            
+            // If auctions tab data isn't loaded yet, copy it from global data
+            if (aucAllAuctions.length === 0) {
+                aucAllAuctions = Array.isArray(globalAuctionsList) ? globalAuctionsList : Object.values(globalAuctionsList);
+                auctionsViewLoaded = true;
+            }
+            
+            // 1. Handle Suggestions Dropdown
+            if (searchSuggestions) {
+                searchSuggestions.innerHTML = '';
+                if (term === '') {
+                    searchSuggestions.classList.add('hidden');
+                } else {
+                    let suggestions = [];
+                    const auctionsArray = Array.isArray(globalAuctionsList) ? globalAuctionsList : Object.values(globalAuctionsList);
+                    
+                    auctionsArray.forEach(a => {
+                        if (!a) return; // Safeguard against null elements
+                        const aId = a.id || a.key || a.auction_id;
+
+                        const aName = (a.name || '');
+                        if (aName.toLowerCase().includes(term)) {
+                            suggestions.push({ type: 'auction', title: aName, sub: 'Tournament', icon: 'fa-gavel', iconClass: 'ss-icon-auction', url: `auction-dashboard.html?id=${aId}` });
+                        }
+                        
+                        if (a.teamList) {
+                            Object.keys(a.teamList).forEach(teamId => {
+                                const t = a.teamList[teamId];
+                                if (!t) return;
+                                const tName = typeof t === 'string' ? t : (t.name || '');
+                                if (tName.toLowerCase().includes(term)) {
+                                    suggestions.push({ type: 'team', title: tName, sub: `Team in ${aName}`, icon: 'fa-shield-halved', iconClass: 'ss-icon-team', url: `team-dashboard.html?auction_id=${aId}&team_id=${teamId}` });
+                                }
+                            });
+                        }
+                        
+                        if (a.players) {
+                            Object.keys(a.players).forEach(playerId => {
+                                const p = a.players[playerId];
+                                if (!p) return;
+                                const pName = typeof p === 'string' ? p : (p.name || '');
+                                if (pName.toLowerCase().includes(term)) {
+                                    suggestions.push({ type: 'player', title: pName, sub: `Player in ${aName}`, icon: 'fa-user', iconClass: 'ss-icon-player', url: `view-player.html?auction_id=${aId}&player_id=${playerId}` });
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Deduplicate suggestions by url
+                    const uniqueSuggestions = [];
+                    const seen = new Set();
+                    suggestions.forEach(s => {
+                        if (!seen.has(s.url)) {
+                            seen.add(s.url);
+                            uniqueSuggestions.push(s);
+                        }
+                    });
+                    
+                    const topSuggestions = uniqueSuggestions.slice(0, 6); // show up to 6
+                    
+                    if (topSuggestions.length > 0) {
+                        searchSuggestions.classList.remove('hidden');
+                        topSuggestions.forEach(s => {
+                            const div = document.createElement('div');
+                            div.className = 'search-suggestion-item';
+                            div.innerHTML = `
+                                <div class="search-suggestion-icon ${s.iconClass}">
+                                    <i class="fa-solid ${s.icon}"></i>
+                                </div>
+                                <div class="search-suggestion-text">
+                                    <span class="ss-title">${s.title}</span>
+                                    <span class="ss-sub">${s.sub}</span>
+                                </div>
+                            `;
+                            div.onclick = () => {
+                                window.location.href = s.url; // Navigate directly to the item!
+                            };
+                            searchSuggestions.appendChild(div);
+                        });
+                    } else {
+                        searchSuggestions.classList.remove('hidden');
+                        searchSuggestions.innerHTML = `
+                            <div class="search-suggestion-item" style="cursor:default; justify-content:center; padding:1.5rem 1rem;">
+                                <div class="search-suggestion-text" style="align-items:center;">
+                                    <i class="fa-solid fa-magnifying-glass" style="font-size:1.5rem; color:#D1D5DB; margin-bottom:0.5rem;"></i>
+                                    <span class="ss-title" style="color:#6B7280;">No matches found</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            // 2. Filter dashboard carousel
+            const filteredDash = (Array.isArray(globalAuctionsList) ? globalAuctionsList : Object.values(globalAuctionsList))
+                .filter(a => matchesSearchTerm(a, term));
+            renderDashboardAuctions(filteredDash, organizerId);
+            
+            // 3. Filter auctions tab
+            if (typeof aucApplyFilter === 'function') {
+                aucApplyFilter();
+            }
+        });
     }
 
 });

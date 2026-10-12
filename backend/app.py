@@ -995,56 +995,123 @@ def sell_player(auction_id):
 
     player_id = request.json.get('player_id')
     team_id = request.json.get('team_id')
-    sold_price = request.json.get('sold_price')
+    sold_price_raw = request.json.get('sold_price')
 
-    if not player_id or not team_id or sold_price is None:
-        return jsonify({"error": "Missing required fields"}), 400
+    if not player_id or not team_id or sold_price_raw is None:
+        return jsonify({"error": "Please select a player, winning franchise, and bid price before confirming sale."}), 400
 
     if not firebase_initialized:
-        return jsonify({"error": "Firebase not initialized"}), 500
+        return jsonify({"error": "Database connection is unavailable. Please check your connection and try again."}), 500
 
     try:
-        # Atomic-like update using update() across multiple paths if possible, 
-        # or just sequential updates since it's a simple app.
-        
-        # 1. Get current team balance
+        # 1. Fetch auction settings
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction_data = auction_ref.get()
+        if not auction_data:
+            return jsonify({"error": "Auction not found"}), 404
+
+        players_per_team = int(auction_data.get('players_per_team', 15) or 15)
+        min_bid = float(auction_data.get('min_bid', 0) or 0)
+
+        # 2. Fetch Player & Validate Status and Base Price
+        player_ref = db.reference(f'/auctions/{auction_id}/players/{player_id}')
+        player_data = player_ref.get()
+        if not player_data:
+            return jsonify({"error": "Selected player was not found in this tournament."}), 404
+
+        # Validation 1.3: Check if already sold
+        if player_data.get('status') == 'Sold':
+            return jsonify({"error": f"{player_data.get('name', 'This player')} has already been sold to another team!"}), 400
+
+        # Validation 1.5: Validate numeric sold price & base price
+        try:
+            sold_price = int(sold_price_raw)
+            if sold_price <= 0:
+                return jsonify({"error": "Please enter a valid bid amount greater than ₹0."}), 400
+        except (ValueError, TypeError):
+            return jsonify({"error": "Please enter a valid number for the sold price."}), 400
+
+        player_base_price = int(float(player_data.get('base_value') or min_bid or 0))
+        if sold_price < player_base_price:
+            return jsonify({"error": f"The starting price is ₹{player_base_price:,}. You cannot sell below this player's base price."}), 400
+
+        # 3. Fetch Team & Validate Purse and Squad Limits
         team_ref = db.reference(f'/auctions/{auction_id}/teamList/{team_id}')
         team_data = team_ref.get()
         if not team_data:
-            return jsonify({"error": "Team not found"}), 404
-            
+            # Fallback: find by name or short_name in teamList
+            teams_ref = db.reference(f'/auctions/{auction_id}/teamList')
+            all_teams = teams_ref.get() or {}
+            if isinstance(all_teams, dict):
+                for real_tid, tinfo in all_teams.items():
+                    if isinstance(tinfo, dict) and (tinfo.get('name') == team_id or tinfo.get('short_name') == team_id):
+                        team_ref = db.reference(f'/auctions/{auction_id}/teamList/{real_tid}')
+                        team_data = tinfo
+                        team_id = real_tid
+                        break
+        if not team_data:
+            return jsonify({"error": "Selected franchise team was not found in the tournament records."}), 404
+
+        team_name = team_data.get('name', 'Team')
         current_balance = int(team_data.get('balance', 0))
-        sold_price = int(sold_price)
-        
-        # 2. Update player
-        db.reference(f'/auctions/{auction_id}/players/{player_id}').update({
+
+        # Validation 1.1: Insufficient purse balance check
+        if current_balance < sold_price:
+            return jsonify({
+                "error": f"{team_name} does not have enough budget! Remaining purse is ₹{current_balance:,}, but the bid is ₹{sold_price:,}."
+            }), 400
+
+        # Fetch current squad of this team
+        all_players_ref = db.reference(f'/auctions/{auction_id}/players')
+        all_players = normalize_dict(all_players_ref.get())
+        current_team_players = [
+            p for p in all_players.values()
+            if isinstance(p, dict) and p.get('status') == 'Sold' and (p.get('sold_to_team') == team_id or p.get('sold_to_team') == team_name)
+        ]
+        current_squad_count = len(current_team_players)
+
+        # Validation 1.2: Squad limit check
+        if current_squad_count >= players_per_team:
+            return jsonify({
+                "error": f"{team_name}'s squad is already full! They have reached their maximum limit of {players_per_team} players."
+            }), 400
+
+        # Validation 1.4: Reserve purse rule check
+        # A team must keep enough purse in reserve to buy their remaining required slots at min_bid
+        slots_remaining_after = players_per_team - (current_squad_count + 1)
+        if slots_remaining_after > 0 and min_bid > 0:
+            min_reserve_needed = slots_remaining_after * min_bid
+            max_allowed_bid = current_balance - min_reserve_needed
+            if sold_price > max_allowed_bid:
+                return jsonify({
+                    "error": f"{team_name} can only bid up to ₹{int(max_allowed_bid):,}. They must save ₹{int(min_reserve_needed):,} to buy their remaining {slots_remaining_after} players."
+                }), 400
+
+        # 4. Commit Player Update
+        player_ref.update({
             'status': 'Sold',
             'sold_to_team': team_id,
             'sold_price': sold_price
         })
-        
-        # 3. Update team balance
+
+        # 5. Commit Team Update (balance & players_count)
+        new_balance = current_balance - sold_price
+        new_squad_count = current_squad_count + 1
         team_ref.update({
-            'balance': current_balance - sold_price
+            'balance': new_balance,
+            'players_count': new_squad_count
         })
-        
-        # 4. Add to history
+
+        # 6. Update History
         try:
-            player_ref = db.reference(f'/auctions/{auction_id}/players/{player_id}')
-            player_data = player_ref.get() or {}
             player_name = player_data.get('name', 'Player')
-            team_name = team_data.get('name', 'Team')
             team_short_name = team_data.get('short_name') or team_name
-            
+
             history_ref = db.reference(f'/auctions/{auction_id}/history/{player_id}')
-            
-            # Update top-level history metadata
             history_ref.update({
                 'sold_team_name': team_short_name,
                 'status': 'Sold'
             })
-            
-            # Push the final sold bid record
             history_ref.push({
                 'team_short_name': team_short_name,
                 'amount': sold_price,
@@ -1053,9 +1120,13 @@ def sell_player(auction_id):
             })
         except Exception as e:
             print(f"Error logging sold history: {e}")
-        
-        return jsonify({"message": "Player sold successfully"}), 200
-        
+
+        return jsonify({
+            "message": f"Player sold to {team_name} successfully",
+            "new_balance": new_balance,
+            "players_count": new_squad_count
+        }), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

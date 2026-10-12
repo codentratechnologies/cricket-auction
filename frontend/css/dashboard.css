@@ -1959,4 +1959,92 @@ h3 {
     /* Mobile drawer takes full width on very small screens */
     .mobile-drawer { width: 85vw; max-width: 300px; }
 }
-
+
+/* --- Search Suggestions Dropdown --- */
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.search-suggestions.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.search-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.search-suggestion-item:hover {
+    background: #F3F4F6;
+}
+
+.search-suggestion-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.ss-icon-auction { background: #EFF6FF; color: #3B82F6; }
+.ss-icon-team    { background: #FDF4FF; color: #C026D3; }
+.ss-icon-player  { background: #ECFDF5; color: #10B981; }
+
+.search-suggestion-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.ss-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.ss-sub {
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+/* Custom Scrollbar for Suggestions */
+.search-suggestions::-webkit-scrollbar {
+    width: 6px;
+}
+.search-suggestions::-webkit-scrollbar-track {
+    background: transparent;
+}
+.search-suggestions::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 10px;
+}
+.search-suggestions::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}

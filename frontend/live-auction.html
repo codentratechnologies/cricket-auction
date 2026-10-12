@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Auction — Cricsquad</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/live-auction.css">
+    <link rel="stylesheet" href="css/live-auction.css?v=8">
 </head>
 <body>
 
     <!-- ══ TOP NAV ══ -->
     <nav class="la-topnav">
-        <div class="la-brand">
+        <div class="la-brand" onclick="window.location.href='dashboard.html'" title="Return to Dashboard">
             <div class="la-brand-mark">
-                <img src="logo.png" style="height: 48px; width: auto;" alt="Cricsquad Logo">
+                <img src="logo.png" style="height: 44px; width: auto;" alt="Cricsquad Logo">
             </div>
             <span>Cricsquad</span>
         </div>
@@ -52,14 +53,27 @@
                 <h2 class="la-player-name" id="currentPlayerName">Waiting for player...</h2>
                 <p class="la-player-role" id="playerRole">--</p>
                 <div class="la-tag-row" id="playerTags">
+                    <span class="la-tag la-tag-base" id="currentPlayerBase" style="display:none;"><i class="fa-solid fa-tag"></i> Base: ₹0</span>
                     <span class="la-tag la-tag-cat" id="currentPlayerCat" style="display:none;"></span>
                 </div>
+                <div class="la-player-specs" id="playerSpecs" style="display:none;"></div>
+                <div class="la-player-stats-row" id="playerStatsRow" style="display:none;"></div>
+            </div>
+
+            <!-- Pool Completed Notice (shown when 0 players remaining) -->
+            <div class="la-pool-complete-card" id="poolCompletedNotice" style="display:none;">
+                <div class="la-complete-icon"><i class="fa-solid fa-trophy"></i></div>
+                <h3 class="la-complete-title">Player Pool Completed!</h3>
+                <p class="la-complete-desc">All registered players have been auctioned. Review franchise rosters on the dashboard.</p>
+                <button class="la-complete-btn" onclick="window.location.href='auction-dashboard.html?id=' + new URLSearchParams(window.location.search).get('auction_id')">
+                    <i class="fa-solid fa-users"></i> View Final Squads
+                </button>
             </div>
 
             <div class="la-divider"></div>
 
             <!-- Next Player -->
-            <div class="la-panel-block">
+            <div class="la-panel-block" id="bringPlayerBlock">
                 <h4 class="la-block-title">Bring up a player</h4>
                 <p class="la-block-hint">Pull the next player onto the block</p>
                 <div class="la-btn-row">
@@ -140,21 +154,33 @@
                         <span class="la-bid-eyebrow">Current bid</span>
                         <div class="la-bid-figure-row">
                             <span class="la-bid-figure" id="currentBid">₹0</span>
-                            <button class="la-edit-pencil" id="editBidBtn" title="Edit bid">
+                            <button class="la-edit-pencil" id="editBidBtn" title="Edit bid amount directly">
                                 <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="la-undo-bid-btn" id="undoBidBtn" title="Undo last bid" style="display:none;">
+                                <i class="fa-solid fa-rotate-left"></i> Undo
                             </button>
                         </div>
                     </div>
                     <div class="la-stepper">
-                        <button class="la-step-btn" id="bidDownBtn" title="Bid down">
+                        <button class="la-step-btn" id="bidDownBtn" title="Decrease bid by increment">
                             <i class="fa-solid fa-minus"></i>
                         </button>
                         <div class="la-step-div"></div>
-                        <button class="la-step-btn" id="bidUpBtn" title="Bid up">
+                        <button class="la-step-btn" id="bidUpBtn" title="Increase bid by increment">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
                 </div>
+
+                <!-- Current Leading Bidder Chip in Dock -->
+                <div class="la-bid-center">
+                    <div class="la-holding-pill" id="holdingPill" style="display:none;">
+                        <span class="la-holding-dot"></span>
+                        <span class="la-holding-text" id="holdingText">Leading: --</span>
+                    </div>
+                </div>
+
                 <div class="la-bid-right">
                     <button class="la-action-btn la-btn-unsold" id="unsoldBtn">
                         <i class="fa-solid fa-xmark"></i> UNSOLD
@@ -168,25 +194,75 @@
         </div>
     </div>
 
+    <!-- ══ AUCTIONEER GAVEL SOLD MODAL ══ -->
+    <div class="la-modal-backdrop" id="soldModalBackdrop" style="display:none;">
+        <div class="la-modal-card">
+            <div class="la-modal-header">
+                <div class="la-modal-gavel"><i class="fa-solid fa-gavel"></i></div>
+                <div>
+                    <h3 class="la-modal-title">Hammer Down: Confirm Sale</h3>
+                    <p class="la-modal-subtitle">Going once... going twice... sold!</p>
+                </div>
+            </div>
+            <div class="la-modal-body">
+                <div class="la-sale-summary-grid">
+                    <div class="la-summary-item">
+                        <span class="la-s-label">Player</span>
+                        <span class="la-s-val" id="modalPlayerName">--</span>
+                    </div>
+                    <div class="la-summary-item">
+                        <span class="la-s-label">Winning Franchise</span>
+                        <span class="la-s-val" id="modalTeamName">--</span>
+                    </div>
+                    <div class="la-summary-item la-summary-highlight">
+                        <span class="la-s-label">Winning Bid</span>
+                        <span class="la-s-val-large" id="modalSoldPrice">₹0</span>
+                    </div>
+                    <div class="la-summary-item">
+                        <span class="la-s-label">Franchise Purse Remaining</span>
+                        <span class="la-s-val" id="modalTeamBalance">₹0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="la-modal-footer">
+                <button class="la-modal-btn la-btn-cancel" id="cancelSoldBtn">Keep Bidding</button>
+                <button class="la-modal-btn la-btn-confirm-sold" id="confirmSoldBtn">
+                    <i class="fa-solid fa-gavel"></i> CONFIRM SALE (SOLD)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ UNSOLD ACTIVE BID WARNING MODAL ══ -->
+    <div class="la-modal-backdrop" id="unsoldModalBackdrop" style="display:none;">
+        <div class="la-modal-card">
+            <div class="la-modal-header la-header-warn">
+                <div class="la-modal-gavel warn-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <h3 class="la-modal-title">Active Bid Warning</h3>
+                    <p class="la-modal-subtitle">A team currently holds the winning bid on this player</p>
+                </div>
+            </div>
+            <div class="la-modal-body">
+                <p class="la-warn-text" id="unsoldWarnText">
+                    Franchise currently holds a bid of ₹0. Passing this player will void this bid and mark the player as UNSOLD without sale.
+                </p>
+            </div>
+            <div class="la-modal-footer">
+                <button class="la-modal-btn la-btn-cancel" id="cancelUnsoldBtn">Keep Bidding</button>
+                <button class="la-modal-btn la-btn-confirm-warn" id="confirmUnsoldBtn">
+                    <i class="fa-solid fa-xmark"></i> Yes, Mark Unsold
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="la-toast-wrap" id="toastWrap"></div>
 
-    <script src="js/live-auction.js?v=2"></script>
+    <script src="js/live-auction.js?v=8"></script>
     <script>
-        // Team selection
-        function selectTeam(el) {
-            document.querySelectorAll('.la-team-tile').forEach(t => t.classList.remove('la-team-selected'));
-            el.classList.add('la-team-selected');
-        }
-
-        // Toggle manual entry
-        document.getElementById('manualBtn').addEventListener('click', function () {
-            const entry = document.getElementById('manualEntry');
-            entry.classList.toggle('la-show');
-            if (entry.classList.contains('la-show')) document.getElementById('manualInput').focus();
-        });
-
-        // Live timer
+        // Live session timer
         let secs = 0;
         setInterval(() => {
             secs++;
@@ -196,18 +272,6 @@
             const el = document.getElementById('auctionTimer');
             if (el) el.textContent = `${h}:${m}:${s}`;
         }, 1000);
-
-        // Toast utility
-        function showToast(msg, kind) {
-            const wrap = document.getElementById('toastWrap');
-            const el = document.createElement('div');
-            el.className = 'la-toast';
-            if (kind === 'sold') el.classList.add('la-toast-sold');
-            el.textContent = msg;
-            wrap.appendChild(el);
-            requestAnimationFrame(() => el.classList.add('la-toast-show'));
-            setTimeout(() => { el.classList.remove('la-toast-show'); setTimeout(() => el.remove(), 300); }, 3200);
-        }
     </script>
 </body>
 </html>
