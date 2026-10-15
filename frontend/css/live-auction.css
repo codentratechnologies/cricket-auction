@@ -107,13 +107,20 @@ body {
     text-transform: uppercase;
 }
 
-.la-topnav-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+.la-nav-left {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
+    min-width: 0;
+}
+
+.la-topnav-center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 16px;
+    border-left: 1.5px solid var(--border-color);
+    min-width: 0;
 }
 
 .la-live-badge {
@@ -1613,4 +1620,441 @@ body {
         margin-left: 0;
         justify-content: flex-end;
     }
+}
+
+/* ═══════════════════════════════════════════════
+   AUCTIONEER DESK ENHANCEMENTS (P0 CONTROLS)
+   ═══════════════════════════════════════════════ */
+
+/* Active Bid Countdown Clock */
+.la-countdown-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0F172A;
+    color: #FFFFFF;
+    border: 1.5px solid #334155;
+    padding: 3px 8px;
+    border-radius: var(--r-m);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.la-countdown-val-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 44px;
+}
+
+.la-countdown-label {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #94A3B8;
+    line-height: 1;
+}
+
+.la-countdown-val {
+    font-family: 'Inter', monospace;
+    font-size: 15px;
+    font-weight: 900;
+    color: #38BDF8;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.la-countdown-wrap.la-countdown-urgent {
+    background: #7F1D1D;
+    border-color: #EF4444;
+    animation: la-pulse-urgent 0.8s infinite alternate;
+}
+.la-countdown-wrap.la-countdown-urgent .la-countdown-val {
+    color: #FEF08A;
+}
+
+@keyframes la-pulse-urgent {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    100% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+.la-timer-ctrl-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.15s ease;
+}
+.la-timer-ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: scale(1.08);
+}
+
+/* Nav Icon Buttons */
+.la-nav-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--r-m);
+    border: 1.5px solid var(--border-color);
+    background: var(--surface);
+    color: var(--text-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.18s ease;
+}
+.la-nav-icon-btn:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    background: var(--surface-subtle);
+    transform: translateY(-1px);
+}
+.la-nav-icon-btn.is-muted {
+    color: #EF4444;
+    background: #FEF2F2;
+    border-color: #FECACA;
+}
+
+/* Nav Pill Buttons */
+.la-nav-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: var(--r-m);
+    border: 1.5px solid var(--border-color);
+    background: var(--surface);
+    color: var(--text-main);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.18s ease;
+}
+.la-nav-pill-btn:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    background: var(--surface-subtle);
+    transform: translateY(-1px);
+}
+
+.la-badge-count {
+    background: #EF4444;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 100px;
+}
+
+/* Undo Last Sale Button */
+.la-btn-revert-sale {
+    background: #FFFBEB !important;
+    border-color: #FCD34D !important;
+    color: #B45309 !important;
+}
+.la-btn-revert-sale:hover {
+    background: #FEF3C7 !important;
+    border-color: #F59E0B !important;
+    color: #92400E !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Gavel Call Stepper (Dock) */
+.la-gavel-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 3px;
+    border-radius: var(--r-m);
+}
+
+.la-gavel-step {
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: var(--r-s);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.la-gavel-step:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #FFFFFF;
+}
+.la-gavel-step.active {
+    background: #F59E0B;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+.la-gavel-step.active-final {
+    background: #EF4444;
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5);
+    animation: la-pulse-urgent 0.8s infinite alternate;
+}
+
+/* Hotkey Badges */
+.la-kbd-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.25);
+    color: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 4px;
+    margin-left: 4px;
+    line-height: 1;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.la-kbd-mini {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-left: 3px;
+}
+.la-kbd-red {
+    background: rgba(239, 68, 68, 0.35);
+    border-color: rgba(239, 68, 68, 0.6);
+}
+.la-kbd-green {
+    background: rgba(16, 185, 129, 0.35);
+    border-color: rgba(16, 185, 129, 0.6);
+}
+
+/* Large Modal Card (Unsold Pool) */
+.la-modal-card-lg {
+    max-width: 780px !important;
+    width: 92% !important;
+}
+
+.la-modal-close {
+    background: transparent;
+    border: none;
+    color: #94A3B8;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.15s ease;
+}
+.la-modal-close:hover {
+    color: #FFFFFF;
+}
+
+/* Unsold Pool Toolbar */
+.la-unsold-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.la-unsold-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-subtle);
+    border: 1.5px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: var(--r-m);
+    flex: 1;
+    min-width: 200px;
+}
+.la-unsold-search-wrap input {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    color: var(--text-main);
+}
+.la-unsold-search-wrap i {
+    color: var(--text-muted);
+}
+
+.la-unsold-bulk-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.la-unsold-bulk-wrap label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.la-select-discount {
+    padding: 6px 10px;
+    border-radius: var(--r-s);
+    border: 1.5px solid var(--border-color);
+    background: var(--surface);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    outline: none;
+}
+
+.la-btn-bulk-reset {
+    padding: 7px 14px;
+    background: #0E48A0;
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--r-s);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease;
+}
+.la-btn-bulk-reset:hover {
+    background: #0B3A82;
+}
+
+/* Unsold List */
+.la-unsold-list {
+    max-height: 380px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.la-unsold-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--r-m);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-color);
+    transition: all 0.15s ease;
+}
+.la-unsold-item:hover {
+    background: #FFFFFF;
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-sm);
+}
+
+.la-unsold-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.la-unsold-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #E2E8F0;
+}
+
+.la-unsold-info h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+.la-unsold-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 2px 0 0;
+}
+
+.la-unsold-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.la-btn-bring-block {
+    padding: 6px 12px;
+    background: var(--primary-green-light);
+    color: var(--primary-green-dark);
+    border: 1px solid #A7F3D0;
+    border-radius: var(--r-s);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+}
+.la-btn-bring-block:hover {
+    background: var(--primary-green);
+    color: #FFFFFF;
+    border-color: var(--primary-green);
+}
+
+/* Hotkeys Modal Grid */
+.la-hotkeys-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+.la-hotkey-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: var(--r-s);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-color);
+}
+
+.la-key {
+    background: #0F172A;
+    color: #FFFFFF;
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    min-width: 45px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.la-key-desc {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
 }

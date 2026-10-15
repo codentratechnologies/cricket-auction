@@ -1,5 +1,198 @@
 // live-auction.js
 
+// ── Web Audio API Acoustic Engine (100% Offline & Pure Synthesis) ──
+const AuctionAudio = (() => {
+    let audioCtx = null;
+    let isMuted = localStorage.getItem('cricsquad_audio_muted') === 'true';
+
+    function getContext() {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                audioCtx = new AudioContextClass();
+            }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        localStorage.setItem('cricsquad_audio_muted', isMuted);
+        updateSoundButtonUI();
+        return isMuted;
+    }
+
+    function getMuted() {
+        return isMuted;
+    }
+
+    function updateSoundButtonUI() {
+        const btn = document.getElementById('soundToggleBtn');
+        if (!btn) return;
+        if (isMuted) {
+            btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            btn.classList.add('is-muted');
+            btn.title = "Audio Effects Muted (Click to Unmute)";
+        } else {
+            btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            btn.classList.remove('is-muted');
+            btn.title = "Audio Effects Enabled (Click to Mute)";
+        }
+    }
+
+    // 1. Realistic Mahogany Gavel Strike (Deep resonant thump + wood transient)
+    function playHammer() {
+        if (isMuted) return;
+        const ctx = getContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Wooden body resonance
+        const osc = ctx.createOscillator();
+        const oscGain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.22);
+        oscGain.gain.setValueAtTime(1.0, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+        osc.connect(oscGain);
+        oscGain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.24);
+
+        // Acoustic wood snap (noise burst)
+        const bufferSize = ctx.sampleRate * 0.05;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.15));
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1300;
+        filter.Q.value = 2.0;
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.8, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noise.start(now);
+
+        // Sounding block slap echo
+        const osc2 = ctx.createOscillator();
+        const osc2Gain = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(85, now + 0.04);
+        osc2.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+        osc2Gain.gain.setValueAtTime(0.5, now + 0.04);
+        osc2Gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc2.connect(osc2Gain);
+        osc2Gain.connect(ctx.destination);
+        osc2.start(now + 0.04);
+        osc2.stop(now + 0.35);
+    }
+
+    // 2. Crystal Bid Ping (Dual sine bells)
+    function playBidPing() {
+        if (isMuted) return;
+        const ctx = getContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        [880, 1760].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(idx === 0 ? 0.3 : 0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + (idx === 0 ? 0.32 : 0.18));
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        });
+    }
+
+    // 3. Countdown Clock Tick
+    function playTick(isUrgent = false) {
+        if (isMuted) return;
+        const ctx = getContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = isUrgent ? 'square' : 'triangle';
+        osc.frequency.setValueAtTime(isUrgent ? 988 : 660, now);
+        gain.gain.setValueAtTime(isUrgent ? 0.22 : 0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+    }
+
+    // 4. Gavel Calling Warning Stage Chime (1st, 2nd, Final Call)
+    function playCall(stage = 1) {
+        if (isMuted) return;
+        const ctx = getContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        const freqs = stage === 1 ? [440, 554] : stage === 2 ? [554, 659] : [659, 880];
+        freqs.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.06);
+            gain.gain.setValueAtTime(0.28, now + i * 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.06);
+            osc.stop(now + i * 0.06 + 0.35);
+        });
+    }
+
+    // 5. Unsold Buzzer
+    function playUnsold() {
+        if (isMuted) return;
+        const ctx = getContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        [160, 215].forEach(freq => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        });
+    }
+
+    return {
+        playHammer,
+        playBidPing,
+        playTick,
+        playCall,
+        playUnsold,
+        toggleMute,
+        getMuted,
+        updateSoundButtonUI
+    };
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     // Auth check
     const organizerId = localStorage.getItem('organizer_id');
@@ -22,17 +215,34 @@ document.addEventListener('DOMContentLoaded', () => {
     let availablePlayers = [];
     let teams = [];
     let bidHistoryStack = [];
+    let lastSoldRecord = null; // Mission-critical for Undo Last Sale
+    let countdownSeconds = 30;
+    let isTimerRunning = false;
+    let timerInterval = null;
+    let currentGavelStage = 0; // 0: None, 1: 1st Call, 2: 2nd Call, 3: Final Call
+
     let currentLiveState = {
         currentPlayer: null,
         currentBid: { amount: 0, teamId: null, teamName: null, teamLogo: null, teamShortName: null },
         status: 'waiting',
-        stats: { sold: 0, unsold: 0, available: 0, teams: 0 }
+        stats: { sold: 0, unsold: 0, available: 0, teams: 0 },
+        gavelStage: null
     };
 
     const firebaseUrl = `https://cricket-auction-9b22a-default-rtdb.asia-southeast1.firebasedatabase.app/live_auctions/${auctionId}.json`;
 
     // Elements
     const timerEl = document.getElementById('auctionTimer');
+    const countdownWrap = document.getElementById('countdownWrap');
+    const bidCountdownEl = document.getElementById('bidCountdown');
+    const toggleTimerBtn = document.getElementById('toggleTimerBtn');
+    const resetTimerBtn = document.getElementById('resetTimerBtn');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const hotkeysModalBtn = document.getElementById('hotkeysModalBtn');
+    const unsoldPoolBtn = document.getElementById('unsoldPoolBtn');
+    const unsoldPoolCount = document.getElementById('unsoldPoolCount');
+    const undoSaleBtn = document.getElementById('undoSaleBtn');
+
     const playerAvatar = document.getElementById('playerAvatar');
     const currentPlayerImg = document.getElementById('currentPlayerImg');
     const playerInitials = document.getElementById('playerInitials');
@@ -44,13 +254,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerSpecs = document.getElementById('playerSpecs');
     const playerStatsRow = document.getElementById('playerStatsRow');
     const poolCompletedNotice = document.getElementById('poolCompletedNotice');
+    const poolOpenUnsoldBtn = document.getElementById('poolOpenUnsoldBtn');
     const bringPlayerBlock = document.getElementById('bringPlayerBlock');
+    const statUnsoldTile = document.getElementById('statUnsoldTile');
 
     const currentBidEl = document.getElementById('currentBid');
     const editBidBtn = document.getElementById('editBidBtn');
     const undoBidBtn = document.getElementById('undoBidBtn');
     const holdingPill = document.getElementById('holdingPill');
     const holdingText = document.getElementById('holdingText');
+    const gavelStep1 = document.getElementById('gavelStep1');
+    const gavelStep2 = document.getElementById('gavelStep2');
+    const gavelStep3 = document.getElementById('gavelStep3');
     const teamsGrid = document.getElementById('teamsGrid');
     const activityList = document.getElementById('activityList');
 
@@ -67,6 +282,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const unsoldWarnText = document.getElementById('unsoldWarnText');
     const confirmUnsoldBtn = document.getElementById('confirmUnsoldBtn');
     const cancelUnsoldBtn = document.getElementById('cancelUnsoldBtn');
+
+    // Undo Sale Modal Elements
+    const undoSaleModalBackdrop = document.getElementById('undoSaleModalBackdrop');
+    const undoPlayerName = document.getElementById('undoPlayerName');
+    const undoTeamName = document.getElementById('undoTeamName');
+    const undoSoldPrice = document.getElementById('undoSoldPrice');
+    const cancelUndoSaleBtn = document.getElementById('cancelUndoSaleBtn');
+    const confirmUndoSaleBtn = document.getElementById('confirmUndoSaleBtn');
+
+    // Unsold Pool Modal Elements
+    const unsoldPoolModalBackdrop = document.getElementById('unsoldPoolModalBackdrop');
+    const closeUnsoldPoolBtn = document.getElementById('closeUnsoldPoolBtn');
+    const unsoldSearchInput = document.getElementById('unsoldSearchInput');
+    const bulkResetUnsoldBtn = document.getElementById('bulkResetUnsoldBtn');
+    const unsoldDiscountSelect = document.getElementById('unsoldDiscountSelect');
+    const unsoldPlayersList = document.getElementById('unsoldPlayersList');
+
+    // Shortcuts Modal Elements
+    const shortcutsModalBackdrop = document.getElementById('shortcutsModalBackdrop');
+    const closeShortcutsBtn = document.getElementById('closeShortcutsBtn');
+
+    // Initialize sound button
+    AuctionAudio.updateSoundButtonUI();
+    if (soundToggleBtn) {
+        soundToggleBtn.addEventListener('click', () => {
+            const muted = AuctionAudio.toggleMute();
+            showToast(
+                muted ? "Audio Muted" : "Audio Enabled",
+                muted ? "Sound effects are now muted." : "Gavel strike, bid pings, and timers are now audible.",
+                "info",
+                muted ? "fa-volume-xmark" : "fa-volume-high"
+            );
+        });
+    }
 
     // 1. Initial Load
     async function loadAuctionData() {
@@ -120,6 +369,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         addActivity(record.message);
                     }
                 });
+            }
+
+            // Check for last sold player to enable Undo Last Sale button
+            const soldList = allPlayers.filter(p => p.status && p.status.toLowerCase() === 'sold');
+            if (soldList.length > 0) {
+                const lastP = soldList[soldList.length - 1];
+                const team = teams.find(t => (t.id || t.name) === lastP.sold_to_team || t.name === lastP.sold_to_team);
+                lastSoldRecord = {
+                    playerId: lastP.id,
+                    playerName: lastP.name,
+                    teamId: lastP.sold_to_team,
+                    teamName: team ? team.name : (lastP.sold_to_team || 'Team'),
+                    soldPrice: Number(lastP.sold_price || 0)
+                };
+                updateUndoSaleButtonState();
             }
 
             // Check if there is an active session to resume from Firebase
@@ -191,6 +455,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('statAvail').textContent = avail;
         document.getElementById('statTeams').textContent = teams.length;
 
+        if (unsoldPoolCount) {
+            unsoldPoolCount.textContent = unsold;
+        }
+
         currentLiveState.stats = { sold, unsold, available: avail, teams: teams.length };
 
         // Pool completion state
@@ -233,6 +501,9 @@ document.addEventListener('DOMContentLoaded', () => {
             teamShortName: prev.teamShortName
         };
         updateUndoButtonState();
+        resetGavelStage();
+        resetCountdown(true);
+        AuctionAudio.playBidPing();
         updateOrganizerUI();
         renderTeams();
         showToast({
@@ -407,6 +678,24 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('manualInput').value = '';
             document.getElementById('manualEntry').classList.remove('la-show');
         } else {
+            // Check if player is in allPlayers and currently Unsold (Round 2 support)
+            const unsoldPlayer = allPlayers.find(p => 
+                (p.name && p.name.toLowerCase().includes(input.toLowerCase())) || 
+                (p.id && p.id.toString() === input)
+            );
+            if (unsoldPlayer && unsoldPlayer.status && unsoldPlayer.status.toLowerCase() === 'unsold') {
+                showToast({
+                    title: "Unsold Player (Round 2)",
+                    message: `${unsoldPlayer.name} was marked Unsold. Bringing them back onto the block for Round 2!`,
+                    type: "sold",
+                    icon: "fa-rotate-right"
+                });
+                bringUnsoldToBlock(unsoldPlayer.id, unsoldPlayer.base_value || 0);
+                document.getElementById('manualInput').value = '';
+                document.getElementById('manualEntry').classList.remove('la-show');
+                return;
+            }
+
             showToast({
                 title: "Player Not Found",
                 message: `No available player matching "${input}" was found in the pool. Check spelling or check if they were already auctioned.`,
@@ -431,6 +720,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset Undo Stack for new player
         bidHistoryStack = [];
         updateUndoButtonState();
+
+        // Reset Gavel Stage & Countdown Timer
+        resetGavelStage();
+        resetCountdown(true);
+        AuctionAudio.playBidPing();
 
         const baseVal = parseInt(player.base_value) || parseInt(auctionSettings.min_bid || 0) || 1000;
 
@@ -465,7 +759,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPlayer: currentLiveState.currentPlayer,
             currentBid: currentLiveState.currentBid,
             status: currentLiveState.status,
-            stats: currentLiveState.stats
+            stats: currentLiveState.stats,
+            gavelStage: null
         });
         
         // Initialize history node for this player
@@ -545,6 +840,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 pushBidHistorySnapshot();
                 currentLiveState.currentBid.amount = cleanNum;
+                resetGavelStage();
+                resetCountdown(true);
+                AuctionAudio.playBidPing();
                 updateOrganizerUI();
                 renderTeams();
                 pushToFirebase({ currentBid: currentLiveState.currentBid });
@@ -598,6 +896,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         pushBidHistorySnapshot();
         currentLiveState.currentBid.amount = newAmount;
+        resetGavelStage();
+        resetCountdown(true);
+        AuctionAudio.playBidPing();
         updateOrganizerUI();
         renderTeams();
         pushToFirebase({ currentBid: currentLiveState.currentBid });
@@ -684,9 +985,13 @@ document.addEventListener('DOMContentLoaded', () => {
         currentLiveState.currentBid.teamLogo = team.logo_url || null;
         currentLiveState.currentBid.teamShortName = team.short_name || (team.name ? team.name.substring(0, 2).toUpperCase() : 'T');
         
+        resetGavelStage();
+        resetCountdown(true);
+        AuctionAudio.playBidPing();
+
         updateOrganizerUI();
         renderTeams();
-        pushToFirebase({ currentBid: currentLiveState.currentBid });
+        pushToFirebase({ currentBid: currentLiveState.currentBid, gavelStage: null });
         
         // Log to bid history under player's ID via Backend
         const historyUrl = `http://127.0.0.1:5000/api/auctions/${auctionId}/history/${currentLiveState.currentPlayer.id}`;
@@ -827,13 +1132,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     organizer_id: organizerId,
                     player_id: pid,
                     team_id: tid,
-                    sold_price: price
+                    final_price: price
                 })
             });
-
             const data = await res.json();
 
             if (res.ok) {
+                AuctionAudio.playHammer();
+                pauseCountdown();
+                resetGavelStage();
+
+                lastSoldRecord = {
+                    playerId: pid,
+                    playerName: currentLiveState.currentPlayer.name,
+                    teamId: tid,
+                    teamName: currentLiveState.currentBid.teamName,
+                    soldPrice: price
+                };
+                updateUndoSaleButtonState();
+
                 showToast({
                     title: "Hammer Down · SOLD!",
                     message: `${currentLiveState.currentPlayer.name} has been sold to ${currentLiveState.currentBid.teamName} for ₹${price.toLocaleString('en-IN')}!`,
@@ -858,7 +1175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     isProcessingSale = false;
                     soldBtn.disabled = false;
                     unsoldBtn.disabled = false;
-                    soldBtn.innerHTML = '<i class="fa-solid fa-gavel"></i> SOLD';
+                    soldBtn.innerHTML = '<i class="fa-solid fa-gavel"></i> SOLD <span class="la-kbd-badge la-kbd-green">S</span>';
                 }, 1500);
             } else {
                 showToast({
@@ -872,7 +1189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isProcessingSale = false;
                 soldBtn.disabled = false;
                 unsoldBtn.disabled = false;
-                soldBtn.innerHTML = '<i class="fa-solid fa-gavel"></i> SOLD';
+                soldBtn.innerHTML = '<i class="fa-solid fa-gavel"></i> SOLD <span class="la-kbd-badge la-kbd-green">S</span>';
             }
         } catch (e) {
             console.error("Error selling player", e);
@@ -887,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isProcessingSale = false;
             soldBtn.disabled = false;
             unsoldBtn.disabled = false;
-            soldBtn.innerHTML = '<i class="fa-solid fa-gavel"></i> SOLD';
+            soldBtn.innerHTML = '<i class="fa-solid fa-gavel"></i> SOLD <span class="la-kbd-badge la-kbd-green">S</span>';
         }
     }
 
@@ -937,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         unsoldBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PASSING...';
 
         currentLiveState.status = 'unsold';
-        await pushToFirebase({ status: 'unsold' });
+        await pushToFirebase({ status: 'unsold', gavelStage: null });
         
         try {
             const res = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/players/${pid}`, {
@@ -946,6 +1263,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ status: 'Unsold', organizer_id: organizerId })
             });
             if (res.ok) {
+                AuctionAudio.playUnsold();
+                pauseCountdown();
+                resetGavelStage();
+
                 showToast({
                     title: "Player Passed · UNSOLD",
                     message: `${currentLiveState.currentPlayer.name} received no bids and has been moved to the unsold list.`,
@@ -962,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     isProcessingSale = false;
                     soldBtn.disabled = false;
                     unsoldBtn.disabled = false;
-                    unsoldBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> UNSOLD';
+                    unsoldBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> UNSOLD <span class="la-kbd-badge la-kbd-red">U</span>';
                 }, 1000);
             } else {
                 showToast({
@@ -974,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isProcessingSale = false;
                 soldBtn.disabled = false;
                 unsoldBtn.disabled = false;
-                unsoldBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> UNSOLD';
+                unsoldBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> UNSOLD <span class="la-kbd-badge la-kbd-red">U</span>';
             }
         } catch (e) {
             console.error("Error passing player", e);
@@ -987,14 +1308,18 @@ document.addEventListener('DOMContentLoaded', () => {
             isProcessingSale = false;
             soldBtn.disabled = false;
             unsoldBtn.disabled = false;
-            unsoldBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> UNSOLD';
+            unsoldBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> UNSOLD <span class="la-kbd-badge la-kbd-red">U</span>';
         }
     }
 
     function clearBlock() {
+        pauseCountdown();
+        resetGavelStage();
+
         currentLiveState.currentPlayer = null;
         currentLiveState.currentBid = { amount: 0, teamId: null, teamName: null, teamLogo: null, teamShortName: null };
         currentLiveState.status = 'waiting';
+        currentLiveState.gavelStage = null;
         
         bidHistoryStack = [];
         updateUndoButtonState();
@@ -1010,7 +1335,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPlayer: null, 
             currentBid: currentLiveState.currentBid, 
             status: 'waiting',
-            stats: currentLiveState.stats
+            stats: currentLiveState.stats,
+            gavelStage: null
         });
     }
 
@@ -1121,6 +1447,503 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             entry.style.display = 'flex';
             document.getElementById('manualInput').focus();
+        }
+    });
+
+    // ═══════════════════════════════════════════════
+    // 1. ACTIVE BID COUNTDOWN TIMER ENGINE (Item 1.3)
+    // ═══════════════════════════════════════════════
+    function updateTimerDisplay() {
+        if (bidCountdownEl) {
+            bidCountdownEl.textContent = `${countdownSeconds}s`;
+        }
+        if (countdownWrap) {
+            if (countdownSeconds <= 5 && isTimerRunning) {
+                countdownWrap.classList.add('la-countdown-urgent');
+            } else {
+                countdownWrap.classList.remove('la-countdown-urgent');
+            }
+        }
+        if (toggleTimerBtn) {
+            toggleTimerBtn.innerHTML = isTimerRunning 
+                ? '<i class="fa-solid fa-pause"></i>' 
+                : '<i class="fa-solid fa-play"></i>';
+        }
+    }
+
+    function startCountdown() {
+        if (isTimerRunning) return;
+        if (countdownSeconds <= 0) countdownSeconds = 30;
+        isTimerRunning = true;
+        updateTimerDisplay();
+
+        timerInterval = setInterval(() => {
+            if (countdownSeconds > 0) {
+                countdownSeconds--;
+                if (countdownSeconds <= 5 && countdownSeconds > 0) {
+                    AuctionAudio.playTick(true);
+                }
+                updateTimerDisplay();
+
+                if (countdownSeconds === 0) {
+                    pauseCountdown();
+                    AuctionAudio.playUnsold();
+                    showToast({
+                        title: "Time's Up!",
+                        message: "Bidding countdown expired. Call final warning or hammer down.",
+                        type: "warning",
+                        icon: "fa-stopwatch"
+                    });
+                }
+            }
+        }, 1000);
+    }
+
+    function pauseCountdown() {
+        isTimerRunning = false;
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        updateTimerDisplay();
+    }
+
+    function toggleCountdown() {
+        if (isTimerRunning) {
+            pauseCountdown();
+        } else {
+            startCountdown();
+        }
+    }
+
+    function resetCountdown(autoStart = false) {
+        pauseCountdown();
+        countdownSeconds = 30;
+        updateTimerDisplay();
+        if (autoStart && currentLiveState.currentPlayer) {
+            startCountdown();
+        }
+    }
+
+    if (toggleTimerBtn) toggleTimerBtn.addEventListener('click', toggleCountdown);
+    if (resetTimerBtn) resetTimerBtn.addEventListener('click', () => resetCountdown(false));
+
+    // ═══════════════════════════════════════════════
+    // 2. 3-STAGE GAVEL WARNING STEPPER (Item 1.3)
+    // ═══════════════════════════════════════════════
+    function setGavelStage(stage) {
+        if (!currentLiveState.currentPlayer) {
+            showToast("No Player on the Block", "Bring up a player before calling gavel stages.", "warning", "fa-user-clock");
+            return;
+        }
+        currentGavelStage = stage;
+
+        [gavelStep1, gavelStep2, gavelStep3].forEach(btn => {
+            if (btn) btn.classList.remove('active', 'active-final');
+        });
+
+        if (stage === 1) {
+            if (gavelStep1) gavelStep1.classList.add('active');
+            AuctionAudio.playCall(1);
+            showToast({
+                title: "Going Once...",
+                message: `${currentLiveState.currentBid.teamName || 'Opening bid'} at ₹${currentLiveState.currentBid.amount.toLocaleString('en-IN')}`,
+                type: "info",
+                icon: "fa-gavel"
+            });
+        } else if (stage === 2) {
+            if (gavelStep1) gavelStep1.classList.add('active');
+            if (gavelStep2) gavelStep2.classList.add('active');
+            AuctionAudio.playCall(2);
+            showToast({
+                title: "Going Twice...",
+                message: `Fair warning! Any counter-bid against ₹${currentLiveState.currentBid.amount.toLocaleString('en-IN')}?`,
+                type: "warning",
+                icon: "fa-gavel"
+            });
+        } else if (stage === 3) {
+            if (gavelStep1) gavelStep1.classList.add('active');
+            if (gavelStep2) gavelStep2.classList.add('active');
+            if (gavelStep3) gavelStep3.classList.add('active-final');
+            AuctionAudio.playCall(3);
+            showToast({
+                title: "Final Call!",
+                message: "Last chance before the hammer falls! Any higher bid?",
+                type: "sold",
+                icon: "fa-gavel"
+            });
+        }
+
+        // Sync to live overlay
+        pushToFirebase({
+            gavelStage: stage === 1 ? '1st Call' : stage === 2 ? '2nd Call' : stage === 3 ? 'Final Call' : null
+        });
+    }
+
+    function advanceGavelStage() {
+        if (currentGavelStage < 3) {
+            setGavelStage(currentGavelStage + 1);
+        } else {
+            // At Final Call: open SOLD modal directly
+            const soldBtn = document.getElementById('soldBtn');
+            if (soldBtn) soldBtn.click();
+        }
+    }
+
+    function resetGavelStage() {
+        currentGavelStage = 0;
+        [gavelStep1, gavelStep2, gavelStep3].forEach(btn => {
+            if (btn) btn.classList.remove('active', 'active-final');
+        });
+    }
+
+    if (gavelStep1) gavelStep1.addEventListener('click', () => setGavelStage(1));
+    if (gavelStep2) gavelStep2.addEventListener('click', () => setGavelStage(2));
+    if (gavelStep3) gavelStep3.addEventListener('click', () => setGavelStage(3));
+
+    // ═══════════════════════════════════════════════
+    // 3. UNDO LAST SALE (EMERGENCY ROLLBACK - Item 1.1)
+    // ═══════════════════════════════════════════════
+    function updateUndoSaleButtonState() {
+        if (!undoSaleBtn) return;
+        undoSaleBtn.style.display = lastSoldRecord ? 'inline-flex' : 'none';
+    }
+
+    function openUndoSaleModal() {
+        if (!lastSoldRecord) {
+            showToast("No Sale to Revert", "There is no completed sale to undo.", "info", "fa-circle-info");
+            return;
+        }
+        if (undoPlayerName) undoPlayerName.textContent = lastSoldRecord.playerName || 'Player';
+        if (undoTeamName) undoTeamName.textContent = lastSoldRecord.teamName || 'Team';
+        if (undoSoldPrice) undoSoldPrice.textContent = `₹${(lastSoldRecord.soldPrice || 0).toLocaleString('en-IN')}`;
+        if (undoSaleModalBackdrop) undoSaleModalBackdrop.style.display = 'flex';
+    }
+
+    if (undoSaleBtn) undoSaleBtn.addEventListener('click', openUndoSaleModal);
+    if (cancelUndoSaleBtn) cancelUndoSaleBtn.addEventListener('click', () => {
+        if (undoSaleModalBackdrop) undoSaleModalBackdrop.style.display = 'none';
+    });
+
+    if (confirmUndoSaleBtn) {
+        confirmUndoSaleBtn.addEventListener('click', async () => {
+            if (undoSaleModalBackdrop) undoSaleModalBackdrop.style.display = 'none';
+            if (!lastSoldRecord) return;
+
+            confirmUndoSaleBtn.disabled = true;
+            confirmUndoSaleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Reverting...';
+
+            try {
+                const res = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/revert-sale`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        organizer_id: organizerId,
+                        player_id: lastSoldRecord.playerId
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    AuctionAudio.playBidPing();
+                    showToast({
+                        title: "Sale Reverted Successfully",
+                        message: `Restored ${lastSoldRecord.playerName} to Available. Refunded ₹${lastSoldRecord.soldPrice.toLocaleString('en-IN')} to ${lastSoldRecord.teamName}.`,
+                        type: "sold",
+                        icon: "fa-rotate-left"
+                    });
+                    addActivity(`REVERTED: ${lastSoldRecord.playerName} sale to ${lastSoldRecord.teamName} undone.`);
+
+                    // Refund team in memory
+                    const team = teams.find(t => (t.id || t.name) === lastSoldRecord.teamId || t.name === lastSoldRecord.teamName);
+                    if (team) {
+                        team.balance = data.new_balance !== undefined ? data.new_balance : ((team.balance || 0) + lastSoldRecord.soldPrice);
+                        team.players_count = data.new_squad_count !== undefined ? data.new_squad_count : Math.max(0, (team.players_count || 1) - 1);
+                    }
+
+                    // Restore player in memory
+                    const pObj = allPlayers.find(p => p.id === lastSoldRecord.playerId);
+                    if (pObj) {
+                        pObj.status = 'Available';
+                        delete pObj.sold_to_team;
+                        delete pObj.sold_price;
+                        if (!availablePlayers.some(p => p.id === pObj.id)) {
+                            availablePlayers.push(pObj);
+                        }
+                        // Put back on block immediately
+                        setLivePlayer(pObj);
+                    }
+
+                    lastSoldRecord = null;
+                    updateUndoSaleButtonState();
+                    updateStatsCounters();
+                    renderTeams();
+                } else {
+                    showToast("Revert Failed", data.error || "Could not revert sale.", "error", "fa-circle-exclamation");
+                }
+            } catch (err) {
+                console.error("Error reverting sale:", err);
+                showToast("Connection Error", "Network request failed while reverting sale.", "error", "fa-wifi");
+            } finally {
+                confirmUndoSaleBtn.disabled = false;
+                confirmUndoSaleBtn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Confirm Revert & Refund';
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════
+    // 4. ROUND 2 / UNSOLD POOL MODAL (Item 1.2)
+    // ═══════════════════════════════════════════════
+    function renderUnsoldPoolModal() {
+        const unsoldList = allPlayers.filter(p => p.status && p.status.toLowerCase() === 'unsold');
+        if (unsoldPoolCount) unsoldPoolCount.textContent = unsoldList.length;
+
+        if (!unsoldPlayersList) return;
+        const filter = (unsoldSearchInput ? unsoldSearchInput.value : '').trim().toLowerCase();
+
+        const displayList = filter 
+            ? unsoldList.filter(p => (p.name && p.name.toLowerCase().includes(filter)) || (p.player_role && p.player_role.toLowerCase().includes(filter)) || (p.category && p.category.toLowerCase().includes(filter)))
+            : unsoldList;
+
+        if (displayList.length === 0) {
+            unsoldPlayersList.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #94A3B8;">
+                    <i class="fa-solid fa-users" style="font-size: 28px; margin-bottom: 10px; display: block;"></i>
+                    <p style="font-weight: 600;">No unsold players ${filter ? 'matching search' : 'in the pool'}.</p>
+                </div>
+            `;
+            return;
+        }
+
+        unsoldPlayersList.innerHTML = displayList.map(p => {
+            const baseVal = parseInt(p.base_value) || parseInt(auctionSettings.min_bid || 0) || 1000;
+            const img = p.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=E2E8F0&color=475569`;
+            return `
+                <div class="la-unsold-item">
+                    <div class="la-unsold-item-left">
+                        <img src="${img}" alt="${p.name}" class="la-unsold-avatar">
+                        <div class="la-unsold-info">
+                            <h5>${p.name} <span style="font-size:11px; font-weight:600; color:#64748B;">(#${p.id})</span></h5>
+                            <p>${p.player_role || p.category || 'Player'} · Base: ₹${baseVal.toLocaleString('en-IN')}</p>
+                        </div>
+                    </div>
+                    <div class="la-unsold-actions">
+                        <button type="button" class="la-btn-bring-block" onclick="bringUnsoldToBlock('${p.id}', ${baseVal})">
+                            <i class="fa-solid fa-play"></i> Call to Block
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.bringUnsoldToBlock = function(playerId, basePrice) {
+        const player = allPlayers.find(p => p.id === playerId);
+        if (!player) return;
+
+        player.status = 'Available';
+        if (!availablePlayers.some(p => p.id === player.id)) {
+            availablePlayers.push(player);
+        }
+        updateStatsCounters();
+
+        fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/players/${playerId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Available', organizer_id: organizerId })
+        }).catch(err => console.error("Error setting player available:", err));
+
+        if (unsoldPoolModalBackdrop) unsoldPoolModalBackdrop.style.display = 'none';
+        setLivePlayer(player);
+    };
+
+    if (unsoldPoolBtn) unsoldPoolBtn.addEventListener('click', () => {
+        renderUnsoldPoolModal();
+        if (unsoldPoolModalBackdrop) unsoldPoolModalBackdrop.style.display = 'flex';
+    });
+    if (statUnsoldTile) statUnsoldTile.addEventListener('click', () => {
+        renderUnsoldPoolModal();
+        if (unsoldPoolModalBackdrop) unsoldPoolModalBackdrop.style.display = 'flex';
+    });
+    if (poolOpenUnsoldBtn) poolOpenUnsoldBtn.addEventListener('click', () => {
+        renderUnsoldPoolModal();
+        if (unsoldPoolModalBackdrop) unsoldPoolModalBackdrop.style.display = 'flex';
+    });
+    if (closeUnsoldPoolBtn) closeUnsoldPoolBtn.addEventListener('click', () => {
+        if (unsoldPoolModalBackdrop) unsoldPoolModalBackdrop.style.display = 'none';
+    });
+    if (unsoldSearchInput) unsoldSearchInput.addEventListener('input', renderUnsoldPoolModal);
+
+    if (bulkResetUnsoldBtn) {
+        bulkResetUnsoldBtn.addEventListener('click', async () => {
+            const discount = parseFloat(unsoldDiscountSelect ? unsoldDiscountSelect.value : 0) || 0;
+            const msg = discount > 0 
+                ? `Reset all Unsold players to Available with a ${discount}% base price discount for Round 2?`
+                : "Reset all Unsold players to Available at their original base price for Round 2?";
+            if (!confirm(msg)) return;
+
+            bulkResetUnsoldBtn.disabled = true;
+            bulkResetUnsoldBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resetting...';
+
+            try {
+                const res = await fetch(`http://127.0.0.1:5000/api/auctions/${auctionId}/reset-unsold`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        organizer_id: organizerId,
+                        discount_percent: discount
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast({
+                        title: "Round 2 Started!",
+                        message: data.message || "All unsold players restored to the active pool.",
+                        type: "sold",
+                        icon: "fa-rotate-right"
+                    });
+                    if (unsoldPoolModalBackdrop) unsoldPoolModalBackdrop.style.display = 'none';
+                    await loadAuctionData();
+                } else {
+                    showToast("Failed to Reset", data.error || "Could not reset unsold players.", "error", "fa-circle-exclamation");
+                }
+            } catch (e) {
+                console.error(e);
+                showToast("Connection Error", "Network request failed.", "error", "fa-wifi");
+            } finally {
+                bulkResetUnsoldBtn.disabled = false;
+                bulkResetUnsoldBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Reset All for Round 2';
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════
+    // 5. KEYBOARD SPEED SHORTCUTS (Item 1.5)
+    // ═══════════════════════════════════════════════
+    if (hotkeysModalBtn) hotkeysModalBtn.addEventListener('click', () => {
+        if (shortcutsModalBackdrop) shortcutsModalBackdrop.style.display = 'flex';
+    });
+    if (closeShortcutsBtn) closeShortcutsBtn.addEventListener('click', () => {
+        if (shortcutsModalBackdrop) shortcutsModalBackdrop.style.display = 'none';
+    });
+
+    window.addEventListener('keydown', (e) => {
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+        // Escape closes any modal or unfocuses
+        if (e.key === 'Escape') {
+            if (shortcutsModalBackdrop) shortcutsModalBackdrop.style.display = 'none';
+            if (unsoldPoolModalBackdrop) unsoldPoolModalBackdrop.style.display = 'none';
+            if (soldModalBackdrop) soldModalBackdrop.style.display = 'none';
+            if (unsoldModalBackdrop) unsoldModalBackdrop.style.display = 'none';
+            if (undoSaleModalBackdrop) undoSaleModalBackdrop.style.display = 'none';
+            if (isInput) document.activeElement.blur();
+            return;
+        }
+
+        // Do not trigger hotkeys if typing in text fields
+        if (isInput) return;
+
+        // Ctrl + Z: Undo Last Sale
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+            e.preventDefault();
+            openUndoSaleModal();
+            return;
+        }
+
+        // Spacebar: Toggle Countdown Timer
+        if (e.code === 'Space') {
+            e.preventDefault();
+            toggleCountdown();
+            return;
+        }
+
+        // 1-9: Select Team Paddle
+        if (e.key >= '1' && e.key <= '9') {
+            const idx = parseInt(e.key) - 1;
+            const tiles = document.querySelectorAll('.la-team-tile');
+            if (tiles[idx]) {
+                e.preventDefault();
+                tiles[idx].click();
+            }
+            return;
+        }
+
+        // Arrow Up / +: Bid Up
+        if (e.key === 'ArrowUp' || e.key === '+' || e.key === '=') {
+            e.preventDefault();
+            const btn = document.getElementById('bidUpBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        // Arrow Down / -: Bid Down
+        if (e.key === 'ArrowDown' || e.key === '-' || e.key === '_') {
+            e.preventDefault();
+            const btn = document.getElementById('bidDownBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        // S or Enter: Sold (Confirm Sale)
+        if (e.key === 's' || e.key === 'S' || (e.key === 'Enter' && soldModalBackdrop && soldModalBackdrop.style.display === 'none')) {
+            e.preventDefault();
+            const btn = document.getElementById('soldBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        // U: Unsold
+        if (e.key === 'u' || e.key === 'U') {
+            e.preventDefault();
+            const btn = document.getElementById('unsoldBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        // C: Advance Gavel Stage
+        if (e.key === 'c' || e.key === 'C') {
+            e.preventDefault();
+            advanceGavelStage();
+            return;
+        }
+
+        // Z (without Ctrl): Undo Last Bid
+        if (e.key === 'z' || e.key === 'Z') {
+            e.preventDefault();
+            undoLastBid();
+            return;
+        }
+
+        // R: Random Player
+        if (e.key === 'r' || e.key === 'R') {
+            e.preventDefault();
+            const btn = document.getElementById('randomBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        // M: Manual Search
+        if (e.key === 'm' || e.key === 'M') {
+            e.preventDefault();
+            const manualBtn = document.getElementById('manualBtn');
+            const manualEntry = document.getElementById('manualEntry');
+            if (manualEntry && manualEntry.style.display !== 'flex') {
+                if (manualBtn) manualBtn.click();
+            }
+            const mInput = document.getElementById('manualInput');
+            if (mInput) mInput.focus();
+            return;
+        }
+
+        // ?: Shortcuts modal
+        if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+            e.preventDefault();
+            if (shortcutsModalBackdrop) {
+                shortcutsModalBackdrop.style.display = shortcutsModalBackdrop.style.display === 'flex' ? 'none' : 'flex';
+            }
+            return;
         }
     });
 

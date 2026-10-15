@@ -1,9 +1,11 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, db
 import uuid
+import csv
+import io
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import cloudinary
@@ -49,6 +51,17 @@ def normalize_dict(data):
     elif isinstance(data, dict):
         return data
     return {}
+
+def safe_int(val, default=0):
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return int(val)
+    val_str = str(val).replace('₹', '').replace(',', '').replace(' ', '').strip()
+    try:
+        return int(float(val_str))
+    except (ValueError, TypeError):
+        return default
 
 def load_local_users():
     import json
@@ -1118,6 +1131,19 @@ def sell_player(auction_id):
                 'type': 'SOLD',
                 'timestamp': datetime.utcnow().isoformat()
             })
+
+            # Record into audit_log
+            db.reference(f'/auctions/{auction_id}/audit_log').push({
+                'event_type': 'SOLD',
+                'timestamp': datetime.utcnow().isoformat(),
+                'player_id': str(player_id),
+                'player_name': player_data.get('name', 'Player'),
+                'team_id': str(team_id),
+                'team_name': team_name,
+                'team_short_name': team_short_name,
+                'amount': sold_price,
+                'details': f"Sold to {team_name} for ₹{sold_price:,}"
+            })
         except Exception as e:
             print(f"Error logging sold history: {e}")
 
@@ -1129,6 +1155,471 @@ def sell_player(auction_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/revert-sale', methods=['POST'])
+def revert_sale(auction_id):
+    organizer_id = (request.json or {}).get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not firebase_initialized:
+        return jsonify({"error": "Database connection is unavailable."}), 500
+
+    player_id = (request.json or {}).get('player_id')
+
+    try:
+        players_ref = db.reference(f'/auctions/{auction_id}/players')
+        all_players = normalize_dict(players_ref.get())
+
+        # If player_id is not given, find the last sold player
+        if not player_id:
+            # Check history first
+            history_ref = db.reference(f'/auctions/{auction_id}/history')
+            history_data = history_ref.get() or {}
+            # Find any player marked Sold
+            sold_candidates = [
+                (pid, p) for pid, p in all_players.items()
+                if isinstance(p, dict) and p.get('status') == 'Sold'
+            ]
+            if not sold_candidates:
+                return jsonify({"error": "No sold players found to revert."}), 404
+            # Pick the last one
+            player_id, player_data = sold_candidates[-1]
+        else:
+            player_data = all_players.get(str(player_id))
+            if not player_data:
+                return jsonify({"error": "Selected player was not found."}), 404
+
+        if player_data.get('status') != 'Sold':
+            return jsonify({"error": f"{player_data.get('name', 'This player')} is not currently marked as Sold."}), 400
+
+        sold_price = int(player_data.get('sold_price') or 0)
+        team_id = player_data.get('sold_to_team')
+        team_name = "Team"
+        new_balance = None
+        new_squad_count = None
+
+        if team_id:
+            team_ref = db.reference(f'/auctions/{auction_id}/teamList/{team_id}')
+            team_data = team_ref.get()
+            if not team_data:
+                # check fallback by name/short_name
+                teams_ref = db.reference(f'/auctions/{auction_id}/teamList')
+                all_teams = teams_ref.get() or {}
+                if isinstance(all_teams, dict):
+                    for real_tid, tinfo in all_teams.items():
+                        if isinstance(tinfo, dict) and (tinfo.get('name') == team_id or tinfo.get('short_name') == team_id):
+                            team_ref = db.reference(f'/auctions/{auction_id}/teamList/{real_tid}')
+                            team_data = tinfo
+                            team_id = real_tid
+                            break
+            if team_data:
+                team_name = team_data.get('name', 'Team')
+                current_balance = int(team_data.get('balance', 0))
+                current_players_count = int(team_data.get('players_count', 1))
+                new_balance = current_balance + sold_price
+                new_squad_count = max(0, current_players_count - 1)
+                team_ref.update({
+                    'balance': new_balance,
+                    'players_count': new_squad_count
+                })
+
+        # Revert Player status back to Available and clear sold fields
+        player_ref = db.reference(f'/auctions/{auction_id}/players/{player_id}')
+        player_ref.update({
+            'status': 'Available',
+            'sold_to_team': None,
+            'sold_price': None
+        })
+
+        # Update History
+        try:
+            player_name = player_data.get('name', 'Player')
+            history_ref = db.reference(f'/auctions/{auction_id}/history/{player_id}')
+            history_ref.update({
+                'sold_team_name': None,
+                'status': 'Available'
+            })
+            history_ref.push({
+                'type': 'SALE_REVERTED',
+                'amount': sold_price,
+                'team_name': team_name,
+                'message': f"REVERTED: {player_name} sale to {team_name} (₹{sold_price:,}) undone. Purse refunded.",
+                'timestamp': datetime.utcnow().isoformat()
+            })
+
+            # Record into audit_log
+            db.reference(f'/auctions/{auction_id}/audit_log').push({
+                'event_type': 'SALE_REVERTED',
+                'timestamp': datetime.utcnow().isoformat(),
+                'player_id': str(player_id),
+                'player_name': player_name,
+                'team_id': str(team_id),
+                'team_name': team_name,
+                'amount': sold_price,
+                'details': f"Sale of {player_name} to {team_name} undone. Refunded ₹{sold_price:,}."
+            })
+        except Exception as e:
+            print(f"Error logging revert history: {e}")
+
+        # If live_auctions current player was this player, clear/reset status
+        try:
+            live_ref = db.reference(f'/live_auctions/{auction_id}')
+            live_data = live_ref.get() or {}
+            cp = live_data.get('currentPlayer') or {}
+            if str(cp.get('id')) == str(player_id):
+                live_ref.update({
+                    'status': 'waiting',
+                    'currentBid': {'amount': int(player_data.get('base_value') or 0), 'teamId': None, 'teamName': None, 'teamLogo': None, 'teamShortName': None}
+                })
+        except Exception as e:
+            print(f"Error updating live state on revert: {e}")
+
+        return jsonify({
+            "message": f"Sale undone successfully! Refunded ₹{sold_price:,} to {team_name}.",
+            "player_id": player_id,
+            "player_name": player_data.get('name'),
+            "refunded_amount": sold_price,
+            "team_id": team_id,
+            "team_name": team_name,
+            "new_balance": new_balance,
+            "new_squad_count": new_squad_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auctions/<auction_id>/reset-unsold', methods=['POST'])
+def reset_unsold_players(auction_id):
+    organizer_id = (request.json or {}).get('organizer_id')
+    if not organizer_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not firebase_initialized:
+        return jsonify({"error": "Database connection is unavailable."}), 500
+
+    try:
+        players_ref = db.reference(f'/auctions/{auction_id}/players')
+        players_data = normalize_dict(players_ref.get())
+
+        discount_percent = (request.json or {}).get('discount_percent', 0)
+        try:
+            discount_percent = float(discount_percent)
+        except (ValueError, TypeError):
+            discount_percent = 0.0
+
+        updated_count = 0
+        updates = {}
+        for pid, pdata in players_data.items():
+            if isinstance(pdata, dict) and pdata.get('status') == 'Unsold':
+                updates[f"{pid}/status"] = 'Available'
+                if discount_percent > 0:
+                    base_val = float(pdata.get('base_value') or 0)
+                    new_val = max(100, int(base_val * (1.0 - (discount_percent / 100.0))))
+                    updates[f"{pid}/base_value"] = new_val
+                updated_count += 1
+
+        if updates:
+            players_ref.update(updates)
+
+        return jsonify({
+            "message": f"Successfully restored {updated_count} unsold player(s) to Available for Round 2!",
+            "updated_count": updated_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ═══════════════════════════════════════════════════════
+# PHASE 5: POST-AUCTION GOVERNANCE, AUDIT & EXPORT API
+# ═══════════════════════════════════════════════════════
+
+@app.route('/api/auctions/<auction_id>/audit-log', methods=['GET', 'POST'])
+def auction_audit_log(auction_id):
+    if not firebase_initialized:
+        return jsonify([]), 200
+
+    if request.method == 'POST':
+        data = request.json or {}
+        event_type = data.get('event_type', 'BID_PLACED')
+        entry = {
+            'event_type': event_type,
+            'timestamp': datetime.utcnow().isoformat(),
+            'player_id': str(data.get('player_id', '')),
+            'player_name': str(data.get('player_name', '')),
+            'team_id': str(data.get('team_id', '')),
+            'team_name': str(data.get('team_name', '')),
+            'team_short_name': str(data.get('team_short_name', '')),
+            'amount': data.get('amount'),
+            'increment': data.get('increment'),
+            'gavel_stage': data.get('gavel_stage'),
+            'details': data.get('details', '')
+        }
+        try:
+            audit_ref = db.reference(f'/auctions/{auction_id}/audit_log')
+            new_ref = audit_ref.push(entry)
+            entry['id'] = new_ref.key
+            return jsonify({"message": "Audit event recorded", "entry": entry}), 201
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    # GET logic
+    try:
+        audit_ref = db.reference(f'/auctions/{auction_id}/audit_log')
+        raw_logs = normalize_dict(audit_ref.get()) or {}
+        logs_list = []
+        for key, val in raw_logs.items():
+            if isinstance(val, dict):
+                val['id'] = key
+                logs_list.append(val)
+        
+        # Sort chronologically (most recent first)
+        logs_list.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+
+        player_filter = request.args.get('player_id')
+        team_filter = request.args.get('team_id')
+        type_filter = request.args.get('event_type')
+        if player_filter:
+            logs_list = [l for l in logs_list if str(l.get('player_id')) == str(player_filter)]
+        if team_filter:
+            logs_list = [l for l in logs_list if str(l.get('team_id')) == str(team_filter)]
+        if type_filter and type_filter.upper() != 'ALL':
+            logs_list = [l for l in logs_list if str(l.get('event_type', '')).upper() == type_filter.upper()]
+
+        return jsonify(logs_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/auctions/<auction_id>/export/summary', methods=['GET'])
+def auction_export_summary(auction_id):
+    if not firebase_initialized:
+        return jsonify({"error": "Database unavailable"}), 500
+
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get() or {}
+
+        teams_ref = db.reference(f'/auctions/{auction_id}/teamList')
+        teams_data = normalize_dict(teams_ref.get()) or {}
+
+        players_ref = db.reference(f'/auctions/{auction_id}/players')
+        players_data = normalize_dict(players_ref.get()) or {}
+
+        auction_budget = safe_int(auction.get('budget', 10000000), 10000000)
+        teams_summary = []
+        team_lookup = {}
+
+        for tid, tinfo in teams_data.items():
+            if isinstance(tinfo, dict):
+                t_copy = dict(tinfo)
+                t_copy['id'] = str(tid)
+                cur_balance = safe_int(t_copy.get('balance', auction_budget), 0)
+                initial_purse = safe_int(t_copy.get('initial_purse'), auction_budget)
+                if initial_purse < cur_balance:
+                    initial_purse = cur_balance
+                total_spent = max(0, initial_purse - cur_balance)
+                t_copy['initial_purse'] = initial_purse
+                t_copy['current_balance'] = cur_balance
+                t_copy['total_spent'] = total_spent
+                t_copy['utilization_pct'] = round((total_spent / initial_purse * 100.0), 1) if initial_purse > 0 else 0
+                t_copy['squad'] = []
+                teams_summary.append(t_copy)
+                team_lookup[str(tid)] = t_copy
+                if t_copy.get('name'):
+                    team_lookup[t_copy['name']] = t_copy
+                if t_copy.get('short_name'):
+                    team_lookup[t_copy['short_name']] = t_copy
+
+        sold_players = []
+        unsold_players = []
+        available_players = []
+
+        for pid, pinfo in players_data.items():
+            if isinstance(pinfo, dict):
+                p_copy = dict(pinfo)
+                p_copy['id'] = str(pid)
+                status = p_copy.get('status', 'Available')
+
+                if status == 'Sold':
+                    sold_players.append(p_copy)
+                    team_key = p_copy.get('sold_to_team')
+                    if team_key and str(team_key) in team_lookup:
+                        team_lookup[str(team_key)]['squad'].append(p_copy)
+                elif status == 'Unsold':
+                    unsold_players.append(p_copy)
+                else:
+                    available_players.append(p_copy)
+
+        total_players = len(players_data)
+        total_sold = len(sold_players)
+        total_unsold = len(unsold_players)
+        total_available = len(available_players)
+        total_spending = sum(safe_int(p.get('sold_price'), 0) for p in sold_players)
+        avg_price = int(total_spending / total_sold) if total_sold > 0 else 0
+        top_buy = max(sold_players, key=lambda x: safe_int(x.get('sold_price'), 0)) if sold_players else None
+
+        result = {
+            "tournament": {
+                "id": str(auction_id),
+                "name": auction.get('name', 'Tournament'),
+                "auction_code": auction.get('auction_code', auction_id),
+                "date": auction.get('date', ''),
+                "budget": auction_budget,
+                "min_bid": safe_int(auction.get('min_bid', 0), 0),
+                "bid_increase": safe_int(auction.get('bid_increase', 100), 100),
+                "players_per_team": safe_int(auction.get('players_per_team', 15), 15),
+                "logo_url": auction.get('logo_url', '')
+            },
+            "metrics": {
+                "total_players": total_players,
+                "sold_count": total_sold,
+                "unsold_count": total_unsold,
+                "available_count": total_available,
+                "total_spending": total_spending,
+                "avg_price": avg_price,
+                "top_buy": top_buy
+            },
+            "teams": teams_summary,
+            "sold_players": sold_players,
+            "unsold_players": unsold_players,
+            "available_players": available_players
+        }
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/auctions/<auction_id>/export/csv', methods=['GET'])
+def auction_export_csv(auction_id):
+    export_type = request.args.get('type', 'squads').lower()
+
+    if not firebase_initialized:
+        return Response("Error: Database unavailable", status=500, mimetype="text/plain")
+
+    try:
+        auction_ref = db.reference(f'/auctions/{auction_id}')
+        auction = auction_ref.get() or {}
+        auction_name = auction.get('name', 'Auction').replace(' ', '_')
+
+        output = io.StringIO()
+        # UTF-8 BOM so Excel opens Hindi / Rupee characters correctly on Windows
+        output.write('\ufeff')
+        writer = csv.writer(output)
+
+        if export_type == 'audit':
+            audit_ref = db.reference(f'/auctions/{auction_id}/audit_log')
+            logs_data = normalize_dict(audit_ref.get()) or {}
+            logs_list = [v for k, v in logs_data.items() if isinstance(v, dict)]
+            logs_list.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+
+            writer.writerow(['Timestamp (UTC)', 'Event Type', 'Player ID', 'Player Name', 'Franchise', 'Amount (INR)', 'Increment (INR)', 'Gavel Stage', 'Details'])
+            for log in logs_list:
+                writer.writerow([
+                    log.get('timestamp', ''),
+                    log.get('event_type', ''),
+                    log.get('player_id', ''),
+                    log.get('player_name', ''),
+                    log.get('team_name') or log.get('team_short_name', ''),
+                    log.get('amount') or '',
+                    log.get('increment') or '',
+                    log.get('gavel_stage') or '',
+                    log.get('details', '')
+                ])
+            filename = f"{auction_name}_Audit_Log.csv"
+
+        elif export_type == 'unsold':
+            players_ref = db.reference(f'/auctions/{auction_id}/players')
+            players_data = normalize_dict(players_ref.get()) or {}
+            unsold = [p for p in players_data.values() if isinstance(p, dict) and p.get('status') == 'Unsold']
+
+            writer.writerow(['Player ID', 'Player Name', 'Category / Role', 'Batting Style', 'Bowling Style', 'Base Value (INR)', 'Status'])
+            for p in unsold:
+                writer.writerow([
+                    p.get('id', ''),
+                    p.get('name', ''),
+                    p.get('role', ''),
+                    p.get('batting_style', ''),
+                    p.get('bowling_style', ''),
+                    p.get('base_value', 0),
+                    'Unsold'
+                ])
+            filename = f"{auction_name}_Unsold_Players.csv"
+
+        elif export_type == 'financial':
+            teams_ref = db.reference(f'/auctions/{auction_id}/teamList')
+            teams_data = normalize_dict(teams_ref.get()) or {}
+            auction_budget = safe_int(auction.get('budget', 10000000), 10000000)
+
+            writer.writerow(['Franchise Name', 'Short Code', 'Initial Purse (INR)', 'Remaining Balance (INR)', 'Total Spent (INR)', 'Utilization %', 'Squad Count', 'Max Allowed'])
+            for tid, t in teams_data.items():
+                if isinstance(t, dict):
+                    bal = safe_int(t.get('balance', auction_budget), 0)
+                    init_p = safe_int(t.get('initial_purse'), auction_budget)
+                    if init_p < bal:
+                        init_p = bal
+                    spent = max(0, init_p - bal)
+                    pct = round((spent / init_p * 100.0), 1) if init_p > 0 else 0
+                    writer.writerow([
+                        t.get('name', ''),
+                        t.get('short_name', ''),
+                        init_p,
+                        bal,
+                        spent,
+                        f"{pct}%",
+                        safe_int(t.get('players_count', 0), 0),
+                        safe_int(auction.get('players_per_team', 15), 15)
+                    ])
+            filename = f"{auction_name}_Financial_Summary.csv"
+
+        else:
+            # Default: Team Squads Roster Sheet (or 'squads' / 'full')
+            teams_ref = db.reference(f'/auctions/{auction_id}/teamList')
+            teams_data = normalize_dict(teams_ref.get()) or {}
+            players_ref = db.reference(f'/auctions/{auction_id}/players')
+            players_data = normalize_dict(players_ref.get()) or {}
+
+            # Map teams
+            team_names = {}
+            for tid, t in teams_data.items():
+                if isinstance(t, dict):
+                    team_names[str(tid)] = t.get('name', '')
+                    if t.get('short_name'):
+                        team_names[t['short_name']] = t.get('name', '')
+                    if t.get('name'):
+                        team_names[t['name']] = t.get('name', '')
+
+            writer.writerow(['Franchise Name', 'Player ID', 'Player Name', 'Role / Category', 'Batting Style', 'Bowling Style', 'Base Value (INR)', 'Sold Price (INR)', 'Status'])
+            sold_list = [p for p in players_data.values() if isinstance(p, dict) and p.get('status') == 'Sold']
+            sold_list.sort(key=lambda x: (str(x.get('sold_to_team', '')), -safe_int(x.get('sold_price'), 0)))
+
+            for p in sold_list:
+                t_key = str(p.get('sold_to_team', ''))
+                t_name = team_names.get(t_key, t_key or 'Unassigned')
+                writer.writerow([
+                    t_name,
+                    p.get('id', ''),
+                    p.get('name', ''),
+                    p.get('role', ''),
+                    p.get('batting_style', ''),
+                    p.get('bowling_style', ''),
+                    p.get('base_value', 0),
+                    p.get('sold_price', 0),
+                    'Sold'
+                ])
+            filename = f"{auction_name}_Team_Squads.csv"
+
+        csv_content = output.getvalue()
+        output.close()
+
+        response = Response(csv_content, mimetype='text/csv')
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return response
+
+    except Exception as e:
+        return Response(f"Error generating CSV: {str(e)}", status=500, mimetype="text/plain")
 
 @app.route('/api/auctions/<auction_id>/players/<player_id>', methods=['DELETE'])
 def delete_player(auction_id, player_id):

@@ -574,8 +574,19 @@
       bidLabelText.textContent = "CURRENT BID";
       bidLabelText.className = "text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#ff8d36] mt-2 mb-0.5 transition-colors duration-500";
       
-      bidCountingBg.className = "mt-2 w-[85%] hazard-stripes py-0.5 px-2 rounded-full border border-amber-300/40 shadow-sm flex items-center justify-center transition-all duration-500";
-      bidCountingText.textContent = "AND COUNTING...";
+      if (data.gavelStage === '1st Call') {
+        bidCountingBg.className = "mt-2 w-[85%] bg-amber-600 text-white py-0.5 px-2 rounded-full border border-amber-300 shadow-sm flex items-center justify-center transition-all duration-500 animate-pulse";
+        bidCountingText.textContent = "1ST CALL";
+      } else if (data.gavelStage === '2nd Call') {
+        bidCountingBg.className = "mt-2 w-[85%] bg-orange-600 text-white py-0.5 px-2 rounded-full border border-orange-300 shadow-sm flex items-center justify-center transition-all duration-500 animate-pulse";
+        bidCountingText.textContent = "2ND CALL";
+      } else if (data.gavelStage === 'Final Call') {
+        bidCountingBg.className = "mt-2 w-[85%] bg-red-600 text-white py-0.5 px-2 rounded-full border border-red-300 shadow-sm flex items-center justify-center transition-all duration-500 animate-pulse";
+        bidCountingText.textContent = "FINAL WARNING";
+      } else {
+        bidCountingBg.className = "mt-2 w-[85%] hazard-stripes py-0.5 px-2 rounded-full border border-amber-300/40 shadow-sm flex items-center justify-center transition-all duration-500";
+        bidCountingText.textContent = "AND COUNTING...";
+      }
       
       podOuter.className = "relative w-[198px] h-[198px] rounded-full p-[6px] bg-gradient-to-b from-[#ff8533] via-[#ea580c] to-[#9a3412] pod-orbit-glow flex items-center justify-center transition-colors duration-500";
       orbitRing.className = "absolute w-[212px] h-[212px] rounded-full border-2 border-[#ea580c] border-dashed animate-[spin_45s_linear_infinite] opacity-70 pointer-events-none transition-colors duration-500";

@@ -14,23 +14,61 @@
 
     <!-- ══ TOP NAV ══ -->
     <nav class="la-topnav">
-        <div class="la-brand" onclick="window.location.href='dashboard.html'" title="Return to Dashboard">
-            <div class="la-brand-mark">
-                <img src="logo.png" style="height: 44px; width: auto;" alt="Cricsquad Logo">
+        <div class="la-nav-left">
+            <div class="la-brand" onclick="window.location.href='dashboard.html'" title="Return to Dashboard">
+                <div class="la-brand-mark">
+                    <img src="logo.png" style="height: 44px; width: auto;" alt="Cricsquad Logo">
+                </div>
+                <span>Cricsquad</span>
             </div>
-            <span>Cricsquad</span>
-        </div>
-        <div class="la-topnav-center">
-            <span class="la-live-badge"><span class="la-pulse"></span> LIVE</span>
-            <span class="la-auction-title" id="liveTournamentName">Indian Premier League 2026</span>
+            <div class="la-topnav-center">
+                <span class="la-live-badge"><span class="la-pulse"></span> LIVE</span>
+                <span class="la-auction-title" id="liveTournamentName">Indian Premier League 2026</span>
+            </div>
         </div>
         <div class="la-nav-right">
-            <div class="la-timer-box">
+            <!-- Active Bid Countdown Timer -->
+            <div class="la-countdown-wrap" id="countdownWrap" title="Active Bid Countdown (Space to pause/resume)">
+                <button class="la-timer-ctrl-btn" id="toggleTimerBtn" title="Start/Pause Timer (Space)">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <div class="la-countdown-val-wrap">
+                    <span class="la-countdown-label">CLOCK</span>
+                    <span id="bidCountdown" class="la-countdown-val">30s</span>
+                </div>
+                <button class="la-timer-ctrl-btn" id="resetTimerBtn" title="Reset Timer to 30s">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+
+            <!-- Session Elapsed Clock -->
+            <div class="la-timer-box" title="Session Duration">
                 <i class="fa-regular fa-clock"></i>
                 <span id="auctionTimer" class="la-timer-val">00:00:00</span>
             </div>
+
+            <!-- Sound Effects Toggle -->
+            <button class="la-nav-icon-btn" id="soundToggleBtn" title="Audio Sound Effects (Gavel, Chimes, Buzzer)">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Keyboard Shortcuts Button -->
+            <button class="la-nav-icon-btn" id="hotkeysModalBtn" title="Keyboard Shortcuts (?)">
+                <i class="fa-solid fa-keyboard"></i>
+            </button>
+
+            <!-- Unsold Pool / Round 2 Button -->
+            <button class="la-nav-pill-btn" id="unsoldPoolBtn" title="Round 2 Unsold Players Pool">
+                <i class="fa-solid fa-layer-group"></i> Unsold <span class="la-badge-count" id="unsoldPoolCount">0</span>
+            </button>
+
+            <!-- Undo Last Sale (Emergency Rollback) -->
+            <button class="la-nav-pill-btn la-btn-revert-sale" id="undoSaleBtn" title="Revert Last Sale (Ctrl+Z)" style="display:none;">
+                <i class="fa-solid fa-rotate-left"></i> Undo Sale
+            </button>
+
             <button class="la-back-btn" id="backToManageBtn">
-                <i class="fa-solid fa-arrow-left"></i> Manage Auction
+                <i class="fa-solid fa-arrow-left"></i> Manage
             </button>
         </div>
     </nav>
@@ -64,10 +102,15 @@
             <div class="la-pool-complete-card" id="poolCompletedNotice" style="display:none;">
                 <div class="la-complete-icon"><i class="fa-solid fa-trophy"></i></div>
                 <h3 class="la-complete-title">Player Pool Completed!</h3>
-                <p class="la-complete-desc">All registered players have been auctioned. Review franchise rosters on the dashboard.</p>
-                <button class="la-complete-btn" onclick="window.location.href='auction-dashboard.html?id=' + new URLSearchParams(window.location.search).get('auction_id')">
-                    <i class="fa-solid fa-users"></i> View Final Squads
-                </button>
+                <p class="la-complete-desc">All registered players have been called. You can start Round 2 for unsold players or view final squads.</p>
+                <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+                    <button class="la-complete-btn" id="poolOpenUnsoldBtn" style="background:#0E48A0;">
+                        <i class="fa-solid fa-rotate-right"></i> Round 2 Unsold
+                    </button>
+                    <button class="la-complete-btn" onclick="window.location.href='auction-dashboard.html?id=' + new URLSearchParams(window.location.search).get('auction_id')">
+                        <i class="fa-solid fa-users"></i> Squads
+                    </button>
+                </div>
             </div>
 
             <div class="la-divider"></div>
@@ -77,15 +120,15 @@
                 <h4 class="la-block-title">Bring up a player</h4>
                 <p class="la-block-hint">Pull the next player onto the block</p>
                 <div class="la-btn-row">
-                    <button class="la-soft-btn" id="randomBtn">
-                        <i class="fa-solid fa-shuffle"></i> Random
+                    <button class="la-soft-btn" id="randomBtn" title="Random Player [R]">
+                        <i class="fa-solid fa-shuffle"></i> Random <span class="la-kbd-badge">R</span>
                     </button>
-                    <button class="la-soft-btn" id="manualBtn">
-                        <i class="fa-regular fa-user"></i> Manual
+                    <button class="la-soft-btn" id="manualBtn" title="Manual Player Search [M]">
+                        <i class="fa-regular fa-user"></i> Manual <span class="la-kbd-badge">M</span>
                     </button>
                 </div>
                 <div class="la-manual-entry" id="manualEntry">
-                    <input id="manualInput" type="text" placeholder="Player number, e.g. 205" class="la-manual-input">
+                    <input id="manualInput" type="text" placeholder="Player name or number (e.g. 101)..." class="la-manual-input">
                     <button id="manualSubmitBtn" class="la-manual-submit">Bring up</button>
                 </div>
             </div>
@@ -105,9 +148,9 @@
                         <div class="la-stat-v" id="statAvail">-</div>
                         <div class="la-stat-l">Available</div>
                     </div>
-                    <div class="la-stat-tile la-stat-unsold">
+                    <div class="la-stat-tile la-stat-unsold" id="statUnsoldTile" style="cursor:pointer;" title="Click to view Unsold Pool">
                         <div class="la-stat-v" id="statUnsold">-</div>
-                        <div class="la-stat-l">Unsold</div>
+                        <div class="la-stat-l">Unsold <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:9px;"></i></div>
                     </div>
                     <div class="la-stat-tile la-stat-teams">
                         <div class="la-stat-v" id="statTeams">-</div>
@@ -136,7 +179,7 @@
 
             <!-- Teams Board Header -->
             <div class="la-teams-head">
-                <p class="la-section-label">Franchise purses <span class="la-label-sub">— tap a team to assign the bid</span></p>
+                <p class="la-section-label">Franchise purses <span class="la-label-sub">— tap a team or press 1-9 to bid</span></p>
                 <button class="la-sort-btn">
                     <i class="fa-solid fa-arrow-down-a-z"></i> Sort
                 </button>
@@ -154,20 +197,20 @@
                         <span class="la-bid-eyebrow">Current bid</span>
                         <div class="la-bid-figure-row">
                             <span class="la-bid-figure" id="currentBid">₹0</span>
-                            <button class="la-edit-pencil" id="editBidBtn" title="Edit bid amount directly">
+                            <button class="la-edit-pencil" id="editBidBtn" title="Edit bid amount directly [E]">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
-                            <button class="la-undo-bid-btn" id="undoBidBtn" title="Undo last bid" style="display:none;">
-                                <i class="fa-solid fa-rotate-left"></i> Undo
+                            <button class="la-undo-bid-btn" id="undoBidBtn" title="Undo last bid [Z]" style="display:none;">
+                                <i class="fa-solid fa-rotate-left"></i> Undo <span class="la-kbd-mini">Z</span>
                             </button>
                         </div>
                     </div>
                     <div class="la-stepper">
-                        <button class="la-step-btn" id="bidDownBtn" title="Decrease bid by increment">
+                        <button class="la-step-btn" id="bidDownBtn" title="Decrease bid by increment [↓]">
                             <i class="fa-solid fa-minus"></i>
                         </button>
                         <div class="la-step-div"></div>
-                        <button class="la-step-btn" id="bidUpBtn" title="Increase bid by increment">
+                        <button class="la-step-btn" id="bidUpBtn" title="Increase bid by increment [↑]">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -179,14 +222,27 @@
                         <span class="la-holding-dot"></span>
                         <span class="la-holding-text" id="holdingText">Leading: --</span>
                     </div>
+
+                    <!-- Gavel Calling Stages (Going 1, Going 2, Final Call) -->
+                    <div class="la-gavel-stepper" id="gavelStepper" title="Gavel Warning Stages [Hotkey: C]">
+                        <button type="button" class="la-gavel-step" id="gavelStep1" data-step="1">
+                            <span>1st Call</span>
+                        </button>
+                        <button type="button" class="la-gavel-step" id="gavelStep2" data-step="2">
+                            <span>2nd Call</span>
+                        </button>
+                        <button type="button" class="la-gavel-step" id="gavelStep3" data-step="3">
+                            <span>Final Call</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="la-bid-right">
-                    <button class="la-action-btn la-btn-unsold" id="unsoldBtn">
-                        <i class="fa-solid fa-xmark"></i> UNSOLD
+                    <button class="la-action-btn la-btn-unsold" id="unsoldBtn" title="Mark Unsold [U]">
+                        <i class="fa-solid fa-xmark"></i> UNSOLD <span class="la-kbd-badge la-kbd-red">U</span>
                     </button>
-                    <button class="la-action-btn la-btn-sold" id="soldBtn">
-                        <i class="fa-solid fa-gavel"></i> SOLD
+                    <button class="la-action-btn la-btn-sold" id="soldBtn" title="Hammer Down · Sold [S / Enter]">
+                        <i class="fa-solid fa-gavel"></i> SOLD <span class="la-kbd-badge la-kbd-green">S</span>
                     </button>
                 </div>
             </div>
@@ -227,8 +283,117 @@
             <div class="la-modal-footer">
                 <button class="la-modal-btn la-btn-cancel" id="cancelSoldBtn">Keep Bidding</button>
                 <button class="la-modal-btn la-btn-confirm-sold" id="confirmSoldBtn">
-                    <i class="fa-solid fa-gavel"></i> CONFIRM SALE (SOLD)
+                    <i class="fa-solid fa-gavel"></i> CONFIRM SALE (SOLD) [Enter]
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ UNDO LAST SALE (EMERGENCY ROLLBACK) MODAL ══ -->
+    <div class="la-modal-backdrop" id="undoSaleModalBackdrop" style="display:none;">
+        <div class="la-modal-card">
+            <div class="la-modal-header la-header-warn">
+                <div class="la-modal-gavel warn-icon"><i class="fa-solid fa-rotate-left"></i></div>
+                <div>
+                    <h3 class="la-modal-title">Emergency Rollback: Revert Sale</h3>
+                    <p class="la-modal-subtitle">Undo an accidental gavel drop or incorrect team assignment</p>
+                </div>
+            </div>
+            <div class="la-modal-body">
+                <p style="color:#4B5563; font-size:13.5px; line-height:1.5; margin-bottom:16px;">
+                    Are you sure you want to revert the last completed sale? This will:
+                </p>
+                <div class="la-sale-summary-grid">
+                    <div class="la-summary-item">
+                        <span class="la-s-label">Player to Restore</span>
+                        <span class="la-s-val" id="undoPlayerName">--</span>
+                    </div>
+                    <div class="la-summary-item">
+                        <span class="la-s-label">Buyer Franchise</span>
+                        <span class="la-s-val" id="undoTeamName">--</span>
+                    </div>
+                    <div class="la-summary-item la-summary-highlight">
+                        <span class="la-s-label">Amount to Refund</span>
+                        <span class="la-s-val-large" id="undoSoldPrice" style="color:#059669;">₹0</span>
+                    </div>
+                    <div class="la-summary-item">
+                        <span class="la-s-label">Player Status After Revert</span>
+                        <span class="la-s-val" style="color:#2563EB; font-weight:700;">Returned to Pool</span>
+                    </div>
+                </div>
+            </div>
+            <div class="la-modal-footer">
+                <button class="la-modal-btn la-btn-cancel" id="cancelUndoSaleBtn">Cancel</button>
+                <button class="la-modal-btn la-btn-confirm-warn" id="confirmUndoSaleBtn">
+                    <i class="fa-solid fa-rotate-left"></i> Confirm Revert & Refund
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ ROUND 2 / UNSOLD POOL MODAL ══ -->
+    <div class="la-modal-backdrop" id="unsoldPoolModalBackdrop" style="display:none;">
+        <div class="la-modal-card la-modal-card-lg">
+            <div class="la-modal-header" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);">
+                <div class="la-modal-gavel" style="background: rgba(239, 68, 68, 0.2); color: #EF4444;"><i class="fa-solid fa-layer-group"></i></div>
+                <div>
+                    <h3 class="la-modal-title">Round 2 · Unsold Players Pool</h3>
+                    <p class="la-modal-subtitle">Bring passed players back onto the block or start the accelerated auction</p>
+                </div>
+                <button type="button" class="la-modal-close" id="closeUnsoldPoolBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="la-modal-body" style="padding: 16px 24px;">
+                <div class="la-unsold-toolbar">
+                    <div class="la-unsold-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="unsoldSearchInput" placeholder="Filter unsold players by name or role...">
+                    </div>
+                    <div class="la-unsold-bulk-wrap">
+                        <label for="unsoldDiscountSelect">Discount Base Price:</label>
+                        <select id="unsoldDiscountSelect" class="la-select-discount">
+                            <option value="0">Original Price (0% off)</option>
+                            <option value="25">25% Discount</option>
+                            <option value="50">50% Discount</option>
+                        </select>
+                        <button class="la-btn-bulk-reset" id="bulkResetUnsoldBtn">
+                            <i class="fa-solid fa-rotate-right"></i> Reset All for Round 2
+                        </button>
+                    </div>
+                </div>
+
+                <div class="la-unsold-list" id="unsoldPlayersList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ KEYBOARD SHORTCUTS HELP MODAL ══ -->
+    <div class="la-modal-backdrop" id="shortcutsModalBackdrop" style="display:none;">
+        <div class="la-modal-card">
+            <div class="la-modal-header">
+                <div class="la-modal-gavel"><i class="fa-solid fa-keyboard"></i></div>
+                <div>
+                    <h3 class="la-modal-title">Auctioneer Speed Hotkeys</h3>
+                    <p class="la-modal-subtitle">Run the live auction desk at maximum speed</p>
+                </div>
+                <button type="button" class="la-modal-close" id="closeShortcutsBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="la-modal-body">
+                <div class="la-hotkeys-grid">
+                    <div class="la-hotkey-row"><span class="la-key">Space</span><span class="la-key-desc">Start / Pause Countdown Timer</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">1 – 9</span><span class="la-key-desc">Select Team Paddle (Grid order)</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">↑ / +</span><span class="la-key-desc">Increment Current Bid</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">↓ / -</span><span class="la-key-desc">Decrement Current Bid</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">S / Enter</span><span class="la-key-desc">Hammer Down (Confirm SOLD)</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">U</span><span class="la-key-desc">Mark Player UNSOLD</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">C</span><span class="la-key-desc">Advance Gavel Call (1st → 2nd → Final)</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">Z</span><span class="la-key-desc">Undo Last Bid</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">Ctrl + Z</span><span class="la-key-desc">Undo Last Sale (Emergency Rollback)</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">R</span><span class="la-key-desc">Bring Up Random Player</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">M</span><span class="la-key-desc">Focus Manual Player Search</span></div>
+                    <div class="la-hotkey-row"><span class="la-key">Esc</span><span class="la-key-desc">Close Any Open Modal</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -260,15 +425,15 @@
     <!-- Toast Container -->
     <div class="la-toast-wrap" id="toastWrap"></div>
 
-    <script src="js/live-auction.js?v=8"></script>
+    <script src="js/live-auction.js?v=9"></script>
     <script>
-        // Live session timer
-        let secs = 0;
+        // Session duration counter
+        let sessionSecs = 0;
         setInterval(() => {
-            secs++;
-            const h = String(Math.floor(secs / 3600)).padStart(2, '0');
-            const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
-            const s = String(secs % 60).padStart(2, '0');
+            sessionSecs++;
+            const h = String(Math.floor(sessionSecs / 3600)).padStart(2, '0');
+            const m = String(Math.floor((sessionSecs % 3600) / 60)).padStart(2, '0');
+            const s = String(sessionSecs % 60).padStart(2, '0');
             const el = document.getElementById('auctionTimer');
             if (el) el.textContent = `${h}:${m}:${s}`;
         }, 1000);

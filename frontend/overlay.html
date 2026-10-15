@@ -582,8 +582,19 @@
       bidLabelText.classList.remove('text-emerald-600', 'text-red-600');
       bidLabelText.classList.add('text-slate-500');
       
-      bidCountingBg.className = "bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md font-broadcast transition-colors duration-500";
-      bidCountingText.textContent = "AND COUNTING...";
+      if (data.gavelStage === '1st Call') {
+        bidCountingBg.className = "bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md font-broadcast transition-colors duration-500 animate-pulse";
+        bidCountingText.textContent = "1ST CALL";
+      } else if (data.gavelStage === '2nd Call') {
+        bidCountingBg.className = "bg-orange-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md font-broadcast transition-colors duration-500 animate-pulse";
+        bidCountingText.textContent = "2ND CALL";
+      } else if (data.gavelStage === 'Final Call') {
+        bidCountingBg.className = "bg-red-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md font-broadcast transition-colors duration-500 animate-pulse";
+        bidCountingText.textContent = "FINAL WARNING";
+      } else {
+        bidCountingBg.className = "bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md font-broadcast transition-colors duration-500";
+        bidCountingText.textContent = "AND COUNTING...";
+      }
       
       // Reset decoration bars heights uniquely as in original design
       const bars = document.querySelectorAll('.decoration-bar');

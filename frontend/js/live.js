@@ -414,8 +414,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 soldStamp.classList.add('unsold-animate');
             }
         } else {
-            bidRibbon.textContent = "CURRENT HIGHEST BID";
-            bidRibbon.style.background = "linear-gradient(135deg, #2563eb, #1e3a8a)";
+            if (data.gavelStage === '1st Call') {
+                bidRibbon.textContent = "🔨 1ST CALL — GOING ONCE!";
+                bidRibbon.style.background = "linear-gradient(135deg, #d97706, #b45309)";
+            } else if (data.gavelStage === '2nd Call') {
+                bidRibbon.textContent = "🔨 2ND CALL — GOING TWICE!";
+                bidRibbon.style.background = "linear-gradient(135deg, #ea580c, #c2410c)";
+            } else if (data.gavelStage === 'Final Call') {
+                bidRibbon.textContent = "🚨 FINAL CALL — ANY FURTHER BIDS?!";
+                bidRibbon.style.background = "linear-gradient(135deg, #dc2626, #b91c1c)";
+            } else {
+                bidRibbon.textContent = "CURRENT HIGHEST BID";
+                bidRibbon.style.background = "linear-gradient(135deg, #2563eb, #1e3a8a)";
+            }
             soldStamp.style.display = 'none';
             soldStamp.classList.remove('animate-stamp');
             soldStamp.classList.remove('unsold-animate');
